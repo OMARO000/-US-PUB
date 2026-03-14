@@ -44,3 +44,6 @@ body {
 }
 
 .font-mono { font-family: var(--font-mono), monospace; }
+
+.nav-tooltip { opacity: 0; }
+a:hover .nav-tooltip { opacity: 1 !important; }
