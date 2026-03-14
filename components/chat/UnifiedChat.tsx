@@ -2,13 +2,11 @@
 import { useRef } from "react";
 import AmbientOrb from "./AmbientOrb";
 import SlideLock from "./SlideLock";
-
 interface Message {
   role: "them" | "user";
   text: string;
   time: string;
 }
-
 interface UnifiedChatProps {
   messages: Message[];
   isRecording: boolean;
@@ -18,14 +16,12 @@ interface UnifiedChatProps {
   onLock: () => void;
   onSend: (text: string) => void;
 }
-
 export default function UnifiedChat({
   messages, isRecording, isLocked,
   onStartRecording, onStopRecording, onLock, onSend
 }: UnifiedChatProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasMessages = messages.length > 1;
-
   const handleSend = () => {
     const text = inputRef.current?.value.trim();
     if (!text) return;
@@ -35,11 +31,14 @@ export default function UnifiedChat({
       inputRef.current.style.height = "auto";
     }
   };
-
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-
-      {/* CHAT BODY — hold anywhere to record */}
+      <style>{`
+        @keyframes hintpulse {
+          0%, 100% { opacity: 0.55; }
+          50% { opacity: 1; }
+        }
+      `}</style>
       <div
         onMouseDown={() => { if (!isLocked && !inputRef.current?.contains(document.activeElement)) onStartRecording(); }}
         onMouseUp={() => { if (!isLocked) onStopRecording(); }}
@@ -62,7 +61,6 @@ export default function UnifiedChat({
           position: "relative",
         }}
       >
-        {/* Orb — shown when no messages or while recording */}
         {(!hasMessages || isRecording) && (
           <div style={{
             position: hasMessages ? "absolute" : "relative",
@@ -72,7 +70,6 @@ export default function UnifiedChat({
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            gap: "12px",
             pointerEvents: "none",
             alignSelf: "center",
             marginTop: hasMessages ? 0 : "auto",
@@ -81,20 +78,8 @@ export default function UnifiedChat({
             justifyContent: "center",
           }}>
             <AmbientOrb isRecording={isRecording} />
-            {isRecording && (
-              <div style={{
-                fontSize: "13px",
-                fontFamily: "var(--font-mono)",
-                color: "var(--rose)",
-                letterSpacing: "0.1em",
-              }}>
-                [listening…]
-              </div>
-            )}
           </div>
         )}
-
-        {/* Messages */}
         {messages.map((msg, i) => (
           <div key={i} className="no-record" style={{
             display: "flex",
@@ -126,8 +111,6 @@ export default function UnifiedChat({
             </div>
           </div>
         ))}
-
-        {/* Slide to lock — appears during recording */}
         {isRecording && !isLocked && (
           <div className="no-record" style={{
             position: "absolute",
@@ -138,8 +121,6 @@ export default function UnifiedChat({
             <SlideLock onLock={onLock} />
           </div>
         )}
-
-        {/* Locked indicator */}
         {isLocked && (
           <div className="no-record" style={{
             position: "absolute",
@@ -185,8 +166,6 @@ export default function UnifiedChat({
           </div>
         )}
       </div>
-
-      {/* BOTTOM INPUT */}
       <div className="no-record" style={{
         padding: "12px 18px 18px",
         borderTop: "1px solid var(--border)",
@@ -195,18 +174,15 @@ export default function UnifiedChat({
         flexDirection: "column",
         gap: "10px",
       }}>
-        {/* hint */}
         <div style={{
           textAlign: "center",
-          fontSize: "11px",
+          fontSize: "10px",
           fontFamily: "var(--font-mono)",
-          color: "var(--dim)",
-          letterSpacing: "0.05em",
+          color: "rgba(196,151,74,0.3)",
+          letterSpacing: "0.1em",
         }}>
-          [hold anywhere to speak · or type below]
+          [or type below]
         </div>
-
-        {/* text input */}
         <div style={{
           display: "flex",
           alignItems: "center",
