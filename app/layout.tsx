@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/themes/ThemeProvider";
 import "./globals.css";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -34,7 +35,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );
