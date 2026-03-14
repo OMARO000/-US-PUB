@@ -47,3 +47,24 @@ body {
 
 .nav-tooltip { opacity: 0; }
 a:hover .nav-tooltip { opacity: 1 !important; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.82); }
+  50% { opacity: 1; transform: scale(1.12); }
+}
+@keyframes rpulse {
+  0%, 100% { opacity: 0; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1); }
+}
+@keyframes obreathe {
+  0%, 100% { opacity: 0.28; transform: scale(0.78); }
+  50% { opacity: 0.65; transform: scale(1.12); }
+}
+@keyframes oring {
+  0%, 100% { opacity: 0.28; transform: scale(0.94); }
+  50% { opacity: 1; transform: scale(1.06); }
+}
+@keyframes recpulse {
+  0%, 100% { opacity: 0.6; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
