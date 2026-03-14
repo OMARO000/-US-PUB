@@ -1,26 +1,46 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Deep Slate (default) */
+  --bg: #1E2A3A;
+  --bg2: #263548;
+  --bg3: #2F4058;
+  --bg4: #3A4D68;
+  --amber: #C4974A;
+  --rose: #C4848A;
+  --text: rgba(255,255,255,0.88);
+  --muted: rgba(255,255,255,0.5);
+  --dim: rgba(255,255,255,0.28);
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+[data-theme="forest"] {
+  --bg: #1A2E22; --bg2: #20382A; --bg3: #284535; --bg4: #345A42;
+  --rose: #C4848A;
+}
+[data-theme="indigo"] {
+  --bg: #1E1A35; --bg2: #262042; --bg3: #302850; --bg4: #3E3468;
+  --rose: #C4909A;
+}
+[data-theme="charcoal"] {
+  --bg: #1C1C1E; --bg2: #242426; --bg3: #2C2C2E; --bg4: #38383A;
+  --rose: #C4848A;
+}
+[data-theme="terra"] {
+  --bg: #2A1A16; --bg2: #35201A; --bg3: #422820; --bg4: #54332A;
+  --rose: #A87888;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
+.font-mono { font-family: var(--font-mono), monospace; }
