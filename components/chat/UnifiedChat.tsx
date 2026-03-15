@@ -1,36 +1,45 @@
 "use client";
 import { useRef } from "react";
 import AmbientOrb from "./AmbientOrb";
-import SlideLock from "./SlideLock";
+
 interface Message {
+  id: string;
   role: "them" | "user";
-  text: string;
-  time: string;
+  content: string;
+  inputMode?: "voice" | "text";
 }
+
 interface UnifiedChatProps {
   messages: Message[];
   isRecording: boolean;
-  isLocked: boolean;
-  onStartRecording: () => void;
-  onStopRecording: () => void;
-  onLock: () => void;
-  onSend: (text: string) => void;
+  isThinking: boolean;
+  isSpeaking: boolean;
+  onHoldStart: () => void;
+  onHoldEnd: () => void;
+  onSendText: (text: string) => void;
+  onRephrase: () => void;
+  disabled?: boolean;
 }
+
 export default function UnifiedChat({
-  messages, isRecording, isLocked,
-  onStartRecording, onStopRecording, onLock, onSend
+  messages, isRecording, isThinking, isSpeaking,
+  onHoldStart, onHoldEnd, onSendText, onRephrase, disabled = false,
 }: UnifiedChatProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const hasMessages = messages.length > 1;
+  const hasMessages = messages.length > 0;
+
+  const orbState = isRecording ? "recording" : isThinking ? "thinking" : isSpeaking ? "speaking" : "idle";
+
   const handleSend = () => {
     const text = inputRef.current?.value.trim();
-    if (!text) return;
-    onSend(text);
+    if (!text || disabled) return;
+    onSendText(text);
     if (inputRef.current) {
       inputRef.current.value = "";
       inputRef.current.style.height = "auto";
     }
   };
+
   return (
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <style>{`
@@ -39,16 +48,19 @@ export default function UnifiedChat({
           50% { opacity: 1; }
         }
       `}</style>
+
+      {/* CHAT BODY */}
       <div
-        onMouseDown={() => { if (!isLocked && !inputRef.current?.contains(document.activeElement)) onStartRecording(); }}
-        onMouseUp={() => { if (!isLocked) onStopRecording(); }}
+        onMouseDown={() => { if (!inputRef.current?.contains(document.activeElement)) onHoldStart(); }}
+        onMouseUp={onHoldEnd}
+        onMouseLeave={onHoldEnd}
         onTouchStart={(e) => {
           const target = e.target as HTMLElement;
           if (target.closest(".no-record")) return;
           e.preventDefault();
-          if (!isLocked) onStartRecording();
+          onHoldStart();
         }}
-        onTouchEnd={() => { if (!isLocked) onStopRecording(); }}
+        onTouchEnd={onHoldEnd}
         style={{
           flex: 1,
           overflowY: "auto",
@@ -61,7 +73,8 @@ export default function UnifiedChat({
           position: "relative",
         }}
       >
-        {(!hasMessages || isRecording) && (
+        {/* Orb — shown when no messages or while recording/thinking/speaking */}
+        {(!hasMessages || isRecording || isThinking || isSpeaking) && (
           <div style={{
             position: hasMessages ? "absolute" : "relative",
             top: hasMessages ? "50%" : "auto",
@@ -77,11 +90,13 @@ export default function UnifiedChat({
             flex: hasMessages ? "none" : 1,
             justifyContent: "center",
           }}>
-            <AmbientOrb isRecording={isRecording} />
+            <AmbientOrb isRecording={isRecording} orbState={orbState} />
           </div>
         )}
-        {messages.map((msg, i) => (
-          <div key={i} className="no-record" style={{
+
+        {/* Messages */}
+        {messages.map((msg) => (
+          <div key={msg.id} className="no-record" style={{
             display: "flex",
             flexDirection: "column",
             gap: "5px",
@@ -98,74 +113,32 @@ export default function UnifiedChat({
               background: msg.role === "them" ? "var(--bg2)" : "var(--bg3)",
               border: `1px solid ${msg.role === "them" ? "var(--border)" : "var(--border2)"}`,
             }}>
-              {msg.text}
+              {msg.content}
             </div>
-            <div style={{
-              fontSize: "10px",
-              color: "var(--dim)",
-              padding: "0 4px",
-              textAlign: msg.role === "user" ? "right" : "left",
-              fontFamily: "var(--font-mono)",
-            }}>
-              [{msg.time}]
-            </div>
+            {msg.role === "them" && (
+              <button
+                className="no-record"
+                onClick={(e) => { e.stopPropagation(); onRephrase(); }}
+                style={{
+                  alignSelf: "flex-start",
+                  fontSize: "10px",
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--dim)",
+                  background: "transparent",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "0 4px",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                [rephrase]
+              </button>
+            )}
           </div>
         ))}
-        {isRecording && !isLocked && (
-          <div className="no-record" style={{
-            position: "absolute",
-            bottom: "16px",
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}>
-            <SlideLock onLock={onLock} />
-          </div>
-        )}
-        {isLocked && (
-          <div className="no-record" style={{
-            position: "absolute",
-            bottom: "16px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "6px 14px",
-            borderRadius: "20px",
-            background: "rgba(196,151,74,0.1)",
-            border: "1px solid rgba(196,151,74,0.22)",
-          }}>
-            <div style={{
-              width: "6px", height: "6px", borderRadius: "50%",
-              background: "var(--amber)",
-              animation: "recpulse 1s ease-in-out infinite",
-            }} />
-            <span style={{
-              fontSize: "11px",
-              fontFamily: "var(--font-mono)",
-              color: "var(--amber)",
-              letterSpacing: "0.05em",
-            }}>
-              [recording locked]
-            </span>
-            <button
-              onClick={(e) => { e.stopPropagation(); onStopRecording(); }}
-              style={{
-                fontSize: "10px",
-                fontFamily: "var(--font-mono)",
-                color: "var(--muted)",
-                background: "transparent",
-                border: "1px solid var(--border2)",
-                borderRadius: "12px",
-                padding: "3px 10px",
-                cursor: "pointer",
-              }}
-            >
-              [done]
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* BOTTOM INPUT */}
       <div className="no-record" style={{
         padding: "12px 18px 18px",
         borderTop: "1px solid var(--border)",
@@ -191,12 +164,14 @@ export default function UnifiedChat({
           border: "1px solid var(--border)",
           borderRadius: "13px",
           padding: "9px 13px",
+          opacity: disabled ? 0.4 : 1,
         }}>
           <textarea
             ref={inputRef}
             rows={1}
             placeholder="[say something…]"
             className="no-record"
+            disabled={disabled}
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
@@ -224,15 +199,17 @@ export default function UnifiedChat({
             }}
           />
           <button
+            className="no-record"
             onMouseDown={(e) => e.stopPropagation()}
             onClick={handleSend}
+            disabled={disabled}
             style={{
               width: "30px",
               height: "30px",
               borderRadius: "8px",
               border: "none",
               background: "rgba(196,151,74,0.14)",
-              cursor: "pointer",
+              cursor: disabled ? "default" : "pointer",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
