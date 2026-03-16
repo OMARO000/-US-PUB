@@ -15,6 +15,7 @@
  */
 
 import { useState, useEffect, useRef } from "react"
+import WalletInput from "@/components/intake/WalletInput"
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -27,6 +28,7 @@ export type PortraitRevealStage =
   | "metaphor_landing"
   | "confirming"
   | "confirmed"
+  | "wallet_input"
   | "minting"
   | "minted"
 
@@ -36,7 +38,7 @@ interface Props {
   imageKey: string           // e.g. "horizon_02" — maps to /portraits/{imageKey}.jpg
   archetype: string
   onConfirm: (correction?: string) => void
-  onMint: () => void
+  onMint: (walletAddress: string | null) => void  // null = custodial
   isMinting?: boolean
   mintTxUrl?: string         // Solana explorer URL after mint
 }
@@ -404,24 +406,23 @@ export default function PortraitReveal({
           </div>
           <div style={{ display: "flex", gap: "8px" }}>
             <button
-              onClick={() => { setStage("minting"); onMint() }}
-              disabled={isMinting}
+              onClick={() => setStage("wallet_input")}
               aria-label="mint portrait as NFT"
               style={{
                 flex: 1,
                 height: "44px",
                 borderRadius: "10px",
-                background: isMinting ? "var(--bg3)" : "var(--bg2)",
+                background: "var(--bg2)",
                 border: "1px solid var(--border)",
                 fontFamily: "var(--font-mono)",
                 fontSize: "12px",
-                color: isMinting ? "var(--dim)" : "var(--amber)",
-                cursor: isMinting ? "default" : "pointer",
+                color: "var(--amber)",
+                cursor: "pointer",
                 letterSpacing: "0.03em",
                 transition: "all 0.2s",
               }}
             >
-              {isMinting ? "[minting...]" : "[mint portrait]"}
+              [mint portrait]
             </button>
             <button
               onClick={() => setStage("minted")}
@@ -443,6 +444,22 @@ export default function PortraitReveal({
               [skip]
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Wallet input — collect address before minting */}
+      {stage === "wallet_input" && (
+        <div style={{
+          width: "100%",
+          animation: "fadeIn 0.4s ease forwards",
+        }}>
+          <WalletInput
+            onSubmit={(walletAddress) => {
+              setStage("minting")
+              onMint(walletAddress)
+            }}
+            onCancel={() => setStage("confirmed")}
+          />
         </div>
       )}
 

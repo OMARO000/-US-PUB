@@ -66,7 +66,7 @@ export default function PortraitPage() {
     }
   }
 
-  const handleMint = async () => {
+  const handleMint = async (walletAddress: string | null) => {
     if (!portrait) return
     setIsMinting(true)
 
@@ -78,6 +78,7 @@ export default function PortraitPage() {
           sessionId: portrait.sessionId,
           imageKey: portrait.imageKey,
           archetype: portrait.archetype,
+          ...(walletAddress !== null && { walletAddress }),
         }),
       })
 
