@@ -9,25 +9,27 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "slate",
+  theme: "charcoal",
   setTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("slate");
+  const [theme, setThemeState] = useState<Theme>("charcoal");
 
   useEffect(() => {
     const stored = localStorage.getItem("us-theme") as Theme;
     if (stored) {
       setThemeState(stored);
       document.documentElement.setAttribute("data-theme", stored);
+    } else {
+      document.documentElement.setAttribute("data-theme", "charcoal");
     }
   }, []);
 
   const setTheme = (t: Theme) => {
     setThemeState(t);
     localStorage.setItem("us-theme", t);
-    document.documentElement.setAttribute("data-theme", t === "slate" ? "" : t);
+    document.documentElement.setAttribute("data-theme", t);
   };
 
   return (
