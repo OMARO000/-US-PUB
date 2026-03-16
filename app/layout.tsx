@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/themes/ThemeProvider";
 import "./globals.css";
@@ -19,12 +19,15 @@ export const metadata: Metadata = {
   title: "[us]",
   description: "human connection",
   manifest: "/manifest.json",
-  themeColor: "#1E2A3A",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "[us]",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#1E2A3A",
 };
 
 export default function RootLayout({
