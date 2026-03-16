@@ -1,4 +1,15 @@
 /**
+ * [us] database schema
+ *
+ * Tables:
+ *   intake_sessions     — one per user per intake attempt
+ *   intake_messages     — every exchange during intake
+ *   intake_portraits    — final portrait generated at Block 8
+ *   custodial_wallets   — Solana wallets created on behalf of users
+ *   journal_entries     — private user reflections
+ */
+
+/**
  * [us] schema extension — intake sessions
  *
  * Extends existing schema with:
@@ -91,6 +102,47 @@ export const intakePortraits = sqliteTable("intake_portraits", {
   readyForMatching: integer("ready_for_matching", { mode: "boolean" })
     .notNull()
     .default(false),
+  // archetype classification
+  archetype: text("archetype"),
+  secondaryArchetype: text("secondary_archetype"),
+  metaphorText: text("metaphor_text"),
+  // NFT mint record
+  mintAddress: text("mint_address"),
+  mintTxUrl: text("mint_tx_url"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+})
+
+// ─────────────────────────────────────────────
+// CUSTODIAL WALLETS
+// Solana keypairs generated on behalf of users
+// who don't have their own wallet at mint time.
+// Private key is AES-256 encrypted before storage.
+// User can export from [profile] at any time.
+// ─────────────────────────────────────────────
+export const custodialWallets = sqliteTable("custodial_wallets", {
+  id: text("id").primaryKey(),                        // uuid
+  userId: text("user_id").notNull(),
+  publicKey: text("public_key").notNull(),
+  encryptedPrivateKey: text("encrypted_private_key").notNull(),  // AES-256 encrypted
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+})
+
+// ─────────────────────────────────────────────
+// JOURNAL ENTRIES
+// Private user reflections. Never shared without
+// explicit consent (allowYouAccess).
+// ─────────────────────────────────────────────
+export const journalEntries = sqliteTable("journal_entries", {
+  id: text("id").primaryKey(),                        // uuid
+  userId: text("user_id").notNull(),
+  content: text("content").notNull(),
+  inputMode: text("input_mode", { enum: ["voice", "text"] }).notNull(),
+  youPrompt: text("you_prompt"),                      // the [you] prompt that sparked this entry
+  allowYouAccess: integer("allow_you_access", { mode: "boolean" })
+    .notNull()
+    .default(false),
+  audioDurationMs: integer("audio_duration_ms"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
