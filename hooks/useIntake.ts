@@ -118,30 +118,10 @@ export function useIntake(): UseIntakeReturn {
     ])
   }, [])
 
-  // ── speak text via ElevenLabs ──
-  const speakText = useCallback(async (text: string) => {
-    if (!audioRef.current) return
-    setIsSpeaking(true)
-    setOrbState("speaking")
-    try {
-      const res = await fetch("/api/intake/speak", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
-      })
-      if (!res.ok) {
-        setIsSpeaking(false)
-        setOrbState("idle")
-        return
-      }
-      const blob = await res.blob()
-      const url = URL.createObjectURL(blob)
-      audioRef.current.src = url
-      await audioRef.current.play()
-    } catch {
-      setIsSpeaking(false)
-      setOrbState("idle")
-    }
+  // ── speak text via ElevenLabs (disabled) ──
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const speakText = useCallback(async (_text: string) => {
+    return
   }, [])
 
   // ── send message to [them] ──
@@ -193,11 +173,14 @@ export function useIntake(): UseIntakeReturn {
               const json = JSON.parse(line.slice(6))
               if (json.chunk) {
                 fullResponse += json.chunk
-                setMessages((prev) =>
-                  prev.map((m) =>
+                console.log("[us] chunk", JSON.stringify(json.chunk), "→ total", fullResponse.length, "chars | msgId", msgId)
+                setMessages((prev) => {
+                  const match = prev.find((m) => m.id === msgId)
+                  if (!match) console.warn("[us] msgId not found in messages:", msgId, prev.map((m) => m.id))
+                  return prev.map((m) =>
                     m.id === msgId ? { ...m, content: fullResponse } : m
                   )
-                )
+                })
               }
               if (json.blockComplete) {
                 setCurrentBlock(json.nextBlock)

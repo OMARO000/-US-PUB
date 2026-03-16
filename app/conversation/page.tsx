@@ -8,8 +8,8 @@
  */
 import { useEffect, useRef } from "react"
 import { useIntake } from "@/hooks/useIntake"
-import AmbientOrb from "@/components/chat/AmbientOrb"
 import UnifiedChat from "@/components/chat/UnifiedChat"
+import Sidebar from "@/components/sidebar/Sidebar"
 
 // ─────────────────────────────────────────────
 // ANONYMOUS USER ID
@@ -42,58 +42,28 @@ export default function ConversationPage() {
   }, [])
 
   return (
-    <main className="relative flex flex-col items-center justify-between min-h-screen overflow-hidden bg-[var(--color-bg)]">
-      {/* ── ambient orb ── */}
-      <div className="flex-1 flex items-center justify-center w-full">
-        <AmbientOrb
-          orbState={intake.orbState}
-          isRecording={intake.isRecording}
-          onHoldStart={intake.startRecording}
-          onHoldEnd={intake.stopRecording}
-        />
-      </div>
+    <div style={{ display: "flex", height: "100dvh", overflow: "hidden" }}>
+      <Sidebar />
+      <main style={{ flex: 1, marginLeft: "64px", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
+        {/* ── error banner ── */}
+        {intake.error && (
+          <div style={{ position: "absolute", top: 12, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 30 }}>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--dim)" }}>
+              {intake.error}
+            </p>
+          </div>
+        )}
 
-      {/* ── rephrase options ── */}
-      {intake.rephrases && (
-        <div className="absolute bottom-48 left-0 right-0 flex flex-col items-center gap-2 px-6 z-20">
-          {intake.rephrases.map((r, i) => (
-            <button
-              key={i}
-              onClick={() => intake.selectRephrase(r)}
-              className="text-[var(--color-text-muted)] text-sm font-mono hover:text-[var(--color-text)] transition-colors text-center max-w-sm"
-            >
-              {r}
-            </button>
-          ))}
-          <button
-            onClick={() => intake.selectRephrase(intake.messages.filter(m => m.role === "them").slice(-1)[0]?.content ?? "")}
-            className="text-[var(--color-text-dim)] text-xs font-mono mt-1"
-          >
-            [keep original]
-          </button>
-        </div>
-      )}
+        {/* ── completion overlay ── */}
+        {intake.sessionComplete && (
+          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 30, background: "var(--bg)", opacity: 0.95 }}>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text)", textAlign: "center", padding: "0 32px" }}>
+              [your portrait is ready]
+            </p>
+          </div>
+        )}
 
-      {/* ── completion state ── */}
-      {intake.sessionComplete && (
-        <div className="absolute inset-0 flex items-center justify-center z-30 bg-[var(--color-bg)] bg-opacity-90">
-          <p className="text-[var(--color-text)] font-mono text-sm text-center px-8">
-            [your portrait is ready]
-          </p>
-        </div>
-      )}
-
-      {/* ── error state ── */}
-      {intake.error && (
-        <div className="absolute top-6 left-0 right-0 flex justify-center z-30">
-          <p className="text-[var(--color-text-muted)] font-mono text-xs">
-            {intake.error}
-          </p>
-        </div>
-      )}
-
-      {/* ── unified chat interface ── */}
-      <div className="w-full">
+        {/* ── unified chat (fills screen, owns the orb) ── */}
         <UnifiedChat
           messages={intake.messages}
           isThinking={intake.isThinking}
@@ -103,9 +73,9 @@ export default function ConversationPage() {
           onHoldStart={intake.startRecording}
           onHoldEnd={intake.stopRecording}
           onRephrase={intake.requestRephrase}
-          disabled={intake.status !== "active"}
+          disabled={intake.status !== "active" ? true : false}
         />
-      </div>
-    </main>
+      </main>
+    </div>
   )
 }
