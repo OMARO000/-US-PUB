@@ -13,13 +13,28 @@ export default function AmbientOrb({ isRecording, orbState = "idle", onHoldStart
   const isThinking = orbState === "thinking";
   const isSpeaking = orbState === "speaking";
 
+  const stateLabel =
+    orbState === "recording" ? "[listening…]" :
+    orbState === "thinking"  ? "[thinking…]" :
+    orbState === "speaking"  ? "[speaking…]" :
+    null;
+
   return (
     <div
+      role={onHoldStart ? "button" : undefined}
+      tabIndex={onHoldStart ? 0 : undefined}
+      aria-label={onHoldStart ? "hold to speak" : undefined}
       onMouseDown={onHoldStart}
       onMouseUp={onHoldEnd}
       onMouseLeave={onHoldEnd}
       onTouchStart={(e) => { e.preventDefault(); onHoldStart?.(); }}
       onTouchEnd={onHoldEnd}
+      onKeyDown={(e) => {
+        if (e.code === "Space" && onHoldStart) { e.preventDefault(); onHoldStart(); }
+      }}
+      onKeyUp={(e) => {
+        if (e.code === "Space" && onHoldEnd) { e.preventDefault(); onHoldEnd(); }
+      }}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -62,67 +77,48 @@ export default function AmbientOrb({ isRecording, orbState = "idle", onHoldStart
         }} />
       </div>
 
-      {orbState === "idle" && (
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "8px",
-        }}>
-          <div style={{
+      {/* State label — announced to screen readers via aria-live */}
+      <span aria-live="polite" aria-atomic="true">
+        {orbState === "idle" && (
+          <span style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "8px",
+          }}>
+            <span style={{
+              fontSize: "13px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--amber)",
+              letterSpacing: "0.06em",
+              animation: "hintpulse 2.8s ease-in-out infinite",
+            }}>
+              [hold anywhere to speak]
+            </span>
+            <span style={{
+              fontSize: "10px",
+              fontFamily: "var(--font-mono)",
+              color: "rgba(196,151,74,0.75)",
+              letterSpacing: "0.1em",
+            }}>
+              [slide to lock]
+            </span>
+          </span>
+        )}
+
+        {stateLabel && (
+          <span style={{
             fontSize: "13px",
             fontFamily: "var(--font-mono)",
-            color: "var(--amber)",
-            letterSpacing: "0.06em",
-            animation: "hintpulse 2.8s ease-in-out infinite",
-          }}>
-            [hold anywhere to speak]
-          </div>
-          <div style={{
-            fontSize: "10px",
-            fontFamily: "var(--font-mono)",
-            color: "rgba(196,151,74,0.35)",
+            color: orbState === "recording" ? "var(--rose)" : orbState === "speaking" ? "var(--amber)" : "var(--muted)",
             letterSpacing: "0.1em",
+            animation: orbState === "thinking" ? "hintpulse 1.2s ease-in-out infinite" :
+                       orbState === "speaking"  ? "hintpulse 1.4s ease-in-out infinite" : "none",
           }}>
-            [slide to lock]
-          </div>
-        </div>
-      )}
-
-      {orbState === "recording" && (
-        <div style={{
-          fontSize: "13px",
-          fontFamily: "var(--font-mono)",
-          color: "var(--rose)",
-          letterSpacing: "0.1em",
-        }}>
-          [listening…]
-        </div>
-      )}
-
-      {orbState === "thinking" && (
-        <div style={{
-          fontSize: "13px",
-          fontFamily: "var(--font-mono)",
-          color: "var(--muted)",
-          letterSpacing: "0.1em",
-          animation: "hintpulse 1.2s ease-in-out infinite",
-        }}>
-          [thinking…]
-        </div>
-      )}
-
-      {orbState === "speaking" && (
-        <div style={{
-          fontSize: "13px",
-          fontFamily: "var(--font-mono)",
-          color: "var(--amber)",
-          letterSpacing: "0.1em",
-          animation: "hintpulse 1.4s ease-in-out infinite",
-        }}>
-          [speaking…]
-        </div>
-      )}
+            {stateLabel}
+          </span>
+        )}
+      </span>
     </div>
   );
 }

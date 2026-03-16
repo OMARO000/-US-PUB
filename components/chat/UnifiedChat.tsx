@@ -47,6 +47,11 @@ export default function UnifiedChat({
           0%, 100% { opacity: 0.55; }
           50% { opacity: 1; }
         }
+        .us-textarea:focus-visible {
+          outline: 2px solid var(--amber) !important;
+          outline-offset: 2px;
+          border-radius: 4px;
+        }
       `}</style>
 
       {/* CHAT BODY */}
@@ -94,48 +99,57 @@ export default function UnifiedChat({
           </div>
         )}
 
-        {/* Messages */}
-        {messages.map((msg) => (
-          <div key={msg.id} className="no-record" style={{
-            display: "flex",
-            flexDirection: "column",
-            gap: "5px",
-            maxWidth: "70%",
-            alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
-          }}>
-            <div style={{
-              padding: "11px 15px",
-              borderRadius: msg.role === "them" ? "15px 15px 15px 4px" : "15px 15px 4px 15px",
-              fontSize: "13.5px",
-              fontWeight: 300,
-              lineHeight: 1.65,
-              color: "var(--text)",
-              background: msg.role === "them" ? "var(--bg2)" : "var(--bg3)",
-              border: `1px solid ${msg.role === "them" ? "var(--border)" : "var(--border2)"}`,
+        {/* Messages — aria-live so screen readers announce incoming [them] responses */}
+        <div
+          aria-live="polite"
+          aria-atomic="false"
+          aria-busy={isThinking}
+          style={{ display: "contents" }}
+        >
+          {messages.map((msg) => (
+            <div key={msg.id} className="no-record" style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "5px",
+              maxWidth: "70%",
+              alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
             }}>
-              {msg.content}
+              <div style={{
+                padding: "11px 15px",
+                borderRadius: msg.role === "them" ? "15px 15px 15px 4px" : "15px 15px 4px 15px",
+                fontSize: "13.5px",
+                fontWeight: 300,
+                lineHeight: 1.65,
+                color: "var(--text)",
+                background: msg.role === "them" ? "var(--bg2)" : "var(--bg3)",
+                border: `1px solid ${msg.role === "them" ? "var(--border)" : "var(--border2)"}`,
+              }}>
+                {msg.content}
+              </div>
+              {msg.role === "them" && (
+                <button
+                  className="no-record"
+                  aria-label="rephrase this"
+                  onClick={(e) => { e.stopPropagation(); onRephrase(); }}
+                  style={{
+                    alignSelf: "flex-start",
+                    fontSize: "10px",
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--muted)",
+                    background: "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "12px 4px",
+                    minHeight: "44px",
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  [rephrase]
+                </button>
+              )}
             </div>
-            {msg.role === "them" && (
-              <button
-                className="no-record"
-                onClick={(e) => { e.stopPropagation(); onRephrase(); }}
-                style={{
-                  alignSelf: "flex-start",
-                  fontSize: "10px",
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--dim)",
-                  background: "transparent",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "0 4px",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                [rephrase]
-              </button>
-            )}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
       {/* BOTTOM INPUT */}
@@ -151,7 +165,7 @@ export default function UnifiedChat({
           textAlign: "center",
           fontSize: "10px",
           fontFamily: "var(--font-mono)",
-          color: "rgba(196,151,74,0.3)",
+          color: "rgba(196,151,74,0.75)",
           letterSpacing: "0.1em",
         }}>
           [or type below]
@@ -170,8 +184,9 @@ export default function UnifiedChat({
             ref={inputRef}
             rows={1}
             placeholder="[say something…]"
-            className="no-record"
-            disabled={disabled}
+            aria-label="say something"
+            className="no-record us-textarea"
+            disabled={!!disabled}
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             onKeyDown={(e) => {
@@ -200,13 +215,14 @@ export default function UnifiedChat({
           />
           <button
             className="no-record"
+            aria-label="send message"
             onMouseDown={(e) => e.stopPropagation()}
             onClick={handleSend}
-            disabled={disabled}
+            disabled={!!disabled}
             style={{
-              width: "30px",
-              height: "30px",
-              borderRadius: "8px",
+              width: "44px",
+              height: "44px",
+              borderRadius: "10px",
               border: "none",
               background: "rgba(196,151,74,0.14)",
               cursor: disabled ? "default" : "pointer",
@@ -216,7 +232,7 @@ export default function UnifiedChat({
               flexShrink: 0,
             }}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <line x1="22" y1="2" x2="11" y2="13"/>
               <polygon points="22 2 15 22 11 13 2 9 22 2"/>
             </svg>

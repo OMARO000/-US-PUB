@@ -12,7 +12,7 @@
   --rose: #C4848A;
   --text: rgba(255,255,255,0.88);
   --muted: rgba(255,255,255,0.5);
-  --dim: rgba(255,255,255,0.28);
+  --dim: rgba(255,255,255,0.55);
   --border: rgba(255,255,255,0.07);
   --border2: rgba(255,255,255,0.12);
 }
@@ -44,6 +44,13 @@ body {
 }
 
 .font-mono { font-family: var(--font-mono), monospace; }
+
+/* Global focus indicator — amber outline for all interactive elements */
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
 
 .nav-tooltip { opacity: 0; }
 a:hover .nav-tooltip { opacity: 1 !important; }

@@ -47,8 +47,8 @@ export default function ConversationPage() {
       <main style={{ flex: 1, marginLeft: "64px", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
         {/* ── error banner ── */}
         {intake.error && (
-          <div style={{ position: "absolute", top: 12, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 30 }}>
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--dim)" }}>
+          <div role="alert" style={{ position: "absolute", top: 12, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 30 }}>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--muted)" }}>
               {intake.error}
             </p>
           </div>
@@ -56,7 +56,7 @@ export default function ConversationPage() {
 
         {/* ── completion overlay ── */}
         {intake.sessionComplete && (
-          <div style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 30, background: "var(--bg)", opacity: 0.95 }}>
+          <div role="status" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 30, background: "var(--bg)", opacity: 0.95 }}>
             <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text)", textAlign: "center", padding: "0 32px" }}>
               [your portrait is ready]
             </p>
