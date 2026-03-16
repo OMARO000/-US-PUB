@@ -21,6 +21,7 @@ import {
 } from "@/lib/intake/them"
 import { generateRephrases } from "@/lib/intake/rephrase"
 import { BLOCKS, type BlockId } from "@/lib/intake/blocks"
+import { generatePortrait } from "@/lib/intake/portrait"
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -192,8 +193,21 @@ export async function POST(req: NextRequest) {
             session.messages.filter((m) => m.role === "user" && m.blockId === 8).length >= 1
           if (portaitComplete) {
             await SessionManager.complete(sessionId)
+            let portraitData = null
+            try {
+              const portrait = await generatePortrait(session.messages)
+              portraitData = {
+                portraitText: portrait.portraitText,
+                metaphorText: portrait.metaphorText,
+                imageKey: portrait.imageKey,
+                archetype: portrait.archetype,
+                sessionId,
+              }
+            } catch (err) {
+              console.error("[us] portrait generation error:", err)
+            }
             controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ sessionComplete: true })}\n\n`)
+              encoder.encode(`data: ${JSON.stringify({ sessionComplete: true, portraitData })}\n\n`)
             )
           }
         } else {

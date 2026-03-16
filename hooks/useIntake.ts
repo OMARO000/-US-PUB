@@ -188,6 +188,10 @@ export function useIntake(): UseIntakeReturn {
               if (json.sessionComplete) {
                 setSessionComplete(true)
                 setStatus("completed")
+                if (json.portraitData && typeof window !== "undefined") {
+                  sessionStorage.setItem("us_portrait", JSON.stringify(json.portraitData))
+                  window.location.href = "/intake/portrait"
+                }
               }
             } catch {
               // malformed chunk — skip
