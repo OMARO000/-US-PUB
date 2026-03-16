@@ -28,28 +28,11 @@ interface JournalEntry {
   createdAt: Date
 }
 
-// ─────────────────────────────────────────────
-// PLACEHOLDER ENTRIES
-// Replace with real DB fetch when API is wired
-// ─────────────────────────────────────────────
-
-const PLACEHOLDER_ENTRIES: JournalEntry[] = [
-  {
-    id: "1",
-    content: "i keep thinking about what [you] said — that i give before i ask. i do. i don't know if that's generosity or if i'm just afraid of asking.",
-    inputMode: "text",
-    youPrompt: "after your last conversation, [you] noticed you pulled back when things got quiet — anything worth noting?",
-    allowYouAccess: true,
-    createdAt: new Date(Date.now() - 86400000 * 2),
-  },
-  {
-    id: "2",
-    content: "met someone who reminded me of how i used to be. not sure if that's good or not.",
-    inputMode: "voice",
-    allowYouAccess: false,
-    createdAt: new Date(Date.now() - 86400000 * 5),
-  },
-]
+// userId is stored in localStorage under "us_user_id"
+function getUserId(): string | null {
+  if (typeof window === "undefined") return null
+  return localStorage.getItem("us_user_id")
+}
 
 // ─────────────────────────────────────────────
 // COMPONENTS
@@ -177,7 +160,8 @@ export default function JournalPage() {
   const pathname = usePathname()
   const narration = useYouNarration(pathname)
 
-  const [entries] = useState<JournalEntry[]>(PLACEHOLDER_ENTRIES)
+  const [entries, setEntries] = useState<JournalEntry[]>([])
+  const [isLoadingEntries, setIsLoadingEntries] = useState(true)
   const [youConsent, setYouConsent] = useState(() => {
     if (typeof window === "undefined") return false
     return localStorage.getItem("us_journal_consent") === "true"
@@ -193,11 +177,68 @@ export default function JournalPage() {
     }
   }, [youConsent])
 
-  const handleSubmit = () => {
+  // fetch entries on mount
+  useEffect(() => {
+    const userId = getUserId()
+    if (!userId) { setIsLoadingEntries(false); return }
+
+    fetch(`/api/journal/entry?userId=${encodeURIComponent(userId)}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.entries) {
+          setEntries(
+            data.entries.map((e: {
+              id: string
+              content: string
+              inputMode: "voice" | "text"
+              youPrompt?: string
+              allowYouAccess: boolean
+              createdAt: string | number
+            }) => ({
+              ...e,
+              createdAt: new Date(e.createdAt),
+            }))
+          )
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoadingEntries(false))
+  }, [])
+
+  const handleSubmit = async () => {
     if (!newEntry.trim()) return
-    // TODO: POST to /api/journal/entry when DB is wired
+    const userId = getUserId()
+    if (!userId) return
+
+    const content = newEntry.trim()
     setNewEntry("")
     setIsWriting(false)
+
+    try {
+      const res = await fetch("/api/journal/entry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          content,
+          inputMode: "text",
+          allowYouAccess: youConsent,
+        }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        const newEntryObj: JournalEntry = {
+          id: data.id,
+          content,
+          inputMode: "text",
+          allowYouAccess: youConsent,
+          createdAt: new Date(),
+        }
+        setEntries((prev) => [newEntryObj, ...prev])
+      }
+    } catch {
+      // non-blocking — user sees the entry immediately, retry can be added later
+    }
   }
 
   return (
@@ -347,7 +388,25 @@ export default function JournalPage() {
               [recent entries]
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {entries.map((entry) => (
+              {isLoadingEntries ? (
+                <div style={{
+                  fontSize: "12px",
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--dim)",
+                  opacity: 0.6,
+                }}>
+                  [loading...]
+                </div>
+              ) : entries.length === 0 ? (
+                <div style={{
+                  fontSize: "12px",
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--dim)",
+                  opacity: 0.6,
+                }}>
+                  [nothing here yet]
+                </div>
+              ) : entries.map((entry) => (
                 <EntryCard key={entry.id} entry={entry} />
               ))}
             </div>
