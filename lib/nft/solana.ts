@@ -1,30 +1,36 @@
 /**
- * [us] NFT minting — Solana + Metaplex
+ * [us] NFT minting — Solana + Metaplex UMI
  *
  * Mints a portrait NFT on Solana mainnet (or devnet for testing).
- * Uses Metaplex JS SDK for NFT creation.
- * Portrait image uploaded to IPFS via Pinata before minting.
+ * Uses Metaplex UMI + mpl-token-metadata for NFT creation.
+ * Portrait image uploaded to Arweave via Irys before minting.
  *
  * Mint price: 0.1–0.2 SOL (set in MINT_PRICE_SOL env var)
  * Royalties: 5% (500 basis points)
  * OMARO treasury receives mint revenue.
  *
  * Setup:
- *   npm install @metaplex-foundation/js @solana/web3.js
+ *   npm install @metaplex-foundation/umi @metaplex-foundation/umi-bundle-defaults \
+ *     @metaplex-foundation/mpl-token-metadata @metaplex-foundation/umi-uploader-irys \
+ *     @solana/web3.js bs58
  */
 
+import { createUmi } from "@metaplex-foundation/umi-bundle-defaults"
+import { irysUploader } from "@metaplex-foundation/umi-uploader-irys"
 import {
-  Metaplex,
+  createNft,
+  mplTokenMetadata,
+} from "@metaplex-foundation/mpl-token-metadata"
+import {
+  createGenericFile,
+  createSignerFromKeypair,
+  generateSigner,
   keypairIdentity,
-  bundlrStorage,
-  toMetaplexFile,
-} from "@metaplex-foundation/js"
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  clusterApiUrl,
-} from "@solana/web3.js"
+  percentAmount,
+  publicKey as umiPublicKey,
+} from "@metaplex-foundation/umi"
+import { fromWeb3JsKeypair } from "@metaplex-foundation/umi-web3js-adapters"
+import { Keypair } from "@solana/web3.js"
 import bs58 from "bs58"
 
 // ─────────────────────────────────────────────
@@ -35,8 +41,7 @@ const SOLANA_NETWORK = (process.env.SOLANA_NETWORK ?? "devnet") as
   | "devnet"
   | "mainnet-beta"
 
-const OMARO_TREASURY = process.env.OMARO_SOLANA_WALLET ?? ""  // OMARO's public wallet address
-const MINT_PRICE_SOL = parseFloat(process.env.MINT_PRICE_SOL ?? "0.1")
+const OMARO_TREASURY = process.env.OMARO_SOLANA_WALLET ?? ""
 const SELLER_FEE_BASIS_POINTS = 500  // 5% royalties on secondary sales
 
 // ─────────────────────────────────────────────
@@ -65,44 +70,45 @@ export interface MintPortraitResult {
 }
 
 // ─────────────────────────────────────────────
-// METAPLEX CLIENT
+// UMI CLIENT
 // ─────────────────────────────────────────────
 
-function getMetaplex(): Metaplex {
-  // OMARO's minting keypair — pays gas, signs the mint
-  // Stored as base58-encoded private key in env
+function getUmi() {
   const privateKeyBase58 = process.env.OMARO_MINT_KEYPAIR
   if (!privateKeyBase58) throw new Error("[us] OMARO_MINT_KEYPAIR not set")
 
-  const keypair = Keypair.fromSecretKey(bs58.decode(privateKeyBase58))
-  const connection = new Connection(
-    SOLANA_NETWORK === "mainnet-beta"
-      ? (process.env.SOLANA_RPC_URL ?? clusterApiUrl("mainnet-beta"))
-      : clusterApiUrl("devnet")
-  )
+  const web3Keypair = Keypair.fromSecretKey(bs58.decode(privateKeyBase58))
 
-  return Metaplex.make(connection)
-    .use(keypairIdentity(keypair))
+  const endpoint =
+    SOLANA_NETWORK === "mainnet-beta"
+      ? (process.env.SOLANA_RPC_URL ?? "https://api.mainnet-beta.solana.com")
+      : "https://api.devnet.solana.com"
+
+  const umi = createUmi(endpoint)
+    .use(mplTokenMetadata())
     .use(
-      bundlrStorage({
+      irysUploader({
         address:
           SOLANA_NETWORK === "mainnet-beta"
-            ? "https://node1.bundlr.network"
-            : "https://devnet.bundlr.network",
-        providerUrl:
-          SOLANA_NETWORK === "mainnet-beta"
-            ? (process.env.SOLANA_RPC_URL ?? clusterApiUrl("mainnet-beta"))
-            : clusterApiUrl("devnet"),
+            ? "https://node1.irys.xyz"
+            : "https://devnet.irys.xyz",
+        providerUrl: endpoint,
         timeout: 60000,
       })
     )
+
+  const umiKeypair = fromWeb3JsKeypair(web3Keypair)
+  const signer = createSignerFromKeypair(umi, umiKeypair)
+  umi.use(keypairIdentity(signer))
+
+  return umi
 }
 
 // ─────────────────────────────────────────────
 // NFT METADATA BUILDER
 // ─────────────────────────────────────────────
 
-function buildMetadata(input: MintPortraitInput, imageUri: string) {
+function buildMetadataJson(input: MintPortraitInput, imageUri: string) {
   return {
     name: `[us] portrait — ${input.archetype}`,
     symbol: "US",
@@ -120,12 +126,9 @@ function buildMetadata(input: MintPortraitInput, imageUri: string) {
     properties: {
       files: [{ uri: imageUri, type: input.imageContentType }],
       category: "image",
-      creators: [
-        {
-          address: OMARO_TREASURY,
-          share: 100,
-        },
-      ],
+      creators: OMARO_TREASURY
+        ? [{ address: OMARO_TREASURY, share: 100 }]
+        : [],
     },
     seller_fee_basis_points: SELLER_FEE_BASIS_POINTS,
   }
@@ -138,44 +141,47 @@ function buildMetadata(input: MintPortraitInput, imageUri: string) {
 export async function mintPortraitNFT(
   input: MintPortraitInput
 ): Promise<MintPortraitResult> {
-  const metaplex = getMetaplex()
+  const umi = getUmi()
 
-  // 1. upload image to Arweave via Bundlr
-  const imageFile = toMetaplexFile(input.imageBuffer, `${input.imageKey}.jpg`, {
-    contentType: input.imageContentType,
-  })
-  const imageUri = await metaplex.storage().upload(imageFile)
+  // 1. upload image to Arweave via Irys
+  const imageFile = createGenericFile(
+    new Uint8Array(input.imageBuffer),
+    `${input.imageKey}.jpg`,
+    { contentType: input.imageContentType }
+  )
+  const [imageUri] = await umi.uploader.upload([imageFile])
 
   // 2. upload metadata JSON
-  const metadata = buildMetadata(input, imageUri)
-  const { uri: metadataUri } = await metaplex.nfts().uploadMetadata(metadata)
+  const metadataJson = buildMetadataJson(input, imageUri)
+  const metadataUri = await umi.uploader.uploadJson(metadataJson)
 
   // 3. mint NFT to user's wallet
-  const { nft, response } = await metaplex.nfts().create({
-    uri: metadataUri,
-    name: metadata.name,
-    symbol: metadata.symbol,
-    sellerFeeBasisPoints: SELLER_FEE_BASIS_POINTS,
-    tokenOwner: new PublicKey(input.userWalletAddress),
-    creators: OMARO_TREASURY
-      ? [
-          {
-            address: new PublicKey(OMARO_TREASURY),
-            share: 100,
-          },
-        ]
-      : undefined,
-    isMutable: false,   // portrait is permanent
-  })
+  const mintSigner = generateSigner(umi)
 
+  const creators = OMARO_TREASURY
+    ? [{ address: umiPublicKey(OMARO_TREASURY), share: 100, verified: false }]
+    : undefined
+
+  const { signature } = await createNft(umi, {
+    mint: mintSigner,
+    name: metadataJson.name,
+    symbol: metadataJson.symbol,
+    uri: metadataUri,
+    sellerFeeBasisPoints: percentAmount(SELLER_FEE_BASIS_POINTS / 100, 2),
+    tokenOwner: umiPublicKey(input.userWalletAddress),
+    creators,
+    isMutable: false,
+  }).sendAndConfirm(umi)
+
+  const txSignature = bs58.encode(signature)
   const explorer =
     SOLANA_NETWORK === "mainnet-beta"
-      ? `https://explorer.solana.com/tx/${response.signature}`
-      : `https://explorer.solana.com/tx/${response.signature}?cluster=devnet`
+      ? `https://explorer.solana.com/tx/${txSignature}`
+      : `https://explorer.solana.com/tx/${txSignature}?cluster=devnet`
 
   return {
-    mintAddress: nft.address.toString(),
-    txSignature: response.signature,
+    mintAddress: mintSigner.publicKey.toString(),
+    txSignature,
     txUrl: explorer,
     metadataUri,
   }
