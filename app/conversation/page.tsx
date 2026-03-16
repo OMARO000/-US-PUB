@@ -46,7 +46,8 @@ export default function ConversationPage() {
   return (
     <div style={{ display: "flex", height: "100dvh", overflow: "hidden" }}>
       <Sidebar />
-      <main style={{ flex: 1, marginLeft: "220px", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
+      <main style={{ flex: 1, marginLeft: "220px", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", alignItems: "center" }}>
+        <div style={{ width: "100%", maxWidth: "680px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
         {/* ── error banner ── */}
         {intake.error && (
           <div role="alert" style={{ position: "absolute", top: 12, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 30 }}>
@@ -77,6 +78,7 @@ export default function ConversationPage() {
           onRephrase={intake.requestRephrase}
           disabled={intake.status !== "active" ? true : false}
         />
+        </div>
       </main>
     </div>
   )
