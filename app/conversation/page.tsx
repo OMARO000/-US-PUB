@@ -7,9 +7,11 @@
  * Handles: recording, text input, rephrase, block state, completion.
  */
 import { useEffect, useRef } from "react"
+import dynamic from "next/dynamic"
 import { useIntake } from "@/hooks/useIntake"
-import UnifiedChat from "@/components/chat/UnifiedChat"
 import Sidebar from "@/components/sidebar/Sidebar"
+
+const UnifiedChat = dynamic(() => import("@/components/chat/UnifiedChat"), { ssr: false })
 
 // ─────────────────────────────────────────────
 // ANONYMOUS USER ID
@@ -44,7 +46,7 @@ export default function ConversationPage() {
   return (
     <div style={{ display: "flex", height: "100dvh", overflow: "hidden" }}>
       <Sidebar />
-      <main style={{ flex: 1, marginLeft: "64px", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
+      <main style={{ flex: 1, marginLeft: "220px", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
         {/* ── error banner ── */}
         {intake.error && (
           <div role="alert" style={{ position: "absolute", top: 12, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 30 }}>

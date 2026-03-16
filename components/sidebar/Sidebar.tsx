@@ -44,14 +44,14 @@ export default function Sidebar() {
 
   return (
     <aside style={{
-      width: "64px",
+      width: "220px",
       height: "100dvh",
       background: "var(--bg)",
       borderRight: "1px solid var(--border)",
       display: "flex",
       flexDirection: "column",
-      alignItems: "center",
-      padding: "20px 0",
+      alignItems: "stretch",
+      padding: "20px 12px",
       gap: "4px",
       flexShrink: 0,
       position: "fixed",
@@ -62,23 +62,24 @@ export default function Sidebar() {
 
       {/* Logo */}
       <Link href="/conversation" aria-label="[us] home" style={{
-        width: "44px",
-        height: "44px",
+        width: "110px",
+        height: "110px",
         display: "flex",
         alignItems: "center",
-        justifyContent: "center",
-        marginBottom: "8px",
+        justifyContent: "flex-start",
+        marginBottom: "4px",
+        paddingLeft: "8px",
         textDecoration: "none",
         color: "var(--amber)",
         fontFamily: "var(--font-sans)",
-        fontSize: "15px",
+        fontSize: "38px",
         fontWeight: 300,
         letterSpacing: "-0.5px",
       }}>
         [us]
       </Link>
 
-      <div style={{ width: "24px", height: "1px", background: "var(--border)", margin: "4px 0" }} />
+      <div style={{ width: "100%", height: "1px", background: "var(--border)", margin: "4px 0" }} />
 
       {/* Nav items */}
       {navItems.map((item) => {
@@ -90,12 +91,13 @@ export default function Sidebar() {
             aria-label={item.label}
             aria-current={active ? "page" : undefined}
             style={{
-              width: "44px",
+              width: "100%",
               height: "44px",
               borderRadius: "10px",
               display: "flex",
               alignItems: "center",
-              justifyContent: "center",
+              gap: "12px",
+              padding: "0 12px",
               position: "relative",
               background: active ? "var(--bg3)" : "transparent",
               color: active ? "var(--amber)" : "var(--muted)",
@@ -103,49 +105,32 @@ export default function Sidebar() {
               textDecoration: "none",
             }}
           >
-            <span style={{ width: "18px", height: "18px", display: "flex" }}>
+            <span style={{ width: "18px", height: "18px", display: "flex", flexShrink: 0 }}>
               {item.icon}
+            </span>
+            <span style={{
+              fontSize: "12px",
+              fontFamily: "var(--font-mono)",
+              letterSpacing: "0.03em",
+              whiteSpace: "nowrap",
+            }}>
+              {item.label}
             </span>
             {item.badge && (
               <span aria-label="new" style={{
-                position: "absolute",
-                top: "6px",
-                right: "6px",
+                marginLeft: "auto",
                 width: "7px",
                 height: "7px",
                 borderRadius: "50%",
                 background: "var(--rose)",
-                border: "1.5px solid var(--bg)",
+                flexShrink: 0,
               }} />
             )}
-            {/* Tooltip */}
-            <span style={{
-              position: "absolute",
-              left: "52px",
-              background: "var(--bg3)",
-              border: "1px solid var(--border2)",
-              borderRadius: "6px",
-              padding: "4px 10px",
-              fontSize: "11px",
-              fontFamily: "var(--font-mono)",
-              color: "var(--text)",
-              whiteSpace: "nowrap",
-              letterSpacing: "0.03em",
-              opacity: 0,
-              pointerEvents: "none",
-              transition: "opacity 0.15s",
-              zIndex: 100,
-            }}
-            className="nav-tooltip"
-            aria-hidden="true"
-            >
-              {item.label}
-            </span>
           </Link>
         );
       })}
 
-      <div style={{ width: "24px", height: "1px", background: "var(--border)", margin: "4px 0" }} />
+      <div style={{ width: "100%", height: "1px", background: "var(--border)", margin: "4px 0" }} />
 
       {/* Settings */}
       <Link
@@ -153,49 +138,76 @@ export default function Sidebar() {
         aria-label="[settings]"
         aria-current={pathname === "/settings" ? "page" : undefined}
         style={{
-          width: "44px",
+          width: "100%",
           height: "44px",
           borderRadius: "10px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
+          gap: "12px",
+          padding: "0 12px",
           background: pathname === "/settings" ? "var(--bg3)" : "transparent",
           color: pathname === "/settings" ? "var(--amber)" : "var(--muted)",
           transition: "background 0.15s",
           textDecoration: "none",
         }}
       >
-        <span style={{ width: "18px", height: "18px", display: "flex" }}>
+        <span style={{ width: "18px", height: "18px", display: "flex", flexShrink: 0 }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </span>
+        <span style={{
+          fontSize: "12px",
+          fontFamily: "var(--font-mono)",
+          letterSpacing: "0.03em",
+          whiteSpace: "nowrap",
+        }}>
+          [settings]
+        </span>
       </Link>
 
       <div style={{ flex: 1 }} />
 
-      {/* Avatar — converted to button for keyboard accessibility */}
+      {/* Avatar */}
       <button
         aria-label="your profile"
         style={{
-          width: "44px",
+          width: "100%",
           height: "44px",
-          borderRadius: "50%",
+          borderRadius: "10px",
           background: "var(--bg4)",
           border: "1.5px solid var(--border2)",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          padding: "0 12px",
+          cursor: "pointer",
+          fontFamily: "var(--font-sans)",
+        }}
+      >
+        <span style={{
+          width: "28px",
+          height: "28px",
+          borderRadius: "50%",
+          background: "var(--bg3)",
+          border: "1px solid var(--border2)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           fontSize: "11px",
           fontWeight: 500,
           color: "var(--muted)",
-          cursor: "pointer",
-          fontFamily: "var(--font-sans)",
-        }}
-      >
-        B
+          flexShrink: 0,
+        }}>B</span>
+        <span style={{
+          fontSize: "12px",
+          fontFamily: "var(--font-mono)",
+          color: "var(--muted)",
+          letterSpacing: "0.03em",
+        }}>
+          [you]
+        </span>
       </button>
     </aside>
   );
