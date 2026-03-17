@@ -81,43 +81,63 @@ export default function ConversationPage() {
             </div>
           )}
 
-          {/* ── hero orb — shown before first user message ── */}
+          {/* ── pre-conversation: orb + input centered as a group ── */}
           {!hasMessages && (
-            <div
-              onMouseDown={intake.startRecording}
-              onMouseUp={intake.stopRecording}
-              onMouseLeave={intake.stopRecording}
-              onTouchStart={(e) => { e.preventDefault(); intake.startRecording() }}
-              onTouchEnd={intake.stopRecording}
-              style={{
-                flex: 1,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                userSelect: "none",
-                WebkitUserSelect: "none",
-              }}
-            >
-              <div style={{ transform: "scale(2)", transformOrigin: "center center" }}>
-                <AmbientOrb isRecording={intake.isRecording} orbState={orbState} />
+            <div style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "56px",
+            }}>
+              {/* hero orb with hold-to-record */}
+              <div
+                onMouseDown={intake.startRecording}
+                onMouseUp={intake.stopRecording}
+                onMouseLeave={intake.stopRecording}
+                onTouchStart={(e) => { e.preventDefault(); intake.startRecording() }}
+                onTouchEnd={intake.stopRecording}
+                style={{ cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" }}
+              >
+                <div style={{ transform: "scale(2)", transformOrigin: "center center" }}>
+                  <AmbientOrb isRecording={intake.isRecording} orbState={orbState} />
+                </div>
+              </div>
+
+              {/* input bar — constrained width, no flex-grow */}
+              <div style={{ width: "100%", flexShrink: 0 }}>
+                <UnifiedChat
+                  messages={intake.messages}
+                  isThinking={intake.isThinking}
+                  isSpeaking={intake.isSpeaking}
+                  isRecording={intake.isRecording}
+                  onSendText={intake.sendText}
+                  onHoldStart={intake.startRecording}
+                  onHoldEnd={intake.stopRecording}
+                  onRephrase={intake.requestRephrase}
+                  disabled={intake.status !== "active"}
+                  showMessages={false}
+                />
               </div>
             </div>
           )}
 
-          {/* ── unified chat — input always shown; messages appear after first reply ── */}
-          <UnifiedChat
-            messages={intake.messages}
-            isThinking={intake.isThinking}
-            isSpeaking={intake.isSpeaking}
-            isRecording={intake.isRecording}
-            onSendText={intake.sendText}
-            onHoldStart={intake.startRecording}
-            onHoldEnd={intake.stopRecording}
-            onRephrase={intake.requestRephrase}
-            disabled={intake.status !== "active"}
-            showMessages={hasMessages}
-          />
+          {/* ── active conversation: full chat ── */}
+          {hasMessages && (
+            <UnifiedChat
+              messages={intake.messages}
+              isThinking={intake.isThinking}
+              isSpeaking={intake.isSpeaking}
+              isRecording={intake.isRecording}
+              onSendText={intake.sendText}
+              onHoldStart={intake.startRecording}
+              onHoldEnd={intake.stopRecording}
+              onRephrase={intake.requestRephrase}
+              disabled={intake.status !== "active"}
+              showMessages={true}
+            />
+          )}
         </div>
       </main>
     </div>
