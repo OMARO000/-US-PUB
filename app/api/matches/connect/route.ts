@@ -14,6 +14,7 @@ import { db } from "@/lib/db"
 import { matchScores, conversations } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 import { v4 as uuid } from "uuid"
+import { generateFirstPrompt } from "@/lib/match/firstPrompt"
 
 export async function POST(req: NextRequest) {
   let body: { matchId: string; userId: string }
@@ -95,7 +96,15 @@ export async function POST(req: NextRequest) {
       updatedAt: now,
     })
 
-    return NextResponse.json({ mutual: true, conversationId })
+    // ── generate opening prompt ──
+    let firstPrompt: string | null = null
+    try {
+      firstPrompt = await generateFirstPrompt(conversationId)
+    } catch (err) {
+      console.error("[us] generateFirstPrompt error:", err)
+    }
+
+    return NextResponse.json({ mutual: true, conversationId, firstPrompt })
   } catch (err) {
     console.error("[us] matches/connect error:", err)
     return NextResponse.json({ error: "failed to process connect" }, { status: 500 })
