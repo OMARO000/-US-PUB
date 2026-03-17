@@ -66,6 +66,13 @@ The user has navigated to settings.
 Brief acknowledgment. Tell them what they can adjust here.
 1 sentence. Functional, not warm — this is a utility space.
   `.trim(),
+
+  "/about": `
+The user has navigated to the about page.
+Tell them what's here — the philosophy behind [us], what you are, and answers to things people often wonder about.
+Invite them to explore. Keep it brief.
+1–2 sentences.
+  `.trim(),
 }
 
 const IDENTITY_PREFIX = `
