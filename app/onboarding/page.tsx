@@ -571,11 +571,26 @@ export default function OnboardingPage() {
     }
   }
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (typeof window === "undefined") return
     localStorage.setItem("us_onboarded", "true")
     localStorage.setItem("us-theme", selectedTheme)
     localStorage.setItem("us_voice_id", selectedVoice)
+
+    // ensure user row exists in DB with chosen preferences
+    const userId = localStorage.getItem("us_uid")
+    if (userId) {
+      try {
+        await fetch("/api/user", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId, themeId: selectedTheme, voiceId: selectedVoice }),
+        })
+      } catch {
+        // non-fatal — proceed to conversation
+      }
+    }
+
     router.push("/conversation")
   }
 

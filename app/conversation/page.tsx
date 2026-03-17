@@ -40,7 +40,14 @@ export default function ConversationPage() {
     if (initialized.current) return
     initialized.current = true
     const userId = getOrCreateUserId()
-    intake.init(userId)
+    // ensure user row exists before starting session
+    fetch("/api/user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId }),
+    })
+      .catch(() => {})
+      .finally(() => intake.init(userId))
   }, [])
 
   return (
