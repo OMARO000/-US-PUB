@@ -10,6 +10,7 @@ import { useEffect, useRef } from "react"
 import dynamic from "next/dynamic"
 import { useIntake } from "@/hooks/useIntake"
 import Sidebar from "@/components/sidebar/Sidebar"
+import AmbientOrb from "@/components/chat/AmbientOrb"
 
 const UnifiedChat = dynamic(() => import("@/components/chat/UnifiedChat"), { ssr: false })
 
@@ -35,6 +36,12 @@ export default function ConversationPage() {
   const intake = useIntake()
   const initialized = useRef(false)
 
+  const hasMessages = intake.messages.length > 0
+  const orbState = intake.isRecording ? "recording"
+    : intake.isThinking ? "thinking"
+    : intake.isSpeaking ? "speaking"
+    : "idle"
+
   // initialize session once on mount
   useEffect(() => {
     if (initialized.current) return
@@ -55,36 +62,62 @@ export default function ConversationPage() {
       <Sidebar />
       <main style={{ flex: 1, marginLeft: "220px", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", alignItems: "center" }}>
         <div style={{ width: "100%", maxWidth: "680px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
-        {/* ── error banner ── */}
-        {intake.error && (
-          <div role="alert" style={{ position: "absolute", top: 12, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 30 }}>
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--muted)" }}>
-              {intake.error}
-            </p>
-          </div>
-        )}
 
-        {/* ── completion overlay ── */}
-        {intake.sessionComplete && (
-          <div role="status" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 30, background: "var(--bg)", opacity: 0.95 }}>
-            <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text)", textAlign: "center", padding: "0 32px" }}>
-              [your portrait is ready]
-            </p>
-          </div>
-        )}
+          {/* ── error banner ── */}
+          {intake.error && (
+            <div role="alert" style={{ position: "absolute", top: 12, left: 0, right: 0, display: "flex", justifyContent: "center", zIndex: 30 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--muted)" }}>
+                {intake.error}
+              </p>
+            </div>
+          )}
 
-        {/* ── unified chat (fills screen, owns the orb) ── */}
-        <UnifiedChat
-          messages={intake.messages}
-          isThinking={intake.isThinking}
-          isSpeaking={intake.isSpeaking}
-          isRecording={intake.isRecording}
-          onSendText={intake.sendText}
-          onHoldStart={intake.startRecording}
-          onHoldEnd={intake.stopRecording}
-          onRephrase={intake.requestRephrase}
-          disabled={intake.status !== "active" ? true : false}
-        />
+          {/* ── completion overlay ── */}
+          {intake.sessionComplete && (
+            <div role="status" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center", zIndex: 30, background: "var(--bg)", opacity: 0.95 }}>
+              <p style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text)", textAlign: "center", padding: "0 32px" }}>
+                [your portrait is ready]
+              </p>
+            </div>
+          )}
+
+          {/* ── hero orb — shown before first user message ── */}
+          {!hasMessages && (
+            <div
+              onMouseDown={intake.startRecording}
+              onMouseUp={intake.stopRecording}
+              onMouseLeave={intake.stopRecording}
+              onTouchStart={(e) => { e.preventDefault(); intake.startRecording() }}
+              onTouchEnd={intake.stopRecording}
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                userSelect: "none",
+                WebkitUserSelect: "none",
+              }}
+            >
+              <div style={{ transform: "scale(2)", transformOrigin: "center center" }}>
+                <AmbientOrb isRecording={intake.isRecording} orbState={orbState} />
+              </div>
+            </div>
+          )}
+
+          {/* ── unified chat — input always shown; messages appear after first reply ── */}
+          <UnifiedChat
+            messages={intake.messages}
+            isThinking={intake.isThinking}
+            isSpeaking={intake.isSpeaking}
+            isRecording={intake.isRecording}
+            onSendText={intake.sendText}
+            onHoldStart={intake.startRecording}
+            onHoldEnd={intake.stopRecording}
+            onRephrase={intake.requestRephrase}
+            disabled={intake.status !== "active"}
+            showMessages={hasMessages}
+          />
         </div>
       </main>
     </div>
