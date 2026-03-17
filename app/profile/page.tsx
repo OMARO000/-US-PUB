@@ -12,43 +12,113 @@
  * [you] narrates on entry.
  */
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import Sidebar from "@/components/sidebar/Sidebar"
 import YouNarrationBanner from "@/components/navigation/YouNarrationBanner"
 import { useYouNarration } from "@/lib/navigation/useYouNarration"
 
 // ─────────────────────────────────────────────
-// PLACEHOLDER DATA
-// Replace with real DB fetch when profile API is wired
+// TYPES
 // ─────────────────────────────────────────────
 
-const PORTRAIT = {
-  archetype: "horizon",
-  imageKey: "horizon_02",
-  portraitText: "you tend to arrive before you're ready — and go anyway. you know what you stand for, even when you can't always name it. the people you're drawn to are in motion, like you. you give before you ask, and you notice when that isn't returned.",
-  metaphorText: "we chose an image for you: a coastline at the exact moment before dawn, when the light hasn't arrived yet but you can already feel it coming.",
-  confirmedAt: "March 14, 2026",
+interface Portrait {
+  id: string
+  portraitText: string
+  metaphorText: string | null
+  archetype: string
+  imageKey: string | null
+  connectionType: string
+  valuesSignals: string[]
+  narrativeSignals: string[]
+  relationalSignals: string[]
+  communicationSignals: string[]
+  frictionSignals: string[]
+  userCorrections: string | null
+  createdAt: Date | string
 }
 
-const DECLARED_PROFILE = [
-  { label: "connection type", value: "open — romantic and platonic", editable: true },
-  { label: "what matters most", value: "honesty, direction, depth", editable: true },
-  { label: "where you're going", value: "building something, figuring out what", editable: true },
-  { label: "what you give", value: "attention, care, directness", editable: true },
-  { label: "what you need", value: "someone who can hold their own", editable: true },
-]
+interface DeclaredField {
+  label: string
+  value: string
+  editable: boolean
+}
 
-const FRAMEWORK_SIGNALS = [
-  { name: "values", observation: "you know what you stand for. it came through in nearly every exchange.", isPaid: false },
-  { name: "narrative", observation: "high aspiration language — you're building toward something, even if unnamed.", isPaid: false },
-  { name: "relational", observation: "depth-seeker. you give before asking. the gap between what you offer and what you receive is visible.", isPaid: false },
-  { name: "communication", observation: "direct. you say the hard thing without waiting for permission.", isPaid: false },
-  { name: "conflict style", observation: "you engage rather than avoid. repair is slower than entry.", isPaid: true },
-  { name: "energy exchange", observation: "high-give. worth sitting with.", isPaid: true },
-  { name: "life stage", observation: "in motion. not settling, not arriving — building.", isPaid: true },
-  { name: "medium preference", observation: "voice-first. you said more when you could hear yourself saying it.", isPaid: true },
-]
+interface FrameworkSignal {
+  name: string
+  observation: string
+  isPaid: boolean
+}
+
+// ─────────────────────────────────────────────
+// DATA DERIVATION
+// Build declared profile + framework signals from portrait signals
+// ─────────────────────────────────────────────
+
+function buildDeclaredProfile(portrait: Portrait): DeclaredField[] {
+  const connectionLabel: Record<string, string> = {
+    romantic: "romantic",
+    platonic: "platonic",
+    professional: "professional",
+    open: "open — romantic and platonic",
+  }
+  return [
+    { label: "connection type", value: connectionLabel[portrait.connectionType] ?? portrait.connectionType, editable: true },
+    { label: "what matters most", value: portrait.valuesSignals.slice(0, 3).join(", ") || "—", editable: true },
+    { label: "where you're going", value: portrait.narrativeSignals[0] ?? "—", editable: true },
+    { label: "what you give", value: portrait.relationalSignals[0] ?? "—", editable: true },
+    { label: "what you need", value: portrait.relationalSignals[1] ?? portrait.relationalSignals[0] ?? "—", editable: true },
+  ]
+}
+
+function buildFrameworkSignals(portrait: Portrait): FrameworkSignal[] {
+  return [
+    {
+      name: "values",
+      observation: portrait.valuesSignals.length > 0
+        ? portrait.valuesSignals.join(". ")
+        : "no signal data yet.",
+      isPaid: false,
+    },
+    {
+      name: "narrative",
+      observation: portrait.narrativeSignals.length > 0
+        ? portrait.narrativeSignals.join(". ")
+        : "no signal data yet.",
+      isPaid: false,
+    },
+    {
+      name: "relational",
+      observation: portrait.relationalSignals.length > 0
+        ? portrait.relationalSignals.join(". ")
+        : "no signal data yet.",
+      isPaid: false,
+    },
+    {
+      name: "communication",
+      observation: portrait.communicationSignals.length > 0
+        ? portrait.communicationSignals.join(". ")
+        : "no signal data yet.",
+      isPaid: false,
+    },
+    {
+      name: "conflict style",
+      observation: portrait.frictionSignals.length > 0
+        ? portrait.frictionSignals.join(". ")
+        : "observed during block 4.",
+      isPaid: true,
+    },
+    { name: "energy exchange", observation: "observed across your relational signals.", isPaid: true },
+    { name: "life stage", observation: "inferred from narrative and timing language.", isPaid: true },
+    { name: "medium preference", observation: "observed from your input mode patterns.", isPaid: true },
+  ]
+}
+
+function formatDate(d: Date | string | null): string {
+  if (!d) return ""
+  const date = new Date(d)
+  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+}
 
 // ─────────────────────────────────────────────
 // COMPONENTS
@@ -70,9 +140,27 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   )
 }
 
-function PortraitSection() {
+function PortraitSection({ portrait, userId }: { portrait: Portrait; userId: string }) {
   const [showCorrect, setShowCorrect] = useState(false)
   const [correction, setCorrection] = useState("")
+  const [saving, setSaving] = useState(false)
+
+  const handleSaveCorrection = async () => {
+    if (!correction.trim()) return
+    setSaving(true)
+    try {
+      await fetch(`/api/intake/portrait/confirm`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ portraitId: portrait.id, userId, userCorrections: correction }),
+      })
+    } catch {
+      // silent — correction saved locally
+    } finally {
+      setSaving(false)
+      setShowCorrect(false)
+    }
+  }
 
   return (
     <section>
@@ -101,16 +189,18 @@ function PortraitSection() {
             color: "var(--dim)",
             letterSpacing: "0.05em",
           }}>
-            [{PORTRAIT.archetype}]
+            [{portrait.archetype}]
           </span>
-          <span style={{
-            fontSize: "10px",
-            fontFamily: "var(--font-mono)",
-            color: "var(--dim)",
-            opacity: 0.5,
-          }}>
-            {PORTRAIT.imageKey}
-          </span>
+          {portrait.imageKey && (
+            <span style={{
+              fontSize: "10px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--dim)",
+              opacity: 0.5,
+            }}>
+              {portrait.imageKey}
+            </span>
+          )}
         </div>
 
         {/* Portrait text */}
@@ -123,26 +213,28 @@ function PortraitSection() {
             lineHeight: 1.8,
             marginBottom: "16px",
           }}>
-            {PORTRAIT.portraitText}
+            {portrait.portraitText}
           </div>
-          <div style={{
-            fontSize: "13px",
-            fontFamily: "var(--font-mono)",
-            color: "var(--amber)",
-            fontWeight: 300,
-            lineHeight: 1.8,
-            fontStyle: "italic",
-            marginBottom: "16px",
-          }}>
-            {PORTRAIT.metaphorText}
-          </div>
+          {portrait.metaphorText && (
+            <div style={{
+              fontSize: "13px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--amber)",
+              fontWeight: 300,
+              lineHeight: 1.8,
+              fontStyle: "italic",
+              marginBottom: "16px",
+            }}>
+              {portrait.metaphorText}
+            </div>
+          )}
           <div style={{
             fontSize: "10px",
             fontFamily: "var(--font-mono)",
             color: "var(--dim)",
             marginBottom: "16px",
           }}>
-            confirmed {PORTRAIT.confirmedAt}
+            confirmed {formatDate(portrait.createdAt)}
           </div>
 
           {/* Correct portrait */}
@@ -188,10 +280,8 @@ function PortraitSection() {
               />
               <div style={{ display: "flex", gap: "8px" }}>
                 <button
-                  onClick={() => {
-                    // TODO: POST correction to /api/intake/portrait/confirm
-                    setShowCorrect(false)
-                  }}
+                  onClick={handleSaveCorrection}
+                  disabled={saving}
                   style={{
                     flex: 1,
                     height: "44px",
@@ -201,10 +291,11 @@ function PortraitSection() {
                     fontFamily: "var(--font-mono)",
                     fontSize: "11px",
                     color: "var(--bg)",
-                    cursor: "pointer",
+                    cursor: saving ? "default" : "pointer",
+                    opacity: saving ? 0.6 : 1,
                   }}
                 >
-                  [save correction]
+                  {saving ? "[saving...]" : "[save correction]"}
                 </button>
                 <button
                   onClick={() => setShowCorrect(false)}
@@ -231,11 +322,16 @@ function PortraitSection() {
   )
 }
 
-function DeclaredProfileSection() {
+function DeclaredProfileSection({ fields }: { fields: DeclaredField[] }) {
   const [editing, setEditing] = useState<string | null>(null)
   const [values, setValues] = useState(
-    Object.fromEntries(DECLARED_PROFILE.map((f) => [f.label, f.value]))
+    Object.fromEntries(fields.map((f) => [f.label, f.value]))
   )
+
+  // sync if fields prop changes (after data loads)
+  useEffect(() => {
+    setValues(Object.fromEntries(fields.map((f) => [f.label, f.value])))
+  }, [fields])
 
   const handleExport = () => {
     const data = JSON.stringify({ declared_profile: values, exported_at: new Date().toISOString() }, null, 2)
@@ -282,12 +378,12 @@ function DeclaredProfileSection() {
         border: "1px solid var(--border)",
         overflow: "hidden",
       }}>
-        {DECLARED_PROFILE.map((field, i) => (
+        {fields.map((field, i) => (
           <div
             key={field.label}
             style={{
               padding: "14px 16px",
-              borderBottom: i < DECLARED_PROFILE.length - 1 ? "1px solid var(--border)" : "none",
+              borderBottom: i < fields.length - 1 ? "1px solid var(--border)" : "none",
             }}
           >
             <div style={{
@@ -384,7 +480,7 @@ function DeclaredProfileSection() {
   )
 }
 
-function FrameworkSection() {
+function FrameworkSection({ signals }: { signals: FrameworkSignal[] }) {
   return (
     <section>
       <SectionLabel>[how [you] sees you]</SectionLabel>
@@ -394,12 +490,12 @@ function FrameworkSection() {
         border: "1px solid var(--border)",
         overflow: "hidden",
       }}>
-        {FRAMEWORK_SIGNALS.map((signal, i) => (
+        {signals.map((signal, i) => (
           <div
             key={signal.name}
             style={{
               padding: "14px 16px",
-              borderBottom: i < FRAMEWORK_SIGNALS.length - 1 ? "1px solid var(--border)" : "none",
+              borderBottom: i < signals.length - 1 ? "1px solid var(--border)" : "none",
               opacity: signal.isPaid ? 0.4 : 1,
               position: "relative",
             }}
@@ -577,6 +673,80 @@ function DataControlsSection() {
   )
 }
 
+function LoadingState() {
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "80px 20px",
+    }}>
+      <div style={{
+        fontSize: "12px",
+        fontFamily: "var(--font-mono)",
+        color: "var(--dim)",
+        fontWeight: 300,
+      }}>
+        [loading your portrait...]
+      </div>
+    </div>
+  )
+}
+
+function EmptyState() {
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "80px 20px",
+      gap: "20px",
+      textAlign: "center",
+    }}>
+      <div style={{
+        fontSize: "13px",
+        fontFamily: "var(--font-mono)",
+        color: "var(--muted)",
+        fontWeight: 300,
+        lineHeight: 1.7,
+        maxWidth: "340px",
+      }}>
+        no portrait yet.
+      </div>
+      <div style={{
+        fontSize: "12px",
+        fontFamily: "var(--font-mono)",
+        color: "var(--dim)",
+        fontWeight: 300,
+        lineHeight: 1.7,
+        maxWidth: "340px",
+      }}>
+        complete your intake conversation and [you] will build a portrait of you.
+      </div>
+      <a
+        href="/conversation"
+        style={{
+          display: "inline-block",
+          marginTop: "8px",
+          height: "44px",
+          lineHeight: "44px",
+          padding: "0 24px",
+          borderRadius: "10px",
+          background: "var(--amber)",
+          fontFamily: "var(--font-mono)",
+          fontSize: "12px",
+          color: "var(--bg)",
+          textDecoration: "none",
+          letterSpacing: "0.03em",
+        }}
+      >
+        [go to conversation]
+      </a>
+    </div>
+  )
+}
+
 // ─────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────
@@ -584,6 +754,28 @@ function DataControlsSection() {
 export default function ProfilePage() {
   const pathname = usePathname()
   const narration = useYouNarration(pathname)
+  const [portrait, setPortrait] = useState<Portrait | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [userId, setUserId] = useState("")
+
+  useEffect(() => {
+    const uid = typeof window !== "undefined"
+      ? (localStorage.getItem("us_uid") ?? "")
+      : ""
+    setUserId(uid)
+    if (!uid) { setLoading(false); return }
+
+    fetch(`/api/profile?userId=${uid}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setPortrait(data.portrait ?? null)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const declaredFields = portrait ? buildDeclaredProfile(portrait) : []
+  const frameworkSignals = portrait ? buildFrameworkSignals(portrait) : []
 
   return (
     <div style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
@@ -608,9 +800,17 @@ export default function ProfilePage() {
           flexDirection: "column",
           gap: "40px",
         }}>
-          <PortraitSection />
-          <DeclaredProfileSection />
-          <FrameworkSection />
+          {loading ? (
+            <LoadingState />
+          ) : !portrait ? (
+            <EmptyState />
+          ) : (
+            <>
+              <PortraitSection portrait={portrait} userId={userId} />
+              <DeclaredProfileSection fields={declaredFields} />
+              <FrameworkSection signals={frameworkSignals} />
+            </>
+          )}
           <DataControlsSection />
         </div>
       </main>

@@ -10,47 +10,34 @@
  * Sections: Your patterns | What your matches reflect | Framework visibility (paid)
  */
 
+import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import Sidebar from "@/components/sidebar/Sidebar"
 import YouNarrationBanner from "@/components/navigation/YouNarrationBanner"
 import { useYouNarration } from "@/lib/navigation/useYouNarration"
 
 // ─────────────────────────────────────────────
-// PLACEHOLDER DATA
-// Replace with real data from portrait + match engine when built
+// TYPES
 // ─────────────────────────────────────────────
 
-const FREE_PATTERNS = [
-  "you tend to lead with honesty before warmth — people feel oriented around you quickly.",
-  "in your connections, you give more than you ask for. you notice this but rarely name it.",
-  "you're drawn to people who are building something — direction matters to you more than arrival.",
-]
+interface MirrorObservation {
+  label: string
+  content: string
+}
 
-const PAID_PATTERNS = [
-  "across three conversations, you've pulled back when things got quiet — not avoidance, more like waiting to be re-invited.",
-  "you describe what you offer in relationships before you describe what you need. the gap between those two things is worth sitting with.",
-  "your communication is most open in voice, not text. you say more when you can hear yourself saying it.",
-]
+interface Framework {
+  name: string
+  score: number
+  note: string
+  isPaid: boolean
+}
 
-const MIRROR_OBSERVATIONS = [
-  {
-    label: "what your matches reflect",
-    content: "the people you've resonated with most are in motion — not settled, not arriving. that tells us something about where you are too.",
-  },
-  {
-    label: "a pattern worth naming",
-    content: "you're drawn to directness in others. people who say the hard thing without apology. [you] notices you do this too, but less often than you'd like.",
-  },
-]
-
-const FRAMEWORKS = [
-  { name: "values", score: 92, note: "strongest signal in your portrait — you know what you stand for." },
-  { name: "narrative", score: 84, note: "high aspiration language. you're in motion." },
-  { name: "relational", score: 71, note: "depth-seeker. you give before you ask." },
-  { name: "communication", score: 68, note: "voice-first. more open when speaking than writing." },
-  { name: "conflict style", score: 55, note: "paid — you engage rather than avoid, but repair is slower than entry." },
-  { name: "energy exchange", score: 61, note: "paid — high-give. the gap between what you offer and what you receive is visible." },
-]
+interface Insights {
+  freePatterns: string[]
+  paidPatterns: string[]
+  mirrorObservations: MirrorObservation[]
+  frameworks: Framework[]
+}
 
 // ─────────────────────────────────────────────
 // COMPONENTS
@@ -85,7 +72,7 @@ function PatternCard({ text, isPaid = false }: { text: string; isPaid?: boolean 
       fontWeight: 300,
       lineHeight: 1.7,
       position: "relative",
-      opacity: isPaid ? 0.5 : 1, // paid locked state
+      opacity: isPaid ? 0.5 : 1,
     }}>
       {text}
       {isPaid && (
@@ -202,6 +189,80 @@ function FrameworkBar({ name, score, note, isPaid = false }: {
   )
 }
 
+function LoadingState() {
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "80px 20px",
+    }}>
+      <div style={{
+        fontSize: "12px",
+        fontFamily: "var(--font-mono)",
+        color: "var(--dim)",
+        fontWeight: 300,
+      }}>
+        [loading your insights...]
+      </div>
+    </div>
+  )
+}
+
+function EmptyState() {
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "80px 20px",
+      gap: "20px",
+      textAlign: "center",
+    }}>
+      <div style={{
+        fontSize: "13px",
+        fontFamily: "var(--font-mono)",
+        color: "var(--muted)",
+        fontWeight: 300,
+        lineHeight: 1.7,
+        maxWidth: "340px",
+      }}>
+        no insights yet.
+      </div>
+      <div style={{
+        fontSize: "12px",
+        fontFamily: "var(--font-mono)",
+        color: "var(--dim)",
+        fontWeight: 300,
+        lineHeight: 1.7,
+        maxWidth: "340px",
+      }}>
+        complete your intake conversation and [you] will start noticing patterns.
+      </div>
+      <a
+        href="/conversation"
+        style={{
+          display: "inline-block",
+          marginTop: "8px",
+          height: "44px",
+          lineHeight: "44px",
+          padding: "0 24px",
+          borderRadius: "10px",
+          background: "var(--amber)",
+          fontFamily: "var(--font-mono)",
+          fontSize: "12px",
+          color: "var(--bg)",
+          textDecoration: "none",
+          letterSpacing: "0.03em",
+        }}
+      >
+        [go to conversation]
+      </a>
+    </div>
+  )
+}
+
 // ─────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────
@@ -209,6 +270,23 @@ function FrameworkBar({ name, score, note, isPaid = false }: {
 export default function InsightsPage() {
   const pathname = usePathname()
   const narration = useYouNarration(pathname)
+  const [insights, setInsights] = useState<Insights | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const userId = typeof window !== "undefined"
+      ? localStorage.getItem("us_uid")
+      : null
+    if (!userId) { setLoading(false); return }
+
+    fetch(`/api/insights?userId=${userId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setInsights(data.insights ?? null)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <div style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
@@ -227,67 +305,77 @@ export default function InsightsPage() {
           overflowY: "auto",
           padding: "32px 40px",
           maxWidth: "680px",
+          width: "100%",
+          margin: "0 auto",
           display: "flex",
           flexDirection: "column",
           gap: "40px",
         }}>
+          {loading ? (
+            <LoadingState />
+          ) : !insights ? (
+            <EmptyState />
+          ) : (
+            <>
+              {/* Your patterns */}
+              <section>
+                <SectionLabel>[your patterns]</SectionLabel>
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                  {insights.freePatterns.map((p, i) => (
+                    <PatternCard key={i} text={p} />
+                  ))}
+                  {insights.paidPatterns.map((p, i) => (
+                    <PatternCard key={i} text={p} isPaid />
+                  ))}
+                </div>
+              </section>
 
-          {/* Your patterns */}
-          <section>
-            <SectionLabel>[your patterns]</SectionLabel>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {FREE_PATTERNS.map((p, i) => (
-                <PatternCard key={i} text={p} />
-              ))}
-              {PAID_PATTERNS.map((p, i) => (
-                <PatternCard key={i} text={p} isPaid />
-              ))}
-            </div>
-          </section>
+              {/* Match as mirror */}
+              {insights.mirrorObservations.length > 0 && (
+                <section>
+                  <SectionLabel>[what your matches reflect]</SectionLabel>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                    {insights.mirrorObservations.map((m, i) => (
+                      <MirrorCard key={i} label={m.label} content={m.content} />
+                    ))}
+                  </div>
+                </section>
+              )}
 
-          {/* Match as mirror */}
-          <section>
-            <SectionLabel>[what your matches reflect]</SectionLabel>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              {MIRROR_OBSERVATIONS.map((m, i) => (
-                <MirrorCard key={i} label={m.label} content={m.content} />
-              ))}
-            </div>
-          </section>
-
-          {/* Framework visibility */}
-          <section>
-            <SectionLabel>[how [you] sees you]</SectionLabel>
-            <div style={{
-              padding: "20px",
-              borderRadius: "12px",
-              background: "var(--bg2)",
-              border: "1px solid var(--border)",
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
-            }}>
-              {FRAMEWORKS.map((f) => (
-                <FrameworkBar
-                  key={f.name}
-                  name={f.name}
-                  score={f.score}
-                  note={f.note}
-                  isPaid={f.name === "conflict style" || f.name === "energy exchange"}
-                />
-              ))}
-            </div>
-            <div style={{
-              marginTop: "12px",
-              fontSize: "11px",
-              fontFamily: "var(--font-mono)",
-              color: "var(--dim)",
-              lineHeight: 1.6,
-            }}>
-              [paid] layers are visible to subscribers. these signals are observed, not declared — [you] notices them across your behavior. you can correct them in [profile].
-            </div>
-          </section>
-
+              {/* Framework visibility */}
+              <section>
+                <SectionLabel>[how [you] sees you]</SectionLabel>
+                <div style={{
+                  padding: "20px",
+                  borderRadius: "12px",
+                  background: "var(--bg2)",
+                  border: "1px solid var(--border)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "20px",
+                }}>
+                  {insights.frameworks.map((f) => (
+                    <FrameworkBar
+                      key={f.name}
+                      name={f.name}
+                      score={f.score}
+                      note={f.note}
+                      isPaid={f.isPaid}
+                    />
+                  ))}
+                </div>
+                <div style={{
+                  marginTop: "12px",
+                  fontSize: "11px",
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--dim)",
+                  lineHeight: 1.6,
+                }}>
+                  [paid] layers are visible to subscribers. these signals are observed, not declared — [you] notices them across your behavior. you can correct them in [profile].
+                </div>
+              </section>
+            </>
+          )}
         </div>
       </main>
     </div>
