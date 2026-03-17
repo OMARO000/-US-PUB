@@ -37,6 +37,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      {/* Blocking script — sets data-theme before first paint to prevent flash */}
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('us-theme');var v=['light','charcoal','dusk'];document.documentElement.setAttribute('data-theme',v.includes(t)?t:'light');})();` }} />
+      </head>
       <body className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
         <ThemeProvider>
           {children}
