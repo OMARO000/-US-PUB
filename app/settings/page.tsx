@@ -18,6 +18,7 @@ import { usePathname } from "next/navigation"
 import Sidebar from "@/components/sidebar/Sidebar"
 import YouNarrationBanner from "@/components/navigation/YouNarrationBanner"
 import { useYouNarration } from "@/lib/navigation/useYouNarration"
+import { useTheme } from "@/components/themes/ThemeProvider"
 
 // ─────────────────────────────────────────────
 // TYPES
@@ -537,21 +538,16 @@ export default function SettingsPage() {
   const pathname = usePathname()
   const narration = useYouNarration(pathname)
 
-  const [currentTheme, setCurrentTheme] = useState("charcoal")
+  const { theme: currentTheme, setTheme } = useTheme()
   const [currentVoiceId, setCurrentVoiceId] = useState("UgBBYS2sOqTuMpoF3BR0")
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    setCurrentTheme(localStorage.getItem("us-theme") ?? "charcoal")
     setCurrentVoiceId(localStorage.getItem("us_voice_id") ?? "UgBBYS2sOqTuMpoF3BR0")
   }, [])
 
   const handleThemeChange = (id: string) => {
-    setCurrentTheme(id)
-    if (typeof window !== "undefined") {
-      localStorage.setItem("us-theme", id)
-      document.documentElement.setAttribute("data-theme", id)
-    }
+    setTheme(id as Parameters<typeof setTheme>[0])
   }
 
   const handleVoiceChange = (id: string) => {
