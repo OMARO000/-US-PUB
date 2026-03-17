@@ -36,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="light">
       {/* Blocking script — sets data-theme before first paint to prevent flash */}
       <head>
         <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('us-theme');var v=['light','charcoal','dusk'];document.documentElement.setAttribute('data-theme',v.includes(t)?t:'light');})();` }} />
