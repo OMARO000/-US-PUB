@@ -35,11 +35,9 @@ interface Voice {
 // ─────────────────────────────────────────────
 
 const THEMES = [
+  { id: "light",    label: "[light]",    bg: "#F5F2EE", bg2: "#EDEAE5", amber: "#A67C3A", rose: "#A85860" },
   { id: "charcoal", label: "[charcoal]", bg: "#1C1C1E", bg2: "#242426", amber: "#C4974A", rose: "#C4848A" },
-  { id: "slate",    label: "[slate]",    bg: "#1E2A3A", bg2: "#263548", amber: "#C4974A", rose: "#C4848A" },
-  { id: "forest",   label: "[forest]",  bg: "#1A2E22", bg2: "#20382A", amber: "#C4974A", rose: "#C4848A" },
-  { id: "indigo",   label: "[indigo]",  bg: "#1E1A35", bg2: "#262042", amber: "#C4974A", rose: "#C4909A" },
-  { id: "terracotta", label: "[terracotta]", bg: "#2A1A16", bg2: "#35201A", amber: "#C4974A", rose: "#A87888" },
+  { id: "dusk",     label: "[dusk]",     bg: "#1A1F2E", bg2: "#202638", amber: "#C4974A", rose: "#C4848A" },
 ]
 
 // ─────────────────────────────────────────────

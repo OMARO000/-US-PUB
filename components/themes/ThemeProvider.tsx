@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "slate" | "forest" | "indigo" | "charcoal" | "terra";
+type Theme = "light" | "charcoal" | "dusk";
 
 interface ThemeContextType {
   theme: Theme;
@@ -9,21 +9,19 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType>({
-  theme: "charcoal",
+  theme: "light",
   setTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("charcoal");
+  const [theme, setThemeState] = useState<Theme>("light");
 
   useEffect(() => {
     const stored = localStorage.getItem("us-theme") as Theme;
-    if (stored) {
-      setThemeState(stored);
-      document.documentElement.setAttribute("data-theme", stored);
-    } else {
-      document.documentElement.setAttribute("data-theme", "charcoal");
-    }
+    const valid: Theme[] = ["light", "charcoal", "dusk"];
+    const active = valid.includes(stored) ? stored : "light";
+    setThemeState(active);
+    document.documentElement.setAttribute("data-theme", active);
   }, []);
 
   const setTheme = (t: Theme) => {

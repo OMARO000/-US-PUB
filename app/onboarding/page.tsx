@@ -44,6 +44,15 @@ interface Voice {
 
 const THEMES: Theme[] = [
   {
+    id: "light",
+    label: "[light]",
+    bg: "#F5F2EE",
+    bg2: "#EDEAE5",
+    text: "rgba(28,24,20,0.88)",
+    amber: "#A67C3A",
+    rose: "#A85860",
+  },
+  {
     id: "charcoal",
     label: "[charcoal]",
     bg: "#1C1C1E",
@@ -53,40 +62,13 @@ const THEMES: Theme[] = [
     rose: "#C4848A",
   },
   {
-    id: "slate",
-    label: "[slate]",
-    bg: "#1E2A3A",
-    bg2: "#263548",
+    id: "dusk",
+    label: "[dusk]",
+    bg: "#1A1F2E",
+    bg2: "#202638",
     text: "rgba(255,255,255,0.88)",
     amber: "#C4974A",
     rose: "#C4848A",
-  },
-  {
-    id: "forest",
-    label: "[forest]",
-    bg: "#1A2E22",
-    bg2: "#20382A",
-    text: "rgba(255,255,255,0.88)",
-    amber: "#C4974A",
-    rose: "#C4848A",
-  },
-  {
-    id: "indigo",
-    label: "[indigo]",
-    bg: "#1E1A35",
-    bg2: "#262042",
-    text: "rgba(255,255,255,0.88)",
-    amber: "#C4974A",
-    rose: "#C4909A",
-  },
-  {
-    id: "terracotta",
-    label: "[terracotta]",
-    bg: "#2A1A16",
-    bg2: "#35201A",
-    text: "rgba(255,255,255,0.88)",
-    amber: "#C4974A",
-    rose: "#A87888",
   },
 ]
 
