@@ -203,6 +203,9 @@ export const matchScores = sqliteTable("match_scores", {
     enum: ["pending", "shown", "connected", "not_a_fit"],
   }).notNull().default("pending"),
 
+  // outcome tracking
+  outcomeRecorded: integer("outcome_recorded", { mode: "boolean" }).notNull().default(false),
+
   // timestamps
   scoredAt: integer("scored_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
@@ -223,4 +226,23 @@ export const conversations = sqliteTable("conversations", {
   firstPrompt: text("first_prompt"),                  // [you]-generated opening context, nullable
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+})
+
+// ─────────────────────────────────────────────
+// MATCH OUTCOMES
+// Reported after a conversation ends.
+// One row per user per conversation (each party reports independently).
+// ─────────────────────────────────────────────
+export const matchOutcomes = sqliteTable("match_outcomes", {
+  id: text("id").primaryKey(),                        // uuid
+  conversationId: text("conversation_id")
+    .notNull()
+    .references(() => conversations.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull(),                  // who is reporting
+  outcome: text("outcome", {
+    enum: ["met", "didnt_meet", "ongoing"],
+  }).notNull(),
+  rating: integer("rating"),                          // 1–5, nullable
+  notes: text("notes"),                               // free text, nullable
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
