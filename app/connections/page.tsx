@@ -12,7 +12,7 @@
  * Match cards show: archetype image, resonance signals, connection type, action buttons.
  */
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import Sidebar from "@/components/sidebar/Sidebar"
 import YouNarrationBanner from "@/components/navigation/YouNarrationBanner"
@@ -45,67 +45,23 @@ interface Match {
 }
 
 // ─────────────────────────────────────────────
-// PLACEHOLDER DATA
-// Replace with real match engine data when built
+// HELPERS
 // ─────────────────────────────────────────────
 
-const PLACEHOLDER_MATCHES: Match[] = [
-  {
-    id: "m1",
-    initials: "A",
-    archetype: "horizon",
-    archetypeImageKey: "horizon_02",
-    connectionType: "romantic",
-    status: "new",
-    resonanceSignals: [
-      { text: "you both lead with direction before arrival — where you're going matters more than where you are", layer: "narrative", isPaid: false },
-      { text: "similar communication directness — both say the hard thing without waiting for permission", layer: "communication", isPaid: false },
-      { text: "values alignment is unusually high — what you protect, they protect too", layer: "values", isPaid: false },
-      { text: "conflict style is complementary — one engages, the other steadies", layer: "conflict", isPaid: true },
-      { text: "energy exchange dynamic: high-give meets someone who receives well and returns differently", layer: "energy", isPaid: true },
-    ],
-    mutualSignals: [
-      "both in motion — building toward something unnamed but close",
-      "both chose voice over text during intake",
-    ],
-    timeAgo: "2 hours ago",
-  },
-  {
-    id: "m2",
-    initials: "R",
-    archetype: "rooted",
-    archetypeImageKey: "rooted_03",
-    connectionType: "platonic",
-    status: "new",
-    resonanceSignals: [
-      { text: "you're both depth-seekers — neither of you stays at the surface for long", layer: "relational", isPaid: false },
-      { text: "values are grounded in the same place — stability isn't stagnation for either of you", layer: "values", isPaid: false },
-      { text: "different narrative trajectories — complementary directions rather than the same one", layer: "narrative", isPaid: false },
-    ],
-    mutualSignals: [
-      "both give before asking",
-      "similar energy in how they describe what matters",
-    ],
-    timeAgo: "yesterday",
-  },
-  {
-    id: "m3",
-    initials: "T",
-    archetype: "liminal",
-    archetypeImageKey: "liminal_01",
-    connectionType: "open",
-    status: "pending",
-    resonanceSignals: [
-      { text: "high openness on both sides — comfortable with not knowing, both of you", layer: "personality", isPaid: false },
-      { text: "communication styles are different in interesting ways — one indirect, one direct, both honest", layer: "communication", isPaid: false },
-      { text: "both marked open for connection type — neither is locked into a category right now", layer: "narrative", isPaid: false },
-    ],
-    mutualSignals: [
-      "both exploring rather than arriving",
-    ],
-    timeAgo: "3 days ago",
-  },
-]
+function formatTimeAgo(date: Date | string): string {
+  const ms = Date.now() - new Date(date).getTime()
+  const mins = Math.floor(ms / 60000)
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days === 1) return "yesterday"
+  return `${days} days ago`
+}
+
+function initialsFromId(id: string): string {
+  return id.slice(0, 1).toUpperCase()
+}
 
 // ─────────────────────────────────────────────
 // COMPONENTS
@@ -279,6 +235,19 @@ function MatchCard({ match }: { match: Match }) {
   const [expanded, setExpanded] = useState(false)
   const [status, setStatus] = useState<MatchStatus>(match.status)
 
+  async function recordAction(action: "connected" | "not_a_fit") {
+    setStatus(action === "connected" ? "pending" : "not_a_fit")
+    try {
+      await fetch("/api/matches", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ matchId: match.id, action }),
+      })
+    } catch {
+      // silent — local state already updated
+    }
+  }
+
   const visibleSignals = expanded
     ? match.resonanceSignals
     : match.resonanceSignals.slice(0, 3)
@@ -400,7 +369,7 @@ function MatchCard({ match }: { match: Match }) {
         {status === "new" && (
           <>
             <button
-              onClick={() => setStatus("pending")}
+              onClick={() => recordAction("connected")}
               aria-label="connect with this person"
               style={{
                 flex: 1,
@@ -419,7 +388,7 @@ function MatchCard({ match }: { match: Match }) {
               [connect]
             </button>
             <button
-              onClick={() => setStatus("not_a_fit")}
+              onClick={() => recordAction("not_a_fit")}
               aria-label="not a fit"
               style={{
                 height: "44px",
@@ -519,7 +488,48 @@ function EmptyState() {
 export default function ConnectionsPage() {
   const pathname = usePathname()
   const narration = useYouNarration(pathname)
-  const matches = PLACEHOLDER_MATCHES
+  const [matches, setMatches] = useState<Match[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const userId = typeof window !== "undefined"
+      ? localStorage.getItem("us_uid")
+      : null
+    if (!userId) { setLoading(false); return }
+
+    fetch(`/api/matches?userId=${userId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        const raw = data.matches ?? []
+        const mapped: Match[] = raw.map((m: {
+          id: string
+          targetUserId: string
+          connectionType: ConnectionType
+          resonanceSignals: string[]
+          mutualSignals: string[]
+          archetypeB: string | null
+          status: string
+          scoredAt: string | Date
+        }) => ({
+          id: m.id,
+          initials: initialsFromId(m.targetUserId),
+          archetype: m.archetypeB ?? "composite",
+          archetypeImageKey: `${m.archetypeB ?? "composite"}_01`,
+          connectionType: m.connectionType,
+          status: (m.status === "shown" ? "new" : m.status) as MatchStatus,
+          resonanceSignals: m.resonanceSignals.map((text, i) => ({
+            text,
+            layer: "signal",
+            isPaid: i >= 3,
+          })),
+          mutualSignals: m.mutualSignals,
+          timeAgo: formatTimeAgo(m.scoredAt),
+        }))
+        setMatches(mapped)
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
 
   return (
     <div style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
@@ -560,7 +570,7 @@ export default function ConnectionsPage() {
               textTransform: "uppercase",
               opacity: 0.8,
             }}>
-              [{matches.length} {matches.length === 1 ? "match" : "matches"}]
+              {loading ? "[loading...]" : `[${matches.length} ${matches.length === 1 ? "match" : "matches"}]`}
             </div>
             <div style={{
               fontSize: "10px",

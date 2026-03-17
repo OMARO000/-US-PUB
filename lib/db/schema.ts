@@ -23,6 +23,25 @@
 import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core"
 
 // ─────────────────────────────────────────────
+// USERS
+// Anonymous — no PII. Mullvad-style account number.
+// ─────────────────────────────────────────────
+export const users = sqliteTable("users", {
+  id: text("id").primaryKey(),               // uuid — same as us_uid in localStorage
+  accountNumber: text("account_number").notNull().unique(), // 16-digit anonymous ID
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  lastActiveAt: integer("last_active_at", { mode: "timestamp" }).notNull(),
+
+  // preferences (set during onboarding)
+  themeId: text("theme_id").notNull().default("charcoal"),
+  voiceId: text("voice_id"),
+
+  // subscription
+  isPaid: integer("is_paid", { mode: "boolean" }).notNull().default(false),
+  paidSince: integer("paid_since", { mode: "timestamp" }),
+})
+
+// ─────────────────────────────────────────────
 // INTAKE SESSIONS
 // One row per user per intake attempt.
 // completed_at null = session in progress.
@@ -144,5 +163,47 @@ export const journalEntries = sqliteTable("journal_entries", {
     .default(false),
   audioDurationMs: integer("audio_duration_ms"),
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+})
+
+// ─────────────────────────────────────────────
+// MATCH SCORES
+// Stores computed match scores between user pairs.
+// Recalculated when either user updates their portrait.
+// ─────────────────────────────────────────────
+export const matchScores = sqliteTable("match_scores", {
+  id: text("id").primaryKey(),
+
+  userIdA: text("user_id_a").notNull(),
+  userIdB: text("user_id_b").notNull(),
+
+  connectionType: text("connection_type", {
+    enum: ["romantic", "platonic", "professional", "open"],
+  }).notNull(),
+
+  // scores — stored but never shown to users
+  totalScore: real("total_score").notNull(),
+
+  // layer scores as JSON
+  layerScores: text("layer_scores").notNull().default("{}"),
+
+  // resonance signals — shown to users
+  resonanceSignals: text("resonance_signals").notNull().default("[]"),
+  mutualSignals: text("mutual_signals").notNull().default("[]"),
+
+  // archetypes
+  archetypeA: text("archetype_a"),
+  archetypeB: text("archetype_b"),
+
+  // go deeper
+  goDeeper: integer("go_deeper", { mode: "boolean" }).notNull().default(false),
+
+  // status
+  status: text("status", {
+    enum: ["pending", "shown", "connected", "not_a_fit"],
+  }).notNull().default("pending"),
+
+  // timestamps
+  scoredAt: integer("scored_at", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
 })
