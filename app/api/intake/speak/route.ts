@@ -19,18 +19,23 @@ const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY
 const SAGE_VOICE_ID = process.env.ELEVENLABS_VOICE_ID // Sage custom voice ID
 
 export async function POST(req: NextRequest) {
-  if (!ELEVENLABS_API_KEY || !SAGE_VOICE_ID) {
+  if (!ELEVENLABS_API_KEY) {
     return NextResponse.json({ error: "TTS not configured" }, { status: 503 })
   }
 
-  let body: { text: string }
+  let body: { text: string; voiceId?: string }
   try {
     body = await req.json()
   } catch {
     return NextResponse.json({ error: "invalid request" }, { status: 400 })
   }
 
-  const { text } = body
+  const { text, voiceId } = body
+  const resolvedVoiceId = voiceId ?? SAGE_VOICE_ID
+
+  if (!resolvedVoiceId) {
+    return NextResponse.json({ error: "TTS not configured" }, { status: 503 })
+  }
   if (!text || typeof text !== "string" || text.trim().length === 0) {
     return NextResponse.json({ error: "text required" }, { status: 400 })
   }
@@ -44,7 +49,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${SAGE_VOICE_ID}/stream`,
+      `https://api.elevenlabs.io/v1/text-to-speech/${resolvedVoiceId}/stream`,
       {
         method: "POST",
         headers: {

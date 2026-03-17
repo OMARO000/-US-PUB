@@ -118,10 +118,38 @@ export function useIntake(): UseIntakeReturn {
     ])
   }, [])
 
-  // ── speak text via ElevenLabs (disabled) ──
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const speakText = useCallback(async (_text: string) => {
-    return
+  // ── speak text via ElevenLabs ──
+  const speakText = useCallback(async (text: string) => {
+    if (!audioRef.current) return
+    try {
+      setIsSpeaking(true)
+      setOrbState("speaking")
+      const voiceId = typeof window !== "undefined"
+        ? (localStorage.getItem("us_voice_id") ?? undefined)
+        : undefined
+      const res = await fetch("/api/intake/speak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, ...(voiceId && { voiceId }) }),
+      })
+      if (!res.ok) {
+        setIsSpeaking(false)
+        setOrbState("idle")
+        return
+      }
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      audioRef.current.src = url
+      audioRef.current.onended = () => {
+        setIsSpeaking(false)
+        setOrbState("idle")
+        URL.revokeObjectURL(url)
+      }
+      await audioRef.current.play()
+    } catch {
+      setIsSpeaking(false)
+      setOrbState("idle")
+    }
   }, [])
 
   // ── send message to [them] ──
