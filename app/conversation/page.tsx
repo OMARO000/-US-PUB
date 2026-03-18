@@ -3,15 +3,16 @@
 /**
  * /conversation — the [us] app shell
  *
- * FIXES APPLIED (round 3):
- * 1. Toggle colors — lock voice and share journal same color/opacity as page view
- * 2. Messages banner — lock voice positioned below the DM analysis banner, not over it
- * 3. viewMode + stale content — ThreadChatView gets key={activeThread} so React
- *    fully unmounts/remounts on tab switch. Eliminates stale bubble content and
- *    viewMode flash in one shot.
- * 4. Layout pinned — orb/bubble/hints/chatbox use absolute positioning anchored
- *    to a fixed vertical center point, so position never shifts between threads
- *    regardless of bubble text length.
+ * FIXES APPLIED (round 4):
+ * 1. threadPrompts.ts: settings hasPageView set to false (handled separately)
+ * 2. viewMode (permanent fix): replaced single viewMode state with threadViewModes —
+ *    a per-thread map. viewMode is derived as threadViewModes[activeThread] ?? "chat"
+ *    on every render — cannot be stale or bleed between tabs. switchThread explicitly
+ *    clears the destination thread to "chat" before navigating.
+ * 3. Input cloned from UnifiedChat exactly: fontSize 20px, var(--font-sans), rounded
+ *    bg2 container, borderRadius 13px, padding 9px 13px, amber SVG send button with
+ *    rgba(196,151,74,0.14) background, disclaimer at 12px var(--muted) opacity 0.6.
+ *    Orb at scale(2) with marginBottom: 80px, anchored at paddingTop: 28vh.
  */
 
 import { useEffect, useRef, useState, Suspense } from "react"
@@ -62,7 +63,7 @@ const ARCHETYPE_GRADIENTS: Record<string, string> = {
   default:   "radial-gradient(ellipse at 50% 40%, rgba(196,151,74,0.12) 0%, transparent 70%)",
 }
 
-// FIX 1: All toggles use identical color/opacity — no dim inactive state
+// All top-right toggles — identical size and weight
 const TOGGLE_BUTTON_STYLE: React.CSSProperties = {
   position: "absolute",
   right: "20px",
@@ -80,9 +81,8 @@ const TOGGLE_BUTTON_STYLE: React.CSSProperties = {
 
 // ─────────────────────────────────────────────
 // THREAD CHAT VIEW
-// FIX 3: key={activeThread} is set at the call site — this component
-// fully remounts on every tab switch, eliminating stale content.
-// FIX 4: layout uses a fixed vertical anchor so position never shifts.
+// key={activeThread} set at call site — full remount on every tab switch
+// Input clones UnifiedChat exactly for pixel-identical layout
 // ─────────────────────────────────────────────
 
 function ThreadChatView({
@@ -90,17 +90,16 @@ function ThreadChatView({
   userId,
   isLocked,
   onToggleLock,
-  hasBanner,
 }: {
   threadType: ThreadType
   userId: string
   isLocked: boolean
   onToggleLock: () => void
-  hasBanner?: boolean // true for messages thread (DM analysis banner present)
 }) {
   const thread = useThread(threadType, userId)
-  const [input, setInput] = useState("")
+  const inputRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const isMessagesThread = threadType === "messages"
   const contextPrompt = THREAD_CONTEXT_PROMPTS[threadType] ?? undefined
 
   useEffect(() => {
@@ -108,16 +107,115 @@ function ThreadChatView({
   }, [thread.messages])
 
   const handleSend = () => {
-    if (!input.trim()) return
-    thread.sendMessage(input.trim())
-    setInput("")
+    const text = inputRef.current?.value.trim()
+    if (!text || thread.isStreaming) return
+    thread.sendMessage(text)
+    if (inputRef.current) {
+      inputRef.current.value = ""
+      inputRef.current.style.height = "auto"
+    }
   }
 
   const hasConversation = thread.messages.length > 1
 
-  // FIX 2 (layout): when banner is shown, empty-state absolute div starts below it
-  const bannerHeight = hasBanner ? 44 : 0
-  const emptyStateTop = `${bannerHeight}px`
+  // Input block — cloned from UnifiedChat exactly
+  const InputBlock = (
+    <div className="no-record" style={{
+      padding: "20px 24px 24px",
+      flexShrink: 0,
+      display: "flex",
+      flexDirection: "column",
+      gap: "10px",
+    }}>
+      <div style={{ borderTop: "1px solid var(--border)", margin: "0 -18px" }} />
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "10px",
+        background: "var(--bg2)",
+        border: "1px solid var(--border)",
+        borderRadius: "13px",
+        padding: "9px 13px",
+        opacity: thread.isStreaming ? 0.4 : 1,
+      }}>
+        <textarea
+          ref={inputRef}
+          rows={1}
+          placeholder={contextPrompt ?? "[say something…]"}
+          aria-label="message [you]"
+          className="no-record us-textarea"
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault()
+              handleSend()
+            }
+          }}
+          onInput={(e) => {
+            const t = e.currentTarget
+            t.style.height = "auto"
+            t.style.height = Math.min(t.scrollHeight, 110) + "px"
+          }}
+          style={{
+            flex: 1,
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            fontSize: "20px",
+            fontWeight: 300,
+            color: "var(--text)",
+            fontFamily: "var(--font-sans)",
+            resize: "none",
+            lineHeight: 1.5,
+          }}
+        />
+        <button
+          className="no-record"
+          aria-label="send message"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={handleSend}
+          disabled={thread.isStreaming}
+          style={{
+            width: "44px",
+            height: "44px",
+            borderRadius: "10px",
+            border: "none",
+            background: "rgba(196,151,74,0.14)",
+            cursor: thread.isStreaming ? "default" : "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+            stroke="var(--amber)" strokeWidth={2}
+            strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+      <div style={{
+        textAlign: "center",
+        marginTop: "8px",
+        fontSize: "12px",
+        fontFamily: "var(--font-mono)",
+        color: "var(--muted)",
+        opacity: 0.6,
+        lineHeight: 1.5,
+      }}>
+        by talking to [you], an AI, you agree to our{" "}
+        <a href="/terms" style={{ color: "inherit", textDecoration: "underline" }}>[terms]</a>
+        {" "}and{" "}
+        <a href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>[privacy policy]</a>
+      </div>
+    </div>
+  )
+
+  // Banner height offset for empty-state absolute positioning
+  const bannerHeight = isMessagesThread ? 44 : 0
 
   return (
     <div style={{
@@ -128,39 +226,43 @@ function ThreadChatView({
       width: "100%",
       position: "relative",
     }}>
+      <style>{`
+        .us-textarea:focus-visible {
+          outline: 2px solid var(--amber) !important;
+          outline-offset: 2px;
+          border-radius: 4px;
+        }
+      `}</style>
 
-      {/* DM analysis banner — messages thread only, sits in normal flow at top */}
-      {hasBanner && <DMAnalysisBanner />}
+      {/* DM analysis banner — messages thread only, sits in normal flow */}
+      {isMessagesThread && <DMAnalysisBanner />}
 
-      {/* ── FIX 4: Empty state with pinned layout ── */}
+      {/* ── Empty state — pinned at 28vh, identical to conversation tab ── */}
       {!hasConversation && (
-        // Outer: absolute below any banner, aligns inner stack to 28vh from its top
         <div style={{
           position: "absolute",
-          top: emptyStateTop,
+          top: `${bannerHeight}px`,
           left: 0,
           right: 0,
           bottom: 0,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: "28vh", // fixed anchor — same on every thread
+          paddingTop: "28vh",
         }}>
-          {/* Inner stack: orb → bubble → hints → chatbox, fixed gaps */}
           <div style={{
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             width: "100%",
-            maxWidth: "860px",
-            padding: "0 40px",
+            maxWidth: "1100px",
+            padding: "0 24px",
           }}>
-
-            {/* Orb — scale(2) matching conversation page */}
+            {/* Orb — scale(2), identical to conversation page */}
             <div style={{
               transform: "scale(2)",
               transformOrigin: "center center",
-              marginBottom: "80px", // fixed gap regardless of bubble text
+              marginBottom: "80px",
             }}>
               <AmbientOrb
                 isRecording={false}
@@ -170,34 +272,33 @@ function ThreadChatView({
               />
             </div>
 
-            {/* Opening bubble */}
+            {/* Opening bubble — matches UnifiedChat message style */}
             {thread.messages[0] && (
               <div style={{
                 maxWidth: "520px",
                 width: "100%",
-                padding: "14px 20px",
-                borderRadius: "16px 16px 16px 4px",
+                padding: "11px 15px",
+                borderRadius: "15px 15px 15px 4px",
                 background: "var(--bg2)",
                 border: "1px solid var(--border)",
-                fontSize: "14px",
-                fontFamily: "var(--font-mono)",
-                color: "var(--text)",
+                fontSize: "13.5px",
                 fontWeight: 300,
-                lineHeight: 1.7,
+                lineHeight: 1.65,
+                color: "var(--text)",
                 textAlign: "center",
-                marginBottom: "32px", // fixed gap
+                marginBottom: "32px",
               }}>
                 {thread.messages[0].content}
               </div>
             )}
 
-            {/* Hold prompt */}
+            {/* Hold prompt — identical to conversation page */}
             <div style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
               gap: "6px",
-              marginBottom: "32px", // fixed gap
+              marginBottom: "32px",
             }}>
               <span style={{
                 fontFamily: "var(--font-mono)",
@@ -217,75 +318,9 @@ function ThreadChatView({
               </span>
             </div>
 
-            {/* Chatbox */}
-            <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: "8px" }}>
-              <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
-                <textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault()
-                      handleSend()
-                    }
-                  }}
-                  placeholder={contextPrompt ?? "[say something...]"}
-                  aria-label="message [you]"
-                  rows={1}
-                  style={{
-                    flex: 1,
-                    padding: "12px 16px",
-                    borderRadius: "12px",
-                    background: "var(--bg2)",
-                    border: "1px solid var(--border)",
-                    outline: "none",
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "14px",
-                    color: "var(--text)",
-                    fontWeight: 300,
-                    lineHeight: 1.5,
-                    resize: "none",
-                    minHeight: "44px",
-                  }}
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={!input.trim() || thread.isStreaming}
-                  aria-label="send message"
-                  style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "10px",
-                    background: input.trim() ? "var(--amber)" : "var(--bg3)",
-                    border: "none",
-                    cursor: input.trim() ? "pointer" : "default",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                    transition: "background 0.15s",
-                  }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke={input.trim() ? "var(--bg)" : "var(--dim)"}
-                    strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"/>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                  </svg>
-                </button>
-              </div>
-              <div style={{
-                fontSize: "11px",
-                fontFamily: "var(--font-mono)",
-                color: "var(--dim)",
-                textAlign: "center",
-                opacity: 0.7,
-              }}>
-                by talking to [you], an AI, you agree to our{" "}
-                <a href="/terms" style={{ color: "var(--muted)", textDecoration: "underline" }}>[terms]</a>
-                {" "}and{" "}
-                <a href="/privacy" style={{ color: "var(--muted)", textDecoration: "underline" }}>[privacy policy]</a>
-              </div>
+            {/* Input — cloned from UnifiedChat */}
+            <div style={{ width: "100%" }}>
+              {InputBlock}
             </div>
           </div>
         </div>
@@ -297,27 +332,29 @@ function ThreadChatView({
           <div style={{
             flex: 1,
             overflowY: "auto",
-            padding: "32px 40px 16px",
+            padding: "24px 24px 16px",
             display: "flex",
             flexDirection: "column",
-            gap: "16px",
+            gap: "20px",
+            scrollbarWidth: "none",
           }}>
             {thread.messages.map((msg) => (
               <div key={msg.id} style={{
                 display: "flex",
-                justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
+                flexDirection: "column",
+                gap: "5px",
+                maxWidth: "70%",
+                alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
               }}>
                 <div style={{
-                  maxWidth: "72%",
-                  padding: "12px 16px",
-                  borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                  background: msg.role === "user" ? "var(--bg3)" : "var(--bg2)",
-                  border: "1px solid var(--border)",
-                  fontSize: "14px",
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--text)",
+                  padding: "11px 15px",
+                  borderRadius: msg.role === "you" ? "15px 15px 15px 4px" : "15px 15px 4px 15px",
+                  fontSize: "13.5px",
                   fontWeight: 300,
-                  lineHeight: 1.7,
+                  lineHeight: 1.65,
+                  color: "var(--text)",
+                  background: msg.role === "you" ? "var(--bg2)" : "var(--bg3)",
+                  border: `1px solid ${msg.role === "you" ? "var(--border)" : "var(--border2)"}`,
                   whiteSpace: "pre-wrap",
                 }}>
                   {msg.content}
@@ -338,82 +375,7 @@ function ThreadChatView({
             ))}
             <div ref={messagesEndRef} />
           </div>
-
-          <div style={{
-            padding: "16px 40px 24px",
-            borderTop: "1px solid var(--border)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "8px",
-          }}>
-            <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    handleSend()
-                  }
-                }}
-                placeholder={contextPrompt ?? "[say something...]"}
-                aria-label="message [you]"
-                rows={1}
-                style={{
-                  flex: 1,
-                  padding: "12px 16px",
-                  borderRadius: "12px",
-                  background: "var(--bg2)",
-                  border: "1px solid var(--border)",
-                  outline: "none",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "14px",
-                  color: "var(--text)",
-                  fontWeight: 300,
-                  lineHeight: 1.5,
-                  resize: "none",
-                  minHeight: "44px",
-                }}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || thread.isStreaming}
-                aria-label="send message"
-                style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "10px",
-                  background: input.trim() ? "var(--amber)" : "var(--bg3)",
-                  border: "none",
-                  cursor: input.trim() ? "pointer" : "default",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                  transition: "background 0.15s",
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                  stroke={input.trim() ? "var(--bg)" : "var(--dim)"}
-                  strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="22" y1="2" x2="11" y2="13"/>
-                  <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                </svg>
-              </button>
-            </div>
-            <div style={{
-              fontSize: "11px",
-              fontFamily: "var(--font-mono)",
-              color: "var(--dim)",
-              textAlign: "center",
-              opacity: 0.7,
-            }}>
-              by talking to [you], an AI, you agree to our{" "}
-              <a href="/terms" style={{ color: "var(--muted)", textDecoration: "underline" }}>[terms]</a>
-              {" "}and{" "}
-              <a href="/privacy" style={{ color: "var(--muted)", textDecoration: "underline" }}>[privacy policy]</a>
-            </div>
-          </div>
+          {InputBlock}
         </>
       )}
 
@@ -461,43 +423,39 @@ export default function ConversationPage() {
   const [journalShared, setJournalShared]               = useState(false)
   const [placeholder, setPlaceholder]                   = useState(CONVERSATION_PROMPTS[0])
 
-  // viewMode: ref for synchronous reads, state for rendering
-  const viewModeRef = useRef<"chat" | "page">("chat")
-  const [viewMode, setViewModeState] = useState<"chat" | "page">("chat")
-  const setViewMode = (mode: "chat" | "page") => {
-    viewModeRef.current = mode
-    setViewModeState(mode)
-  }
+  // FIX 2: viewMode is derived directly from activeThread on every render.
+  // A separate piece of state tracks user's explicit toggle choice,
+  // keyed per thread so it can never bleed across tabs.
+  const [threadViewModes, setThreadViewModes] = useState<Partial<Record<ThreadType, "chat" | "page">>>({})
+
+  // The effective viewMode for the current thread is always "chat" unless
+  // the user has explicitly toggled this specific thread to "page".
+  const viewMode: "chat" | "page" = threadViewModes[activeThread] ?? "chat"
 
   const intake      = useIntake()
   const initialized = useRef(false)
 
   const hasMessages          = intake.messages.length > 0
   const isConversationThread = activeThread === "conversation"
-  const config               = THREAD_CONFIGS[activeThread]
   const isMessagesThread     = activeThread === "messages"
+  const config               = THREAD_CONFIGS[activeThread]
 
   const orbState = intake.isRecording ? "recording"
     : intake.isThinking ? "thinking"
     : intake.isSpeaking ? "speaking"
     : "idle"
 
-  // Reset viewMode synchronously on tab switch — before navigation fires
+  // switchThread: navigate only — viewMode auto-resets because threadViewModes
+  // for the new thread defaults to "chat" unless user toggled it previously.
+  // We also clear the target thread's viewMode to guarantee chat on arrival.
   const switchThread = (thread: ThreadType) => {
-    viewModeRef.current = "chat"
-    setViewModeState("chat")
+    setThreadViewModes((prev) => ({ ...prev, [thread]: "chat" }))
     router.push(`/conversation?thread=${thread}`)
   }
 
-  // Safety net for back/forward nav
-  useEffect(() => {
-    viewModeRef.current = "chat"
-    setViewModeState("chat")
-  }, [activeThread])
-
   const toggleViewMode = () => {
-    const next = viewModeRef.current === "chat" ? "page" : "chat"
-    setViewMode(next)
+    const next = viewMode === "chat" ? "page" : "chat"
+    setThreadViewModes((prev) => ({ ...prev, [activeThread]: next }))
   }
 
   const handleToggleLock = () => {
@@ -552,12 +510,10 @@ export default function ConversationPage() {
 
   const gradient = ARCHETYPE_GRADIENTS[archetype?.toLowerCase() ?? ""] ?? ARCHETYPE_GRADIENTS.default
 
-  // FIX 2: Calculate top offset for lock voice toggle on messages thread.
-  // The DM analysis banner is ~44px tall. Lock voice sits below it with 12px gap.
+  // Lock voice toggle top — below banner on messages thread
   const lockVoiceTop = isMessagesThread
-    ? "68px"  // below banner (44px) + gap (12px) + 12px top margin
+    ? "68px"
     : config.hasPageView ? "72px" : "16px"
-
   const journalToggleTop = config.hasPageView ? "128px" : "72px"
 
   return (
@@ -595,10 +551,9 @@ export default function ConversationPage() {
           }} />
         )}
 
-        {/* ── Top-right toggles for non-conversation threads ── */}
+        {/* ── Top-right toggles — non-conversation threads ── */}
         {!isConversationThread && (
           <>
-            {/* [page view] toggle */}
             {config.hasPageView && (
               <button
                 onClick={toggleViewMode}
@@ -606,7 +561,6 @@ export default function ConversationPage() {
                 style={{
                   ...TOGGLE_BUTTON_STYLE,
                   top: "16px",
-                  // FIX 1: same border/color as all other toggles
                   border: "1px solid var(--border)",
                   color: "var(--muted)",
                 }}
@@ -615,17 +569,12 @@ export default function ConversationPage() {
               </button>
             )}
 
-            {/* FIX 1 + FIX 2: [lock voice] — same color as page view, positioned below banner on messages */}
             <button
-              onClick={(e) => {
-                e.stopPropagation()
-                handleToggleLock()
-              }}
+              onClick={(e) => { e.stopPropagation(); handleToggleLock() }}
               aria-label={isLocked ? "unlock voice" : "lock voice"}
               style={{
                 ...TOGGLE_BUTTON_STYLE,
                 top: lockVoiceTop,
-                // FIX 1: match page view color when inactive; amber only when active
                 border: `1px solid ${isLocked ? "var(--amber)" : "var(--border)"}`,
                 color: isLocked ? "var(--amber)" : "var(--muted)",
               }}
@@ -633,18 +582,13 @@ export default function ConversationPage() {
               {isLocked ? "[voice locked]" : "[lock voice]"}
             </button>
 
-            {/* Journal share toggle */}
             {activeThread === "journal" && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setJournalShared((prev) => !prev)
-                }}
-                aria-label={journalShared ? "stop sharing journal with [you]" : "share journal with [you]"}
+                onClick={(e) => { e.stopPropagation(); setJournalShared((p) => !p) }}
+                aria-label={journalShared ? "stop sharing journal" : "share journal with [you]"}
                 style={{
                   ...TOGGLE_BUTTON_STYLE,
                   top: journalToggleTop,
-                  // FIX 1: match page view color when inactive
                   border: `1px solid ${journalShared ? "var(--amber)" : "var(--border)"}`,
                   color: journalShared ? "var(--amber)" : "var(--muted)",
                 }}
@@ -655,10 +599,10 @@ export default function ConversationPage() {
           </>
         )}
 
-        {/* Portrait toggle — conversation thread only */}
+        {/* Portrait toggle — conversation only */}
         {isConversationThread && (
           <button
-            aria-label={portraitAsBackground ? "hide portrait background" : "show portrait background"}
+            aria-label={portraitAsBackground ? "hide portrait" : "show portrait"}
             onClick={(e) => {
               e.stopPropagation()
               const next = !portraitAsBackground
@@ -715,7 +659,7 @@ export default function ConversationPage() {
               </div>
             )}
 
-            {/* FIX 4: conversation page also uses paddingTop anchor for consistency */}
+            {/* Empty state — pinned at 28vh */}
             {!hasMessages && (
               <div style={{
                 position: "absolute",
@@ -731,7 +675,7 @@ export default function ConversationPage() {
                   alignItems: "center",
                   width: "100%",
                   maxWidth: "1100px",
-                  padding: "0 40px",
+                  padding: "0 24px",
                 }}>
                   <div style={{
                     transform: "scale(2)",
@@ -742,10 +686,7 @@ export default function ConversationPage() {
                       isRecording={intake.isRecording}
                       orbState={orbState}
                       isLocked={isLocked}
-                      onToggleLock={(e) => {
-                        e?.stopPropagation()
-                        handleToggleLock()
-                      }}
+                      onToggleLock={(e) => { e?.stopPropagation(); handleToggleLock() }}
                     />
                   </div>
 
@@ -833,15 +774,12 @@ export default function ConversationPage() {
             zIndex: 1,
           }}>
             {viewMode === "chat" ? (
-              // FIX 3: key={activeThread} forces full remount on tab switch.
-              // Eliminates stale bubble content AND viewMode flash simultaneously.
               <ThreadChatView
                 key={activeThread}
                 threadType={activeThread}
                 userId={userId}
                 isLocked={isLocked}
                 onToggleLock={handleToggleLock}
-                hasBanner={isMessagesThread}
               />
             ) : (
               <div style={{ flex: 1, overflowY: "auto" }}>

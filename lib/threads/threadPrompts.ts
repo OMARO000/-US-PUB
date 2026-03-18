@@ -216,7 +216,7 @@ Be efficient. If someone says "make it dark," switch to charcoal without asking 
 If someone asks to see their account number, display it.
 If someone asks to delete their account, take them to [profile] for that action — it's too significant for a conversational command.`,
     pageRoute: "/settings",
-    hasPageView: true,
+    hasPageView: false,
   },
 
   terms: {
