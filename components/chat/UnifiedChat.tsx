@@ -136,11 +136,11 @@ export default function UnifiedChat({
                 alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
               }}>
                 <div style={{
-                  padding: "11px 15px",
+                  padding: "14px 18px",
                   borderRadius: msg.role === "them" ? "15px 15px 15px 4px" : "15px 15px 4px 15px",
-                  fontSize: "13.5px",
+                  fontSize: "15px",
                   fontWeight: 300,
-                  lineHeight: 1.65,
+                  lineHeight: 1.7,
                   color: "var(--text)",
                   background: msg.role === "them" ? "var(--bg2)" : "var(--bg3)",
                   border: `1px solid ${msg.role === "them" ? "var(--border)" : "var(--border2)"}`,

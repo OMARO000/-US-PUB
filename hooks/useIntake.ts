@@ -100,7 +100,8 @@ export function useIntake(): UseIntakeReturn {
       setArrivalStatement(data.arrivalStatement)
       setCurrentBlock(data.currentBlock)
       setStatus("active")
-      // speak arrival statement — audio only, not added to messages
+      // add arrival statement as visible bubble + speak it
+      addMessage({ role: "them", content: data.arrivalStatement, inputMode: null })
       await speakText(data.arrivalStatement)
     } catch (err) {
       console.error("[us] init error:", err)

@@ -164,14 +164,28 @@ function MatchCard({ match, onConnect, onNotAFit, mutual, isActing }: {
 
 function EmptyState({ noPortrait }: { noPortrait: boolean }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "20vh", gap: "12px" }}>
-      <span style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--muted)", textAlign: "center", lineHeight: 1.7, maxWidth: "280px" }}>
-        {noPortrait ? "[your portrait isn't ready yet. finish your conversation with [them] first.]" : "[no matches yet. check back soon.]"}
-      </span>
-      {noPortrait && (
-        <a href="/conversation" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--amber)", textDecoration: "none", letterSpacing: "0.04em" }}>
-          [go to [them] →]
-        </a>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", paddingTop: "20vh", gap: "16px", maxWidth: "320px", margin: "0 auto" }}>
+      {noPortrait ? (
+        <>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text)", textAlign: "center", lineHeight: 1.75 }}>
+            your portrait isn't ready yet.
+          </span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--muted)", textAlign: "center", lineHeight: 1.75 }}>
+            [them] needs to hear from you first. your intake conversation builds the portrait that matching is based on — the more you share, the more resonant your matches will be.
+          </span>
+          <a href="/conversation" style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--amber)", textDecoration: "none", letterSpacing: "0.04em", marginTop: "4px" }}>
+            [start your conversation →]
+          </a>
+        </>
+      ) : (
+        <>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "13px", color: "var(--text)", textAlign: "center", lineHeight: 1.75 }}>
+            no matches yet.
+          </span>
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--muted)", textAlign: "center", lineHeight: 1.75 }}>
+            [them] is looking. this takes time — matching on signal rather than surface means fewer results, but ones that actually resonate.
+          </span>
+        </>
       )}
     </div>
   )

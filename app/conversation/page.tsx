@@ -196,7 +196,7 @@ export default function ConversationPage() {
   // Lock voice toggle top — below banner on messages thread
   // Banner is ~44px tall + 16px top margin = 60px, plus 16px gap = 76px
   const lockVoiceTop = isMessagesThread
-    ? "76px"
+    ? "60px"
     : activeThread === "about"
     ? "16px"
     : config.hasPageView ? "72px" : "16px"

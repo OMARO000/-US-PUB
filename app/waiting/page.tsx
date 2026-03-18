@@ -77,8 +77,8 @@ function WaitingContent() {
         opacity: 0.6,
       }}>
         {isPortrait
-          ? "this takes a moment. you don't need to stay on this page."
-          : "when the other person is ready, it will open on its own."}
+          ? "matching on signal takes a moment. [them] is working through your portrait and finding resonance — not volume. you don't need to stay on this page."
+          : "mutual connection means both people choose. when they do, it opens on its own. you'll see it in [connections]."}
       </div>
 
       {/* nav links */}

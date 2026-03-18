@@ -112,7 +112,7 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
   }, []);
 
   useEffect(() => {
-    const width = collapsed ? "112px" : "480px";
+    const width = collapsed ? "112px" : "430px";
     document.documentElement.style.setProperty("--sidebar-width", width);
   }, [collapsed]);
 
@@ -125,12 +125,12 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
     setCollapsed((prev) => {
       const next = !prev;
       localStorage.setItem("us_sidebar_collapsed", String(next));
-      document.documentElement.style.setProperty("--sidebar-width", next ? "112px" : "480px");
+      document.documentElement.style.setProperty("--sidebar-width", next ? "112px" : "430px");
       return next;
     });
   }
 
-  const w = collapsed ? "112px" : "480px";
+  const w = collapsed ? "112px" : "430px";
 
   const navContent = (isMobile: boolean) => (
     <>
