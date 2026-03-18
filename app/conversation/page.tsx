@@ -6,7 +6,7 @@
  * Initializes session on mount with anonymous userId.
  * Handles: recording, text input, rephrase, block state, completion.
  */
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import dynamic from "next/dynamic"
 import { useIntake } from "@/hooks/useIntake"
 import Sidebar from "@/components/sidebar/Sidebar"
@@ -16,8 +16,6 @@ const UnifiedChat = dynamic(() => import("@/components/chat/UnifiedChat"), { ssr
 
 // ─────────────────────────────────────────────
 // ANONYMOUS USER ID
-// Generates a stable anonymous ID per device.
-// Stored in localStorage — no PII.
 // ─────────────────────────────────────────────
 function getOrCreateUserId(): string {
   if (typeof window === "undefined") return "anon"
@@ -30,11 +28,36 @@ function getOrCreateUserId(): string {
 }
 
 // ─────────────────────────────────────────────
+// ARCHETYPE GRADIENTS
+// Placeholder until real portrait artwork exists.
+// ─────────────────────────────────────────────
+const ARCHETYPE_GRADIENTS: Record<string, { gradient: string; label: string }> = {
+  connector:    { gradient: "radial-gradient(ellipse at 60% 40%, rgba(196,151,74,0.28) 0%, rgba(196,151,74,0.04) 60%, transparent 80%)",  label: "connector" },
+  seeker:       { gradient: "radial-gradient(ellipse at 40% 60%, rgba(100,140,200,0.28) 0%, rgba(100,140,200,0.04) 60%, transparent 80%)", label: "seeker" },
+  nurturer:     { gradient: "radial-gradient(ellipse at 50% 50%, rgba(168,88,96,0.28)  0%, rgba(168,88,96,0.04)  60%, transparent 80%)",  label: "nurturer" },
+  visionary:    { gradient: "radial-gradient(ellipse at 70% 30%, rgba(130,100,200,0.28) 0%, rgba(130,100,200,0.04) 60%, transparent 80%)", label: "visionary" },
+  architect:    { gradient: "radial-gradient(ellipse at 30% 70%, rgba(80,160,140,0.28)  0%, rgba(80,160,140,0.04)  60%, transparent 80%)",  label: "architect" },
+  challenger:   { gradient: "radial-gradient(ellipse at 60% 60%, rgba(200,120,60,0.28)  0%, rgba(200,120,60,0.04)  60%, transparent 80%)",  label: "challenger" },
+  default:      { gradient: "radial-gradient(ellipse at 50% 40%, rgba(196,151,74,0.18) 0%, rgba(196,151,74,0.03) 60%, transparent 80%)",  label: "" },
+}
+
+function getArchetypeStyle(archetype: string | null) {
+  if (!archetype) return ARCHETYPE_GRADIENTS.default
+  const key = archetype.toLowerCase()
+  return ARCHETYPE_GRADIENTS[key] ?? ARCHETYPE_GRADIENTS.default
+}
+
+// ─────────────────────────────────────────────
 // PAGE
 // ─────────────────────────────────────────────
 export default function ConversationPage() {
   const intake = useIntake()
   const initialized = useRef(false)
+  const [isLocked, setIsLocked] = useState(false)
+
+  // Portrait background
+  const [portraitAsBackground, setPortraitAsBackground] = useState(false)
+  const [archetype, setArchetype] = useState<string | null>(null)
 
   const hasMessages = intake.messages.length > 0
   const orbState = intake.isRecording ? "recording"
@@ -42,11 +65,43 @@ export default function ConversationPage() {
     : intake.isSpeaking ? "speaking"
     : "idle"
 
-  // initialize session once on mount
+  const handleToggleLock = () => {
+    setIsLocked((prev) => {
+      if (prev && intake.isRecording) intake.stopRecording()
+      return !prev
+    })
+  }
+
+  const handleTap = () => {
+    if (isLocked) {
+      if (intake.isRecording) intake.stopRecording()
+      else intake.startRecording()
+    } else {
+      intake.startRecording()
+    }
+  }
+
+  const handleTapEnd = () => {
+    if (!isLocked) intake.stopRecording()
+  }
+
+  const togglePortraitBg = () => {
+    setPortraitAsBackground((prev) => {
+      const next = !prev
+      localStorage.setItem("us_portrait_bg", String(next))
+      return next
+    })
+  }
+
+  // initialize session + load preferences once on mount
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
     const userId = getOrCreateUserId()
+
+    // restore portrait bg preference
+    setPortraitAsBackground(localStorage.getItem("us_portrait_bg") === "true")
+
     // ensure user row exists before starting session
     fetch("/api/user", {
       method: "POST",
@@ -55,13 +110,98 @@ export default function ConversationPage() {
     })
       .catch(() => {})
       .finally(() => intake.init(userId))
+
+    // fetch archetype for background gradient
+    fetch(`/api/profile?userId=${encodeURIComponent(userId)}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.archetype) setArchetype(data.archetype)
+      })
+      .catch(() => {})
   }, [])
+
+  const archetypeStyle = getArchetypeStyle(archetype)
 
   return (
     <div style={{ display: "flex", height: "100dvh", overflow: "hidden" }}>
       <Sidebar />
-      <main style={{ flex: 1, marginLeft: "var(--sidebar-width)", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", alignItems: "center" }}>
-        <div style={{ width: "100%", maxWidth: "680px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
+      <main style={{
+        flex: 1,
+        marginLeft: "var(--sidebar-width)",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+        position: "relative",
+        alignItems: "center",
+        background: "var(--bg)",
+        transition: "background 0.4s ease",
+      }}>
+
+        {/* Portrait background */}
+        {portraitAsBackground && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: archetypeStyle.gradient,
+              pointerEvents: "none",
+              zIndex: 0,
+              transition: "opacity 0.6s ease",
+            }}
+          />
+        )}
+        {portraitAsBackground && archetypeStyle.label && (
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              fontSize: "clamp(80px, 14vw, 160px)",
+              fontFamily: "var(--font-sans)",
+              fontWeight: 300,
+              color: "var(--text)",
+              opacity: 0.04,
+              letterSpacing: "-0.02em",
+              pointerEvents: "none",
+              userSelect: "none",
+              whiteSpace: "nowrap",
+              zIndex: 0,
+            }}
+          >
+            {archetypeStyle.label}
+          </div>
+        )}
+
+        {/* Portrait toggle — top right */}
+        <button
+          aria-label={portraitAsBackground ? "hide portrait background" : "show portrait background"}
+          onClick={togglePortraitBg}
+          style={{
+            position: "absolute",
+            top: "16px",
+            right: "20px",
+            zIndex: 20,
+            background: "transparent",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "10px",
+            fontFamily: "var(--font-mono)",
+            color: portraitAsBackground ? "var(--amber)" : "var(--dim)",
+            letterSpacing: "0.06em",
+            opacity: portraitAsBackground ? 0.9 : 0.45,
+            padding: "6px 4px",
+            transition: "color 0.15s, opacity 0.15s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.opacity = "1")}
+          onMouseLeave={(e) => (e.currentTarget.style.opacity = portraitAsBackground ? "0.9" : "0.45")}
+        >
+          {portraitAsBackground ? "[portrait on]" : "[portrait]"}
+        </button>
+
+        <div style={{ width: "100%", maxWidth: "680px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", zIndex: 1 }}>
 
           {/* ── error banner ── */}
           {intake.error && (
@@ -93,28 +233,35 @@ export default function ConversationPage() {
             }}>
               {/* hero orb with hold-to-record */}
               <div
-                onMouseDown={intake.startRecording}
-                onMouseUp={intake.stopRecording}
-                onMouseLeave={intake.stopRecording}
-                onTouchStart={(e) => { e.preventDefault(); intake.startRecording() }}
-                onTouchEnd={intake.stopRecording}
+                onMouseDown={handleTap}
+                onMouseUp={handleTapEnd}
+                onMouseLeave={handleTapEnd}
+                onTouchStart={(e) => { e.preventDefault(); handleTap() }}
+                onTouchEnd={handleTapEnd}
                 style={{ cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" }}
               >
                 <div style={{ transform: "scale(2)", transformOrigin: "center center" }}>
-                  <AmbientOrb isRecording={intake.isRecording} orbState={orbState} />
+                  <AmbientOrb
+                    isRecording={intake.isRecording}
+                    orbState={orbState}
+                    isLocked={isLocked}
+                    onToggleLock={handleToggleLock}
+                  />
                 </div>
               </div>
 
-              {/* input bar — constrained width, no flex-grow */}
+              {/* input bar */}
               <div style={{ width: "100%", flexShrink: 0 }}>
                 <UnifiedChat
                   messages={intake.messages}
                   isThinking={intake.isThinking}
                   isSpeaking={intake.isSpeaking}
                   isRecording={intake.isRecording}
+                  isLocked={isLocked}
                   onSendText={intake.sendText}
-                  onHoldStart={intake.startRecording}
-                  onHoldEnd={intake.stopRecording}
+                  onHoldStart={handleTap}
+                  onHoldEnd={handleTapEnd}
+                  onToggleLock={handleToggleLock}
                   onRephrase={intake.requestRephrase}
                   disabled={intake.status !== "active"}
                   showMessages={false}
@@ -130,9 +277,11 @@ export default function ConversationPage() {
               isThinking={intake.isThinking}
               isSpeaking={intake.isSpeaking}
               isRecording={intake.isRecording}
+              isLocked={isLocked}
               onSendText={intake.sendText}
-              onHoldStart={intake.startRecording}
-              onHoldEnd={intake.stopRecording}
+              onHoldStart={handleTap}
+              onHoldEnd={handleTapEnd}
+              onToggleLock={handleToggleLock}
               onRephrase={intake.requestRephrase}
               disabled={intake.status !== "active"}
               showMessages={true}
