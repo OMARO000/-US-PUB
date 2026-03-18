@@ -110,7 +110,9 @@ export default function ConversationPage() {
   const [portraitAsBackground, setPortraitAsBackground] = useState(false)
   const [archetype, setArchetype]                       = useState<string | null>(null)
   const [journalShared, setJournalShared]               = useState(false)
-  const [placeholder, setPlaceholder]                   = useState(CONVERSATION_PROMPTS[0])
+  const [openingBubble] = useState(
+    () => CONVERSATION_PROMPTS[Math.floor(Math.random() * CONVERSATION_PROMPTS.length)]
+  )
 
   const searchParams = useSearchParams()
   const matchedConversationId = searchParams.get("c")
@@ -161,14 +163,6 @@ export default function ConversationPage() {
     if (!isLocked) intake.stopRecording()
   }
 
-  // Shuffle conversation placeholder every 3s
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPlaceholder(CONVERSATION_PROMPTS[Math.floor(Math.random() * CONVERSATION_PROMPTS.length)])
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
-
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
@@ -192,6 +186,26 @@ export default function ConversationPage() {
   }, [])
 
   const gradient = ARCHETYPE_GRADIENTS[archetype?.toLowerCase() ?? ""] ?? ARCHETYPE_GRADIENTS.default
+
+  const [typedBubble, setTypedBubble] = useState("")
+  const [bubbleDone, setBubbleDone] = useState(false)
+  const bubbleIndexRef = useRef(0)
+
+  useEffect(() => {
+    bubbleIndexRef.current = 0
+    setTypedBubble("")
+    setBubbleDone(false)
+    const interval = setInterval(() => {
+      if (bubbleIndexRef.current >= openingBubble.length) {
+        setBubbleDone(true)
+        clearInterval(interval)
+        return
+      }
+      setTypedBubble(openingBubble.slice(0, bubbleIndexRef.current + 1))
+      bubbleIndexRef.current += 1
+    }, 18)
+    return () => clearInterval(interval)
+  }, [openingBubble])
 
   // Lock voice toggle top — below banner on messages thread
   // Banner is ~44px tall + 16px top margin = 60px, plus 16px gap = 76px
@@ -389,6 +403,32 @@ export default function ConversationPage() {
                   </div>
 
                   <div style={{
+                    maxWidth: "560px",
+                    width: "100%",
+                    padding: "14px 18px",
+                    borderRadius: "15px 15px 15px 4px",
+                    background: "var(--bg2)",
+                    border: "1px solid var(--border)",
+                    fontSize: "15px",
+                    fontWeight: 300,
+                    lineHeight: 1.7,
+                    color: "var(--text)",
+                    fontFamily: "var(--font-mono)",
+                    textAlign: "center",
+                    marginBottom: "32px",
+                    minHeight: "52px",
+                  }}>
+                    {typedBubble}
+                    {!bubbleDone && (
+                      <span style={{
+                        display: "inline-block", width: "7px", height: "15px",
+                        background: "var(--amber)", marginLeft: "2px", opacity: 0.7,
+                        animation: "blink 0.8s step-end infinite", verticalAlign: "text-bottom",
+                      }} />
+                    )}
+                  </div>
+
+                  <div style={{
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
@@ -427,7 +467,7 @@ export default function ConversationPage() {
                       onRephrase={intake.requestRephrase}
                       disabled={intake.status !== "active"}
                       showMessages={false}
-                      placeholder={placeholder}
+                      placeholder="[say something...]"
                     />
                   </div>
                 </div>
@@ -453,7 +493,7 @@ export default function ConversationPage() {
                   onRephrase={intake.requestRephrase}
                   disabled={intake.status !== "active"}
                   showMessages={true}
-                  placeholder={placeholder}
+                  placeholder="[say something...]"
                 />
               </div>
             )}
