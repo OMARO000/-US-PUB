@@ -14,8 +14,10 @@ interface UnifiedChatProps {
   isRecording: boolean;
   isThinking: boolean;
   isSpeaking: boolean;
+  isLocked: boolean;
   onHoldStart: () => void;
   onHoldEnd: () => void;
+  onToggleLock: () => void;
   onSendText: (text: string) => void;
   onRephrase: () => void;
   disabled?: boolean;
@@ -24,7 +26,8 @@ interface UnifiedChatProps {
 
 export default function UnifiedChat({
   messages, isRecording, isThinking, isSpeaking,
-  onHoldStart, onHoldEnd, onSendText, onRephrase, disabled = false,
+  isLocked, onHoldStart, onHoldEnd, onToggleLock,
+  onSendText, onRephrase, disabled = false,
   showMessages = true,
 }: UnifiedChatProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -40,6 +43,20 @@ export default function UnifiedChat({
       inputRef.current.value = "";
       inputRef.current.style.height = "auto";
     }
+  };
+
+  // Body tap handlers — respect locked mode
+  const handleBodyMouseDown = () => {
+    if (inputRef.current?.contains(document.activeElement)) return;
+    if (isLocked) {
+      if (isRecording) onHoldEnd();
+      else onHoldStart();
+    } else {
+      onHoldStart();
+    }
+  };
+  const handleBodyMouseUp = () => {
+    if (!isLocked) onHoldEnd();
   };
 
   return (
@@ -59,16 +76,21 @@ export default function UnifiedChat({
       {/* CHAT BODY — only rendered when showMessages is true */}
       {showMessages && (
         <div
-          onMouseDown={() => { if (!inputRef.current?.contains(document.activeElement)) onHoldStart(); }}
-          onMouseUp={onHoldEnd}
-          onMouseLeave={onHoldEnd}
+          onMouseDown={handleBodyMouseDown}
+          onMouseUp={handleBodyMouseUp}
+          onMouseLeave={() => { if (!isLocked) onHoldEnd(); }}
           onTouchStart={(e) => {
             const target = e.target as HTMLElement;
             if (target.closest(".no-record")) return;
             e.preventDefault();
-            onHoldStart();
+            if (isLocked) {
+              if (isRecording) onHoldEnd();
+              else onHoldStart();
+            } else {
+              onHoldStart();
+            }
           }}
-          onTouchEnd={onHoldEnd}
+          onTouchEnd={() => { if (!isLocked) onHoldEnd(); }}
           style={{
             flex: 1,
             overflowY: "auto",
@@ -93,7 +115,7 @@ export default function UnifiedChat({
               alignItems: "center",
               pointerEvents: "none",
             }}>
-              <AmbientOrb isRecording={isRecording} orbState={orbState} />
+              <AmbientOrb isRecording={isRecording} orbState={orbState} isLocked={isLocked} />
             </div>
           )}
 
@@ -159,15 +181,6 @@ export default function UnifiedChat({
         flexDirection: "column",
         gap: "10px",
       }}>
-        <div style={{
-          textAlign: "center",
-          fontSize: "10px",
-          fontFamily: "var(--font-mono)",
-          color: "rgba(196,151,74,0.75)",
-          letterSpacing: "0.1em",
-        }}>
-          [slide to lock]
-        </div>
         <div style={{
           textAlign: "center",
           fontSize: "10px",
