@@ -8,7 +8,7 @@
  * Re-delivers fresh on every mount (tab switch resets via key={activeThread}).
  */
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 
 // ─────────────────────────────────────────────
 // CONTENT
@@ -323,6 +323,10 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
     }
   }
 
+  const onPhilosophyDone = useCallback(() => setTimeout(() => setStage(1), 600), [])
+  const onMissionDone    = useCallback(() => setTimeout(() => setStage(2), 600), [])
+  const onFaqIntroDone   = useCallback(() => setTimeout(() => setStage(3), 400), [])
+
   const inputUnlocked = stage >= 3
 
   return (
@@ -351,7 +355,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
         <ThemBubble
           text={PHILOSOPHY}
           active={stage === 0}
-          onDone={() => setTimeout(() => setStage(1), 600)}
+          onDone={onPhilosophyDone}
           speed={10}
         />
 
@@ -360,7 +364,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
           <ThemBubble
             text={MISSION}
             active={stage === 1}
-            onDone={() => setTimeout(() => setStage(2), 600)}
+            onDone={onMissionDone}
             speed={10}
           />
         )}
@@ -370,7 +374,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
           <ThemBubble
             text={FAQ_INTRO}
             active={stage === 2}
-            onDone={() => setTimeout(() => setStage(3), 400)}
+            onDone={onFaqIntroDone}
             speed={18}
           />
         )}
