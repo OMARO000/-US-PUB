@@ -19,14 +19,16 @@ interface UnifiedChatProps {
   onSendText: (text: string) => void;
   onRephrase: () => void;
   disabled?: boolean;
+  showMessages?: boolean;
 }
 
 export default function UnifiedChat({
   messages, isRecording, isThinking, isSpeaking,
   onHoldStart, onHoldEnd, onSendText, onRephrase, disabled = false,
+  showMessages = true,
 }: UnifiedChatProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const hasMessages = messages.length > 0;
+  const hasMessages = messages.length > 0 && showMessages;
 
   const orbState = isRecording ? "recording" : isThinking ? "thinking" : isSpeaking ? "speaking" : "idle";
 
@@ -54,108 +56,104 @@ export default function UnifiedChat({
         }
       `}</style>
 
-      {/* CHAT BODY */}
-      <div
-        onMouseDown={() => { if (!inputRef.current?.contains(document.activeElement)) onHoldStart(); }}
-        onMouseUp={onHoldEnd}
-        onMouseLeave={onHoldEnd}
-        onTouchStart={(e) => {
-          const target = e.target as HTMLElement;
-          if (target.closest(".no-record")) return;
-          e.preventDefault();
-          onHoldStart();
-        }}
-        onTouchEnd={onHoldEnd}
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "24px 24px 16px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "20px",
-          scrollbarWidth: "none",
-          cursor: "default",
-          position: "relative",
-        }}
-      >
-        {/* Orb — shown when no messages or while recording/thinking/speaking */}
-        {(!hasMessages || isRecording || isThinking || isSpeaking) && (
-          <div style={{
-            position: hasMessages ? "absolute" : "relative",
-            top: hasMessages ? "50%" : "auto",
-            left: hasMessages ? "50%" : "auto",
-            transform: hasMessages ? "translate(-50%, -50%)" : "none",
+      {/* CHAT BODY — only rendered when showMessages is true */}
+      {showMessages && (
+        <div
+          onMouseDown={() => { if (!inputRef.current?.contains(document.activeElement)) onHoldStart(); }}
+          onMouseUp={onHoldEnd}
+          onMouseLeave={onHoldEnd}
+          onTouchStart={(e) => {
+            const target = e.target as HTMLElement;
+            if (target.closest(".no-record")) return;
+            e.preventDefault();
+            onHoldStart();
+          }}
+          onTouchEnd={onHoldEnd}
+          style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "24px 24px 16px",
             display: "flex",
             flexDirection: "column",
-            alignItems: "center",
-            pointerEvents: "none",
-            alignSelf: "center",
-            marginTop: hasMessages ? 0 : "auto",
-            marginBottom: hasMessages ? 0 : "auto",
-            flex: hasMessages ? "none" : 1,
-            justifyContent: "center",
-          }}>
-            <AmbientOrb isRecording={isRecording} orbState={orbState} />
-          </div>
-        )}
-
-        {/* Messages — aria-live so screen readers announce incoming [them] responses */}
-        <div
-          aria-live="polite"
-          aria-atomic="false"
-          aria-busy={isThinking}
-          style={{ display: "contents" }}
+            gap: "20px",
+            scrollbarWidth: "none",
+            cursor: "default",
+            position: "relative",
+          }}
         >
-          {messages.map((msg) => (
-            <div key={msg.id} className="no-record" style={{
+          {/* Orb overlay — while recording/thinking/speaking over messages */}
+          {(isRecording || isThinking || isSpeaking) && (
+            <div style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
               display: "flex",
               flexDirection: "column",
-              gap: "5px",
-              maxWidth: "70%",
-              alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+              alignItems: "center",
+              pointerEvents: "none",
             }}>
-              <div style={{
-                padding: "11px 15px",
-                borderRadius: msg.role === "them" ? "15px 15px 15px 4px" : "15px 15px 4px 15px",
-                fontSize: "13.5px",
-                fontWeight: 300,
-                lineHeight: 1.65,
-                color: "var(--text)",
-                background: msg.role === "them" ? "var(--bg2)" : "var(--bg3)",
-                border: `1px solid ${msg.role === "them" ? "var(--border)" : "var(--border2)"}`,
-              }}>
-                {msg.content}
-              </div>
-              {msg.role === "them" && (
-                <button
-                  className="no-record"
-                  aria-label="rephrase this"
-                  onClick={(e) => { e.stopPropagation(); onRephrase(); }}
-                  style={{
-                    alignSelf: "flex-start",
-                    fontSize: "10px",
-                    fontFamily: "var(--font-mono)",
-                    color: "var(--muted)",
-                    background: "transparent",
-                    border: "none",
-                    cursor: "pointer",
-                    padding: "12px 4px",
-                    minHeight: "44px",
-                    letterSpacing: "0.04em",
-                  }}
-                >
-                  [rephrase]
-                </button>
-              )}
+              <AmbientOrb isRecording={isRecording} orbState={orbState} />
             </div>
-          ))}
+          )}
+
+          {/* Messages — aria-live so screen readers announce incoming [them] responses */}
+          <div
+            aria-live="polite"
+            aria-atomic="false"
+            aria-busy={isThinking}
+            style={{ display: "contents" }}
+          >
+            {messages.map((msg) => (
+              <div key={msg.id} className="no-record" style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "5px",
+                maxWidth: "70%",
+                alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+              }}>
+                <div style={{
+                  padding: "11px 15px",
+                  borderRadius: msg.role === "them" ? "15px 15px 15px 4px" : "15px 15px 4px 15px",
+                  fontSize: "13.5px",
+                  fontWeight: 300,
+                  lineHeight: 1.65,
+                  color: "var(--text)",
+                  background: msg.role === "them" ? "var(--bg2)" : "var(--bg3)",
+                  border: `1px solid ${msg.role === "them" ? "var(--border)" : "var(--border2)"}`,
+                }}>
+                  {msg.content}
+                </div>
+                {msg.role === "them" && (
+                  <button
+                    className="no-record"
+                    aria-label="rephrase this"
+                    onClick={(e) => { e.stopPropagation(); onRephrase(); }}
+                    style={{
+                      alignSelf: "flex-start",
+                      fontSize: "10px",
+                      fontFamily: "var(--font-mono)",
+                      color: "var(--muted)",
+                      background: "transparent",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: "12px 4px",
+                      minHeight: "44px",
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    [rephrase]
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* BOTTOM INPUT */}
       <div className="no-record" style={{
         padding: "12px 18px 18px",
-        borderTop: "1px solid var(--border)",
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
@@ -168,8 +166,18 @@ export default function UnifiedChat({
           color: "rgba(196,151,74,0.75)",
           letterSpacing: "0.1em",
         }}>
+          [slide to lock]
+        </div>
+        <div style={{
+          textAlign: "center",
+          fontSize: "10px",
+          fontFamily: "var(--font-mono)",
+          color: "rgba(196,151,74,0.75)",
+          letterSpacing: "0.1em",
+        }}>
           [or type below]
         </div>
+        <div style={{ borderTop: "1px solid var(--border)", margin: "0 -18px" }} />
         <div style={{
           display: "flex",
           alignItems: "center",

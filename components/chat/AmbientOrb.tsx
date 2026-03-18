@@ -81,28 +81,13 @@ export default function AmbientOrb({ isRecording, orbState = "idle", onHoldStart
       <span aria-live="polite" aria-atomic="true">
         {orbState === "idle" && (
           <span style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "8px",
+            fontSize: "13px",
+            fontFamily: "var(--font-mono)",
+            color: "var(--amber)",
+            letterSpacing: "0.06em",
+            animation: "hintpulse 2.8s ease-in-out infinite",
           }}>
-            <span style={{
-              fontSize: "13px",
-              fontFamily: "var(--font-mono)",
-              color: "var(--amber)",
-              letterSpacing: "0.06em",
-              animation: "hintpulse 2.8s ease-in-out infinite",
-            }}>
-              [hold anywhere to speak]
-            </span>
-            <span style={{
-              fontSize: "10px",
-              fontFamily: "var(--font-mono)",
-              color: "rgba(196,151,74,0.75)",
-              letterSpacing: "0.1em",
-            }}>
-              [slide to lock]
-            </span>
+            [hold anywhere to speak]
           </span>
         )}
 
