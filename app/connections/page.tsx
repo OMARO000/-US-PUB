@@ -231,6 +231,28 @@ function MutualSignals({ signals }: { signals: string[] }) {
   )
 }
 
+const PULSE_STYLES = `
+  @keyframes pulse-border-low {
+    0%, 100% { border-color: var(--border); box-shadow: none; }
+    50%       { border-color: rgba(166,124,58,0.45); box-shadow: 0 0 0 2px rgba(166,124,58,0.08); }
+  }
+  @keyframes pulse-border-mid {
+    0%, 100% { border-color: var(--border); box-shadow: none; }
+    50%       { border-color: rgba(196,151,74,0.65); box-shadow: 0 0 0 3px rgba(196,151,74,0.10); }
+  }
+  @keyframes pulse-border-high {
+    0%, 100% { border-color: var(--border); box-shadow: none; }
+    50%       { border-color: rgba(168,88,96,0.70); box-shadow: 0 0 0 4px rgba(168,88,96,0.12); }
+  }
+`
+
+function getPulseAnimation(signalCount: number): string | undefined {
+  if (signalCount >= 6) return "pulse-border-high 2.6s ease-in-out infinite"
+  if (signalCount >= 4) return "pulse-border-mid 3.4s ease-in-out infinite"
+  if (signalCount >= 3) return "pulse-border-low 4.8s ease-in-out infinite"
+  return undefined
+}
+
 function MatchCard({ match }: { match: Match }) {
   const [expanded, setExpanded] = useState(false)
   const [status, setStatus] = useState<MatchStatus>(match.status)
@@ -252,6 +274,8 @@ function MatchCard({ match }: { match: Match }) {
     ? match.resonanceSignals
     : match.resonanceSignals.slice(0, 3)
 
+  const pulseAnimation = getPulseAnimation(match.resonanceSignals.length)
+
   if (status === "not_a_fit") return null
 
   return (
@@ -260,8 +284,9 @@ function MatchCard({ match }: { match: Match }) {
       background: "var(--bg2)",
       border: "1px solid var(--border)",
       overflow: "hidden",
-      transition: "border-color 0.2s",
+      animation: pulseAnimation,
     }}>
+      <style>{PULSE_STYLES}</style>
 
       {/* Card header */}
       <div style={{
