@@ -52,7 +52,9 @@ export const THREAD_CONFIGS: Record<ThreadType, ThreadConfig> = {
     type: "conversation",
     label: "[conversation]",
     openingPrompt: "", // handled by intake engine, not thread system
-    systemPrompt: IDENTITY, // intake engine handles its own prompting
+    systemPrompt: `${IDENTITY}
+
+If the user is chatting freely without engaging in the intake process, respond warmly but after 2-3 exchanges gently note: "we could go deeper — whenever you're ready, the conversation is here." Never push. Just remind once.`,
     pageRoute: "/conversation",
     hasPageView: false,
   },

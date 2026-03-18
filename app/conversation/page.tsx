@@ -22,6 +22,7 @@ import AmbientOrb from "@/components/chat/AmbientOrb"
 import DMAnalysisBanner from "@/components/chat/DMAnalysisBanner"
 import type { ThreadType } from "@/lib/threads/threadPrompts"
 import { THREAD_CONFIGS } from "@/lib/threads/threadPrompts"
+import { CONVERSATION_PROMPTS, THREAD_CONTEXT_PROMPTS } from "@/lib/threads/conversationPrompts"
 
 const UnifiedChat = dynamic(() => import("@/components/chat/UnifiedChat"), { ssr: false })
 
@@ -67,6 +68,7 @@ const ARCHETYPE_GRADIENTS: Record<string, string> = {
 
 function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId: string }) {
   const isMessages = threadType === "messages"
+  const contextPrompt = THREAD_CONTEXT_PROMPTS[threadType] ?? ""
   const thread = useThread(threadType, userId)
   const [input, setInput] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -153,6 +155,28 @@ function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId
         <div ref={messagesEndRef} />
       </div>
 
+      {/* Context bubble — shown when no user messages yet */}
+      {thread.messages.length <= 1 && contextPrompt && (
+        <div style={{ padding: "0 40px 12px" }}>
+          <div style={{
+            alignSelf: "flex-start",
+            display: "inline-block",
+            maxWidth: "72%",
+            padding: "10px 14px",
+            borderRadius: "14px 14px 14px 4px",
+            background: "var(--bg2)",
+            border: "1px solid var(--border)",
+            fontSize: "13.5px",
+            fontWeight: 300,
+            fontFamily: "var(--font-sans)",
+            color: "var(--muted)",
+            lineHeight: 1.6,
+          }}>
+            {contextPrompt}
+          </div>
+        </div>
+      )}
+
       {/* Input */}
       <div style={{
         padding: "16px 40px 24px",
@@ -171,7 +195,7 @@ function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId
                 handleSend()
               }
             }}
-            placeholder="[say something...]"
+            placeholder={contextPrompt || "[say something...]"}
             aria-label="message [you]"
             rows={1}
             style={{
@@ -313,6 +337,7 @@ export default function ConversationPage() {
   const [portraitAsBackground, setPortraitAsBackground] = useState(false)
   const [archetype, setArchetype] = useState<string | null>(null)
   const [viewMode, setViewMode] = useState<"chat" | "page">("chat")
+  const [placeholder, setPlaceholder] = useState(CONVERSATION_PROMPTS[0])
 
   const intake = useIntake()
   const initialized = useRef(false)
@@ -345,6 +370,14 @@ export default function ConversationPage() {
       localStorage.setItem(`us_thread_view_${activeThread}`, next)
     }
   }
+
+  // shuffle conversation placeholder every 3s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholder(CONVERSATION_PROMPTS[Math.floor(Math.random() * CONVERSATION_PROMPTS.length)])
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
 
   const handleToggleLock = () => {
     setIsLocked((prev) => {
@@ -436,35 +469,62 @@ export default function ConversationPage() {
           />
         )}
 
-        {/* Portrait toggle — conversation thread only */}
+        {/* Portrait toggle + lock voice — conversation thread only */}
         {isConversationThread && (
-          <button
-            aria-label={portraitAsBackground ? "hide portrait background" : "show portrait background"}
-            onClick={() => {
-              const next = !portraitAsBackground
-              setPortraitAsBackground(next)
-              localStorage.setItem("us_portrait_bg", String(next))
-            }}
-            style={{
-              position: "absolute",
-              top: "16px",
-              right: "20px",
-              zIndex: 20,
-              background: "transparent",
-              border: "1px solid var(--amber)",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "12px",
-              fontFamily: "var(--font-mono)",
-              color: "var(--amber)",
-              letterSpacing: "0.06em",
-              opacity: portraitAsBackground ? 0.9 : 0.45,
-              padding: "6px 10px",
-              minHeight: "44px",
-            }}
-          >
-            {portraitAsBackground ? "[portrait on]" : "[portrait]"}
-          </button>
+          <div style={{
+            position: "absolute",
+            top: "16px",
+            right: "20px",
+            zIndex: 20,
+            display: "flex",
+            flexDirection: "column",
+            gap: "12px",
+            alignItems: "flex-end",
+          }}>
+            <button
+              aria-label={portraitAsBackground ? "hide portrait background" : "show portrait background"}
+              onClick={() => {
+                const next = !portraitAsBackground
+                setPortraitAsBackground(next)
+                localStorage.setItem("us_portrait_bg", String(next))
+              }}
+              style={{
+                background: "transparent",
+                border: "1px solid var(--amber)",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontFamily: "var(--font-mono)",
+                color: "var(--amber)",
+                letterSpacing: "0.06em",
+                opacity: portraitAsBackground ? 0.9 : 0.45,
+                padding: "6px 10px",
+                minHeight: "44px",
+              }}
+            >
+              {portraitAsBackground ? "[portrait on]" : "[portrait]"}
+            </button>
+            <button
+              aria-label={isLocked ? "unlock voice" : "lock voice"}
+              onClick={handleToggleLock}
+              style={{
+                background: isLocked ? "var(--amber)" : "transparent",
+                border: "1px solid var(--amber)",
+                borderRadius: "6px",
+                cursor: "pointer",
+                fontSize: "12px",
+                fontFamily: "var(--font-mono)",
+                color: isLocked ? "var(--bg)" : "var(--amber)",
+                letterSpacing: "0.06em",
+                opacity: isLocked ? 1 : 0.45,
+                padding: "6px 10px",
+                minHeight: "44px",
+                transition: "background 0.15s, color 0.15s, opacity 0.15s",
+              }}
+            >
+              {isLocked ? "[voice locked]" : "[lock voice]"}
+            </button>
+          </div>
         )}
 
         {/* ── CONVERSATION THREAD — intake engine ── */}
@@ -521,7 +581,41 @@ export default function ConversationPage() {
                     />
                   </div>
                 </div>
-                <div style={{ width: "100%", flexShrink: 0 }}>
+                <div style={{ width: "100%", flexShrink: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
+                  {/* [you]-style hint bubbles just above the input */}
+                  <div style={{ padding: "0 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
+                    <div style={{
+                      alignSelf: "flex-start",
+                      maxWidth: "72%",
+                      padding: "10px 14px",
+                      borderRadius: "14px 14px 14px 4px",
+                      background: "var(--bg2)",
+                      border: "1px solid var(--border)",
+                      fontSize: "13.5px",
+                      fontWeight: 300,
+                      fontFamily: "var(--font-sans)",
+                      color: "var(--muted)",
+                      lineHeight: 1.6,
+                    }}>
+                      hold anywhere to speak
+                    </div>
+                    <div style={{
+                      alignSelf: "flex-start",
+                      maxWidth: "72%",
+                      padding: "8px 14px",
+                      borderRadius: "14px 14px 14px 4px",
+                      background: "var(--bg2)",
+                      border: "1px solid var(--border)",
+                      fontSize: "12px",
+                      fontWeight: 300,
+                      fontFamily: "var(--font-sans)",
+                      color: "var(--dim)",
+                      lineHeight: 1.5,
+                      opacity: 0.7,
+                    }}>
+                      or type below
+                    </div>
+                  </div>
                   <UnifiedChat
                     messages={intake.messages}
                     isThinking={intake.isThinking}
@@ -535,6 +629,7 @@ export default function ConversationPage() {
                     onRephrase={intake.requestRephrase}
                     disabled={intake.status !== "active"}
                     showMessages={false}
+                    placeholder={placeholder}
                   />
                 </div>
               </div>

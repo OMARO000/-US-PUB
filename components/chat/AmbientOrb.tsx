@@ -90,61 +90,19 @@ export default function AmbientOrb({
         }} />
       </div>
 
-      {/* State label */}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-        <span aria-live="polite" aria-atomic="true">
-          {orbState === "idle" && (
-            <span style={{
-              fontSize: "13px",
-              fontFamily: "var(--font-mono)",
-              color: isLocked ? "var(--rose)" : "var(--amber)",
-              letterSpacing: "0.06em",
-              animation: "hintpulse 2.8s ease-in-out infinite",
-            }}>
-              {isLocked ? "[locked — tap to unlock]" : "[hold anywhere to speak]"}
-            </span>
-          )}
-
-          {stateLabel && (
-            <span style={{
-              fontSize: "13px",
-              fontFamily: "var(--font-mono)",
-              color: orbState === "recording" ? "var(--rose)" : orbState === "speaking" ? "var(--amber)" : "var(--muted)",
-              letterSpacing: "0.1em",
-              animation: orbState === "thinking" ? "hintpulse 1.2s ease-in-out infinite" :
-                         orbState === "speaking"  ? "hintpulse 1.4s ease-in-out infinite" : "none",
-            }}>
-              {stateLabel}
-            </span>
-          )}
+      {/* State label — only active states, no idle hint */}
+      {stateLabel && (
+        <span aria-live="polite" aria-atomic="true" style={{
+          fontSize: "13px",
+          fontFamily: "var(--font-mono)",
+          color: orbState === "recording" ? "var(--rose)" : orbState === "speaking" ? "var(--amber)" : "var(--muted)",
+          letterSpacing: "0.1em",
+          animation: orbState === "thinking" ? "hintpulse 1.2s ease-in-out infinite" :
+                     orbState === "speaking"  ? "hintpulse 1.4s ease-in-out infinite" : "none",
+        }}>
+          {stateLabel}
         </span>
-
-        {/* Lock toggle — only shown in idle state */}
-        {orbState === "idle" && onToggleLock && (
-          <button
-            className="no-record"
-            aria-label={isLocked ? "unlock voice recording" : "lock voice recording"}
-            onClick={(e) => { e.stopPropagation(); onToggleLock(); }}
-            onMouseDown={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: "4px 8px",
-              fontSize: "11px",
-              fontFamily: "var(--font-mono)",
-              color: isLocked ? "var(--amber)" : "var(--dim)",
-              letterSpacing: "0.06em",
-              opacity: isLocked ? 1 : 0.6,
-              transition: "color 0.15s, opacity 0.15s",
-              minHeight: "36px",
-            }}
-          >
-            {isLocked ? "[locked]" : "[lock voice]"}
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 }

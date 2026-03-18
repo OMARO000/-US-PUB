@@ -22,13 +22,14 @@ interface UnifiedChatProps {
   onRephrase: () => void;
   disabled?: boolean;
   showMessages?: boolean;
+  placeholder?: string;
 }
 
 export default function UnifiedChat({
   messages, isRecording, isThinking, isSpeaking,
   isLocked, onHoldStart, onHoldEnd, onToggleLock,
   onSendText, onRephrase, disabled = false,
-  showMessages = true,
+  showMessages = true, placeholder,
 }: UnifiedChatProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasMessages = messages.length > 0 && showMessages;
@@ -181,15 +182,6 @@ export default function UnifiedChat({
         flexDirection: "column",
         gap: "10px",
       }}>
-        <div style={{
-          textAlign: "center",
-          fontSize: "10px",
-          fontFamily: "var(--font-mono)",
-          color: "rgba(196,151,74,0.75)",
-          letterSpacing: "0.1em",
-        }}>
-          [or type below]
-        </div>
         <div style={{ borderTop: "1px solid var(--border)", margin: "0 -18px" }} />
         <div style={{
           display: "flex",
@@ -204,7 +196,7 @@ export default function UnifiedChat({
           <textarea
             ref={inputRef}
             rows={1}
-            placeholder="[say something…]"
+            placeholder={placeholder ?? "[say something…]"}
             aria-label="say something"
             className="no-record us-textarea"
             disabled={!!disabled}
