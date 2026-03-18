@@ -258,6 +258,8 @@ export default function JournalPage() {
           overflowY: "auto",
           padding: "32px 40px",
           maxWidth: "680px",
+          width: "100%",
+          margin: "0 auto",
           display: "flex",
           flexDirection: "column",
           gap: "32px",
