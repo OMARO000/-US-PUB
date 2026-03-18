@@ -170,7 +170,7 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
               opacity: 0.6,
               fontWeight: 300,
             }}>
-              authentic connections
+              authentic connections.
             </span>
           </>
         )}
