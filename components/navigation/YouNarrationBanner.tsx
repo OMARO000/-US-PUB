@@ -65,7 +65,7 @@ export default function YouNarrationBanner({ narration }: Props) {
 
       {/* message */}
       <span style={{
-        fontSize: "13px",
+        fontSize: "14px",
         fontFamily: "var(--font-mono)",
         color: "var(--text)",
         fontWeight: 300,

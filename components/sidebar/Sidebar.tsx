@@ -108,7 +108,7 @@ export default function Sidebar() {
       display: "flex",
       flexDirection: "column",
       alignItems: "stretch",
-      padding: collapsed ? "20px 0" : "20px 12px",
+      padding: collapsed ? "24px 0" : "24px 14px",
       gap: "4px",
       flexShrink: 0,
       position: "fixed",
@@ -156,7 +156,7 @@ export default function Sidebar() {
             aria-current={active ? "page" : undefined}
             style={{
               width: "100%",
-              height: "44px",
+              height: "48px",
               borderRadius: "10px",
               display: "flex",
               alignItems: "center",
@@ -217,7 +217,7 @@ export default function Sidebar() {
         aria-current={pathname === "/settings" ? "page" : undefined}
         style={{
           width: "100%",
-          height: "44px",
+          height: "48px",
           borderRadius: "10px",
           display: "flex",
           alignItems: "center",
@@ -238,7 +238,7 @@ export default function Sidebar() {
         </span>
         {!collapsed && (
           <span style={{
-            fontSize: "12px",
+            fontSize: "13px",
             fontFamily: "var(--font-mono)",
             letterSpacing: "0.03em",
             whiteSpace: "nowrap",
