@@ -77,12 +77,14 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return localStorage.getItem("us_sidebar_collapsed") === "true";
-  });
+  const [collapsed, setCollapsed] = useState(false);
 
-  // Sync CSS variable on mount and on change
+  // Read localStorage after mount and sync CSS variable
+  useEffect(() => {
+    const stored = localStorage.getItem("us_sidebar_collapsed") === "true";
+    setCollapsed(stored);
+  }, []);
+
   useEffect(() => {
     const width = collapsed ? "112px" : "480px";
     document.documentElement.style.setProperty("--sidebar-width", width);
@@ -100,7 +102,7 @@ export default function Sidebar() {
   const w = collapsed ? "112px" : "480px";
 
   return (
-    <aside style={{
+    <aside suppressHydrationWarning style={{
       width: w,
       height: "100dvh",
       background: "var(--bg)",
