@@ -120,7 +120,7 @@ export default function ConversationPage() {
   const intake      = useIntake()
   const initialized = useRef(false)
 
-  const hasMessages          = intake.messages.length > 0
+  const hasMessages          = intake.messages.some((m) => m.role === "user")
   const isConversationThread = activeThread === "conversation"
   const isMessagesThread     = activeThread === "messages"
   const config               = THREAD_CONFIGS[activeThread]
