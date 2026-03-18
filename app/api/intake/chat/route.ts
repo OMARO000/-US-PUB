@@ -194,6 +194,7 @@ export async function POST(req: NextRequest) {
           if (portaitComplete) {
             await SessionManager.complete(sessionId)
             let portraitData = null
+            let accountNumber: string | null = null
             try {
               const portrait = await generatePortrait(session.messages)
               portraitData = {
@@ -206,8 +207,15 @@ export async function POST(req: NextRequest) {
             } catch (err) {
               console.error("[us] portrait generation error:", err)
             }
+            try {
+              const { getOrCreateUser } = await import("@/lib/users/getOrCreateUser")
+              const user = await getOrCreateUser(session.userId)
+              accountNumber = user.accountNumber
+            } catch (err) {
+              console.error("[us] account number fetch error:", err)
+            }
             controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify({ sessionComplete: true, portraitData })}\n\n`)
+              encoder.encode(`data: ${JSON.stringify({ sessionComplete: true, portraitData, accountNumber })}\n\n`)
             )
           }
         } else {

@@ -15,12 +15,8 @@ import type { InferSelectModel } from "drizzle-orm"
 type User = InferSelectModel<typeof users>
 
 function generateAccountNumber(): string {
-  // 16 random digits
-  let n = ""
-  for (let i = 0; i < 16; i++) {
-    n += Math.floor(Math.random() * 10).toString()
-  }
-  return n
+  const group = () => Math.floor(1000 + Math.random() * 9000).toString()
+  return `${group()} ${group()} ${group()} ${group()}`
 }
 
 export async function getOrCreateUser(

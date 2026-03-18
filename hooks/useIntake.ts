@@ -215,9 +215,27 @@ export function useIntake(): UseIntakeReturn {
               if (json.sessionComplete) {
                 setSessionComplete(true)
                 setStatus("completed")
-                if (json.portraitData && typeof window !== "undefined") {
-                  sessionStorage.setItem("us_portrait", JSON.stringify(json.portraitData))
-                  window.location.href = "/intake/portrait"
+                if (typeof window !== "undefined") {
+                  if (json.accountNumber) {
+                    localStorage.setItem("us_account_number", json.accountNumber)
+                    // trigger browser credential save
+                    try {
+                      const uid = localStorage.getItem("us_uid") ?? "user"
+                      await navigator.credentials?.store?.(
+                        new PasswordCredential({
+                          id: uid,
+                          password: json.accountNumber,
+                          name: "[us] account number",
+                        })
+                      )
+                    } catch {
+                      // credential save not supported — silent
+                    }
+                  }
+                  if (json.portraitData) {
+                    sessionStorage.setItem("us_portrait", JSON.stringify(json.portraitData))
+                    window.location.href = "/intake/portrait"
+                  }
                 }
               }
             } catch {

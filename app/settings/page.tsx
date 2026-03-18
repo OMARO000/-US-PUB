@@ -415,9 +415,10 @@ function AccountSection() {
 
   useEffect(() => {
     if (typeof window === "undefined") return
-    const uid = localStorage.getItem("us_uid") ?? ""
-    // display last 16 chars as account number
-    setAccountNumber(uid.replace("anon_", "").slice(0, 16).toUpperCase())
+    const saved = localStorage.getItem("us_account_number")
+    if (saved) {
+      setAccountNumber(saved)
+    }
   }, [])
 
   const handleCopy = () => {
@@ -445,9 +446,9 @@ function AccountSection() {
               fontSize: "11px",
               fontFamily: "var(--font-mono)",
               color: "var(--muted)",
-              letterSpacing: "0.08em",
+              letterSpacing: "0.12em",
             }}>
-              {accountNumber || "—"}
+              {accountNumber || "[issued after intake]"}
             </span>
             <button
               onClick={handleCopy}
