@@ -245,7 +245,7 @@ export default function AmbientYou() {
       style={{
         position: "fixed",
         bottom: "24px",
-        left: "50%",
+        left: "calc(var(--sidebar-width) + (100vw - var(--sidebar-width)) / 2)",
         transform: "translateX(-50%)",
         zIndex: 40,
         display: "flex",
