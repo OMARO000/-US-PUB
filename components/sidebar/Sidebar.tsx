@@ -278,49 +278,6 @@ export default function Sidebar() {
         </svg>
       </button>
 
-      {/* Avatar */}
-      <button
-        aria-label="your profile"
-        style={{
-          width: "100%",
-          height: "44px",
-          borderRadius: "10px",
-          background: "var(--bg4)",
-          border: "1.5px solid var(--border2)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: collapsed ? "center" : "flex-start",
-          gap: collapsed ? 0 : "12px",
-          padding: collapsed ? "0" : "0 12px",
-          cursor: "pointer",
-          fontFamily: "var(--font-sans)",
-        }}
-      >
-        <span style={{
-          width: "28px",
-          height: "28px",
-          borderRadius: "50%",
-          background: "var(--bg3)",
-          border: "1px solid var(--border2)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "11px",
-          fontWeight: 500,
-          color: "var(--muted)",
-          flexShrink: 0,
-        }}>B</span>
-        {!collapsed && (
-          <span style={{
-            fontSize: "12px",
-            fontFamily: "var(--font-mono)",
-            color: "var(--muted)",
-            letterSpacing: "0.03em",
-          }}>
-            [you]
-          </span>
-        )}
-      </button>
     </aside>
   );
 }
