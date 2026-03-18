@@ -128,6 +128,7 @@ export default function ConversationPage() {
       <main style={{
         flex: 1,
         marginLeft: "var(--sidebar-width)",
+        width: "calc(100vw - var(--sidebar-width))",
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
