@@ -449,7 +449,8 @@ export default function ConversationPage() {
   // for the new thread defaults to "chat" unless user toggled it previously.
   // We also clear the target thread's viewMode to guarantee chat on arrival.
   const switchThread = (thread: ThreadType) => {
-    setThreadViewModes((prev) => ({ ...prev, [thread]: "chat" }))
+    // Reset ALL threads to chat on every switch — no stale page state anywhere
+    setThreadViewModes({})
     router.push(`/conversation?thread=${thread}`)
   }
 
