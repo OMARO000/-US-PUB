@@ -196,6 +196,8 @@ export default function ConversationPage() {
   // Banner is ~44px tall + 16px top margin = 60px, plus 16px gap = 76px
   const lockVoiceTop = isMessagesThread
     ? "76px"
+    : activeThread === "about"
+    ? "16px"
     : config.hasPageView ? "72px" : "16px"
   const journalToggleTop = config.hasPageView ? "128px" : "72px"
 
@@ -237,7 +239,7 @@ export default function ConversationPage() {
         {/* ── Top-right toggles — non-conversation threads (not settings) ── */}
         {!isConversationThread && activeThread !== "settings" && (
           <>
-            {config.hasPageView && (
+            {config.hasPageView && activeThread !== "about" && (
               <button
                 onClick={toggleViewMode}
                 aria-label={viewMode === "chat" ? "switch to page view" : "switch to chat view"}

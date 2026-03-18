@@ -1,23 +1,17 @@
 "use client"
 
 /**
- * /about — philosophy, mission, FAQs
+ * /about — hybrid chat delivery
  *
- * Not a static page. [you] delivers everything conversationally.
- * Three sections: philosophy, mission, FAQs.
- * FAQs expand on tap — [you]'s voice throughout.
- * [you] narrates on entry.
+ * [them] delivers philosophy → mission → FAQs as typed bubbles.
+ * After delivery completes, input bar appears for follow-up questions.
+ * Re-delivers fresh on every mount (tab switch resets via key={activeThread}).
  */
 
-import { useState } from "react"
-import { usePathname } from "next/navigation"
-import Sidebar from "@/components/sidebar/Sidebar"
-import YouNarrationBanner from "@/components/navigation/YouNarrationBanner"
-import { useYouNarration } from "@/lib/navigation/useYouNarration"
+import { useState, useEffect, useRef } from "react"
 
 // ─────────────────────────────────────────────
 // CONTENT
-// All written in [you]'s voice.
 // ─────────────────────────────────────────────
 
 const PHILOSOPHY = `most people don't fail at connection because they can't find someone.
@@ -48,97 +42,146 @@ const FAQS: { question: string; answer: string }[] = [
     answer: "no. [us] supports romantic connection, but also platonic and professional. and eventually, community. it doesn't privilege one type of connection over another. it just creates the conditions for real connection to happen — and then gets out of the way.",
   },
   {
-    question: "what does [you] actually do?",
-    answer: "[you] is the presence at the center of [us]. not a chatbot, not a therapist, not an assistant. a mirror. and a reminder.\n\nduring intake, [you] listens without judgment and reflects back what it observes — not what it assumes. over time, [you] notices patterns across your connections and surfaces them with care. in coaching, [you] helps you prepare, debrief, and understand what's happening.\n\n[you] is not trying to become the connection. it's trying to make connection between humans possible.",
+    question: "what does [them] actually do?",
+    answer: "[them] is the presence at the center of [us]. not a chatbot, not a therapist, not an assistant. a mirror. and a reminder.\n\nduring intake, [them] listens without judgment and reflects back what it observes — not what it assumes. over time, [them] notices patterns across your connections and surfaces them with care.\n\n[them] is not trying to become the connection. it's trying to make connection between humans possible.",
   },
   {
     question: "how does matching work?",
-    answer: "the match engine scores compatibility across seven layers: values, narrative, personality, relational style, communication style, cognitive patterns, and cosmological frameworks. each layer is weighted differently depending on whether you're looking for romantic, platonic, or professional connection.\n\nyou never see a score. you see resonance signals — specific observations about where two people align. the score is only used for ranking.\n\npaid users get four additional layers and can activate a 'go deeper' mode that may surface different matches.",
+    answer: "the match engine scores compatibility across seven layers: values, narrative, personality, relational style, communication style, cognitive patterns, and cosmological frameworks. each layer is weighted differently depending on whether you're looking for romantic, platonic, or professional connection.\n\nyou never see a score. you see resonance signals — specific observations about where two people align.\n\npaid users get four additional layers and can activate [go deeper] mode.",
   },
   {
     question: "what's the portrait?",
-    answer: "at the end of your intake conversation, [you] generates a portrait — a written reflection of what emerged across your conversation, plus a visual image chosen from a curated library based on your signal profile.\n\nthe portrait is yours. you can confirm it, correct it, or add to it. you can mint it as an NFT on Solana — a permanent record of who you were at this moment. it's the foundation everything else in [us] is built on.",
+    answer: "at the end of your intake conversation, [them] generates a portrait — a written reflection of what emerged, plus a visual image chosen from a curated library based on your signal profile.\n\nthe portrait is yours. you can confirm it, correct it, or add to it. you can mint it as an NFT on Solana — a permanent record of who you were at this moment.",
   },
   {
     question: "who can see my data?",
-    answer: "[us] maintains two portraits of every user: declared and observed.\n\nthe declared profile is what you tell [you]. it belongs to you — you can see it, correct it, and export it at any time.\n\nthe observed profile is what [you] notices across your behavior. it informs the match engine. for paid users, it becomes visible as pattern recognition — things you might want to know about yourself, offered with care.\n\nno third-party data brokers. no social scraping. no passive device tracking. no advertising. ever.",
+    answer: "[us] maintains two portraits of every user: declared and observed.\n\nthe declared profile is what you tell [them]. it belongs to you — you can see it, correct it, and export it at any time.\n\nno third-party data brokers. no social scraping. no passive device tracking. no advertising. ever.",
   },
   {
     question: "what's the difference between free and paid?",
-    answer: "matching is always free. your portrait is always free. the core experience is always free.\n\npaid unlocks the connection intelligence layer: pattern recognition across your connections, deeper coaching with [you], pre-meet preparation, post-connect debriefs, four additional match engine layers, and framework visibility — seeing exactly how [you] understands you and why you were matched with someone.\n\nhaving an NFT from the [us] portrait collection also unlocks paid features.",
+    answer: "matching is always free. your portrait is always free. the core experience is always free.\n\npaid unlocks the connection intelligence layer: pattern recognition, deeper coaching, pre-meet preparation, post-connect debriefs, four additional match engine layers, and framework visibility.",
   },
   {
     question: "how do I delete my account?",
-    answer: "go to [profile] → scroll to the bottom → [delete account]. it's permanent and immediate. all your data is removed.\n\nbefore you do — you can export everything first. your portrait, declared profile, and journal entries are all exportable as JSON. your data belongs to you.",
+    answer: "go to [profile] → scroll to the bottom → [delete account]. permanent and immediate. all your data is removed.\n\nbefore you do — you can export everything first. your portrait, declared profile, and journal entries are all exportable as JSON.",
   },
   {
     question: "what is OMARO?",
-    answer: "OMARO PBC is a public benefit corporation — the parent entity behind [us]. PBC means the company is legally structured to pursue a public benefit alongside profit.\n\n[us] is a product of One Plus LLC, a wholly-owned subsidiary of OMARO PBC. the long-term vision includes OMARO Human Connection Institute — a nonprofit research arm dedicated to understanding what actually makes human connection work. the platform funds the research. the research belongs to everyone.",
+    answer: "OMARO PBC is a public benefit corporation — the parent entity behind [us]. PBC means the company is legally structured to pursue a public benefit alongside profit.\n\n[us] is a product of One Plus LLC, a wholly-owned subsidiary of OMARO PBC. the long-term vision includes OMARO Human Connection Institute — a nonprofit research arm dedicated to understanding what actually makes human connection work.",
   },
 ]
 
 // ─────────────────────────────────────────────
-// COMPONENTS
+// TYPING HOOK
 // ─────────────────────────────────────────────
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{
-      fontSize: "10px",
-      fontFamily: "var(--font-mono)",
-      color: "var(--amber)",
-      letterSpacing: "0.1em",
-      textTransform: "uppercase",
-      marginBottom: "16px",
-      opacity: 0.8,
-    }}>
-      {children}
-    </div>
-  )
+function useTypingText(text: string, active: boolean, speed = 12) {
+  const [displayed, setDisplayed] = useState("")
+  const [done, setDone] = useState(false)
+  const indexRef = useRef(0)
+
+  useEffect(() => {
+    if (!active || !text) return
+    indexRef.current = 0
+    setDisplayed("")
+    setDone(false)
+    const interval = setInterval(() => {
+      if (indexRef.current >= text.length) {
+        setDone(true)
+        clearInterval(interval)
+        return
+      }
+      setDisplayed(text.slice(0, indexRef.current + 1))
+      indexRef.current += 1
+    }, speed)
+    return () => clearInterval(interval)
+  }, [text, active, speed])
+
+  return { displayed, done }
 }
 
-function YouVoiceBlock({ text }: { text: string }) {
+// ─────────────────────────────────────────────
+// BUBBLE
+// ─────────────────────────────────────────────
+
+function ThemBubble({
+  text,
+  active,
+  onDone,
+  speed = 12,
+}: {
+  text: string
+  active: boolean
+  onDone: () => void
+  speed?: number
+}) {
+  const { displayed, done } = useTypingText(text, active, speed)
+
+  useEffect(() => {
+    if (done) onDone()
+  }, [done, onDone])
+
+  if (!active && !displayed) return null
+
   return (
     <div style={{
-      padding: "20px",
-      borderRadius: "12px",
+      maxWidth: "85%",
+      alignSelf: "flex-start",
+      padding: "11px 15px",
+      borderRadius: "15px 15px 15px 4px",
       background: "var(--bg2)",
       border: "1px solid var(--border)",
+      fontSize: "13.5px",
+      fontWeight: 300,
+      lineHeight: 1.75,
+      color: "var(--text)",
+      fontFamily: "var(--font-mono)",
+      whiteSpace: "pre-wrap",
     }}>
-      {text.split("\n\n").map((para, i) => (
-        <p key={i} style={{
-          fontSize: "13px",
-          fontFamily: "var(--font-mono)",
-          color: "var(--text)",
-          fontWeight: 300,
-          lineHeight: 1.8,
-          margin: 0,
-          marginBottom: i < text.split("\n\n").length - 1 ? "16px" : 0,
-        }}>
-          {para}
-        </p>
-      ))}
+      {displayed}
+      {!done && active && (
+        <span style={{
+          display: "inline-block",
+          width: "7px",
+          height: "14px",
+          background: "var(--amber)",
+          marginLeft: "2px",
+          opacity: 0.7,
+          animation: "blink 0.8s step-end infinite",
+          verticalAlign: "text-bottom",
+        }} />
+      )}
     </div>
   )
 }
 
-function FAQItem({ question, answer }: { question: string; answer: string }) {
+// ─────────────────────────────────────────────
+// FAQ BUBBLE
+// ─────────────────────────────────────────────
+
+function FAQBubble({ faq, visible }: { faq: typeof FAQS[0]; visible: boolean }) {
   const [open, setOpen] = useState(false)
 
+  if (!visible) return null
+
   return (
-    <div style={{
-      borderRadius: "10px",
-      background: "var(--bg2)",
-      border: `1px solid ${open ? "var(--amber)" : "var(--border)"}`,
-      overflow: "hidden",
-      transition: "border-color 0.2s",
-    }}>
+    <div
+      style={{
+        maxWidth: "85%",
+        alignSelf: "flex-start",
+        borderRadius: "10px",
+        background: "var(--bg2)",
+        border: `1px solid ${open ? "var(--amber)" : "var(--border)"}`,
+        overflow: "hidden",
+        transition: "border-color 0.2s",
+        animation: "fadeInUp 0.3s ease forwards",
+      }}
+    >
       <button
-        onClick={() => setOpen(!open)}
-        aria-expanded={open}
+        onClick={() => setOpen((p) => !p)}
         style={{
           width: "100%",
-          padding: "14px 16px",
+          padding: "12px 14px",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -151,43 +194,42 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
         }}
       >
         <span style={{
-          fontSize: "13px",
+          fontSize: "12px",
           fontFamily: "var(--font-mono)",
           color: open ? "var(--amber)" : "var(--text)",
           fontWeight: 300,
           lineHeight: 1.5,
           transition: "color 0.2s",
         }}>
-          {question}
+          {faq.question}
         </span>
         <span style={{
           fontSize: "12px",
           fontFamily: "var(--font-mono)",
           color: "var(--dim)",
           flexShrink: 0,
-          transition: "transform 0.2s",
           display: "inline-block",
           transform: open ? "rotate(45deg)" : "rotate(0deg)",
+          transition: "transform 0.2s",
         }}>
           +
         </span>
       </button>
-
       {open && (
         <div style={{
-          padding: "0 16px 16px",
+          padding: "0 14px 14px",
           borderTop: "1px solid var(--border)",
-          paddingTop: "14px",
+          paddingTop: "12px",
         }}>
-          {answer.split("\n\n").map((para, i) => (
+          {faq.answer.split("\n\n").map((para, i) => (
             <p key={i} style={{
-              fontSize: "12px",
+              fontSize: "11px",
               fontFamily: "var(--font-mono)",
               color: "var(--muted)",
               fontWeight: 300,
               lineHeight: 1.8,
               margin: 0,
-              marginBottom: i < answer.split("\n\n").length - 1 ? "12px" : 0,
+              marginBottom: i < faq.answer.split("\n\n").length - 1 ? "10px" : 0,
             }}>
               {para}
             </p>
@@ -199,72 +241,288 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 }
 
 // ─────────────────────────────────────────────
-// PAGE
+// DELIVERY STAGES
+// 0 = philosophy typing
+// 1 = mission typing
+// 2 = faq intro typing
+// 3 = faqs visible + input unlocked
 // ─────────────────────────────────────────────
 
+const FAQ_INTRO = "you might be wondering..."
+
 export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
-  const pathname = usePathname()
-  const narration = useYouNarration(pathname)
+  const [stage, setStage] = useState(0)
+  const [inputValue, setInputValue] = useState("")
+  const [messages, setMessages] = useState<{ role: "them" | "user"; content: string }[]>([])
+  const [isThinking, setIsThinking] = useState(false)
+  const inputRef = useRef<HTMLTextAreaElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [stage, messages])
+
+  const handleSend = async () => {
+    const text = inputValue.trim()
+    if (!text || isThinking) return
+    setInputValue("")
+    if (inputRef.current) inputRef.current.style.height = "auto"
+
+    setMessages((prev) => [...prev, { role: "user", content: text }])
+    setIsThinking(true)
+
+    try {
+      const history = messages.map((m) => ({
+        role: m.role === "them" ? "assistant" : "user" as "user" | "assistant",
+        content: m.content,
+      }))
+
+      const res = await fetch("/api/threads/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          threadId: "about",
+          threadType: "about",
+          userId: typeof window !== "undefined" ? (localStorage.getItem("us_uid") ?? "anon") : "anon",
+          message: text,
+          history,
+        }),
+      })
+
+      if (!res.ok || !res.body) throw new Error("chat failed")
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let fullResponse = ""
+
+      setMessages((prev) => [...prev, { role: "them", content: "" }])
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        const text = decoder.decode(value)
+        const lines = text.split("\n").filter((l) => l.startsWith("data: "))
+        for (const line of lines) {
+          try {
+            const json = JSON.parse(line.slice(6))
+            if (json.chunk) {
+              fullResponse += json.chunk
+              setMessages((prev) => {
+                const last = [...prev]
+                last[last.length - 1] = { role: "them", content: fullResponse }
+                return last
+              })
+            }
+          } catch { }
+        }
+      }
+    } catch {
+      setMessages((prev) => [...prev, { role: "them", content: "something went wrong. try again." }])
+    } finally {
+      setIsThinking(false)
+    }
+  }
+
+  const inputUnlocked = stage >= 3
 
   return (
-    <div style={{ display: "flex", minHeight: embedded ? undefined : "100dvh", background: "var(--bg)" }}>
-      {!embedded && <Sidebar />}
-      <main style={{
-        marginLeft: embedded ? 0 : "var(--sidebar-width)",
+    <div style={{
+      flex: 1,
+      display: "flex",
+      flexDirection: "column",
+      height: "100%",
+      width: "100%",
+      position: "relative",
+      overflow: "hidden",
+    }}>
+
+      {/* message stream */}
+      <div style={{
         flex: 1,
+        overflowY: "auto",
+        padding: "24px 24px 16px",
         display: "flex",
         flexDirection: "column",
-        minHeight: embedded ? undefined : "100dvh",
+        gap: "14px",
+        scrollbarWidth: "none",
       }}>
-        <YouNarrationBanner narration={narration} />
 
-        <div style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "32px 40px",
-          maxWidth: "1100px",
-          width: "100%",
-          margin: "0 auto",
-          display: "flex",
-          flexDirection: "column",
-          gap: "40px",
-        }}>
+        {/* philosophy */}
+        <ThemBubble
+          text={PHILOSOPHY}
+          active={stage === 0}
+          onDone={() => setTimeout(() => setStage(1), 600)}
+          speed={10}
+        />
 
-          {/* Philosophy */}
-          <section>
-            <SectionLabel>[why [us] exists]</SectionLabel>
-            <YouVoiceBlock text={PHILOSOPHY} />
-          </section>
+        {/* mission */}
+        {stage >= 1 && (
+          <ThemBubble
+            text={MISSION}
+            active={stage === 1}
+            onDone={() => setTimeout(() => setStage(2), 600)}
+            speed={10}
+          />
+        )}
 
-          {/* Mission */}
-          <section>
-            <SectionLabel>[what we're building]</SectionLabel>
-            <YouVoiceBlock text={MISSION} />
-          </section>
+        {/* faq intro */}
+        {stage >= 2 && (
+          <ThemBubble
+            text={FAQ_INTRO}
+            active={stage === 2}
+            onDone={() => setTimeout(() => setStage(3), 400)}
+            speed={18}
+          />
+        )}
 
-          {/* FAQs */}
-          <section>
-            <SectionLabel>[you might be wondering]</SectionLabel>
-            <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-              {FAQS.map((faq) => (
-                <FAQItem key={faq.question} question={faq.question} answer={faq.answer} />
-              ))}
-            </div>
-          </section>
+        {/* faqs */}
+        {stage >= 3 && (
+          <div style={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "7px",
+            alignSelf: "flex-start",
+            width: "85%",
+          }}>
+            {FAQS.map((faq) => (
+              <FAQBubble key={faq.question} faq={faq} visible={stage >= 3} />
+            ))}
+          </div>
+        )}
 
-          {/* Footer */}
+        {/* follow-up messages */}
+        {messages.map((msg, i) => (
+          <div key={i} style={{
+            maxWidth: "75%",
+            alignSelf: msg.role === "user" ? "flex-end" : "flex-start",
+            padding: "11px 15px",
+            borderRadius: msg.role === "them" ? "15px 15px 15px 4px" : "15px 15px 4px 15px",
+            background: msg.role === "them" ? "var(--bg2)" : "var(--bg3)",
+            border: `1px solid ${msg.role === "them" ? "var(--border)" : "var(--border2)"}`,
+            fontSize: "13.5px",
+            fontWeight: 300,
+            lineHeight: 1.65,
+            color: "var(--text)",
+            fontFamily: "var(--font-mono)",
+            whiteSpace: "pre-wrap",
+          }}>
+            {msg.content}
+            {msg.role === "them" && isThinking && i === messages.length - 1 && !msg.content && (
+              <span style={{
+                display: "inline-block", width: "7px", height: "14px",
+                background: "var(--amber)", opacity: 0.7,
+                animation: "blink 0.8s step-end infinite",
+                verticalAlign: "text-bottom", marginLeft: "2px",
+              }} />
+            )}
+          </div>
+        ))}
+
+        {/* footer */}
+        {stage >= 3 && messages.length === 0 && (
           <div style={{
             fontSize: "11px",
             fontFamily: "var(--font-mono)",
             color: "var(--dim)",
             lineHeight: 1.7,
-            paddingBottom: "40px",
+            alignSelf: "flex-start",
+            opacity: 0.5,
+            marginTop: "8px",
           }}>
-            [us] is a product of One Plus LLC, a subsidiary of OMARO PBC. sovereign by design.
+            [us] by One Plus LLC · OMARO PBC · sovereign by design.
           </div>
+        )}
 
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* input — appears after delivery */}
+      {inputUnlocked && (
+        <div style={{
+          padding: "16px 24px 24px",
+          flexShrink: 0,
+        }}>
+          <div style={{ borderTop: "1px solid var(--border)", margin: "0 -18px 12px" }} />
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+            background: "var(--bg2)",
+            border: "1px solid var(--border)",
+            borderRadius: "13px",
+            padding: "9px 13px",
+            opacity: isThinking ? 0.4 : 1,
+            transition: "opacity 0.15s",
+          }}>
+            <textarea
+              ref={inputRef}
+              rows={1}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="[ask anything about [us]...]"
+              aria-label="ask about [us]"
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSend()
+                }
+              }}
+              onInput={(e) => {
+                const t = e.currentTarget
+                t.style.height = "auto"
+                t.style.height = Math.min(t.scrollHeight, 110) + "px"
+              }}
+              style={{
+                flex: 1, background: "transparent", border: "none", outline: "none",
+                fontSize: "20px", fontWeight: 300, color: "var(--text)",
+                fontFamily: "var(--font-sans)", resize: "none", lineHeight: 1.5,
+              }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={isThinking || !inputValue.trim()}
+              onMouseDown={(e) => e.stopPropagation()}
+              aria-label="send"
+              style={{
+                width: "44px", height: "44px", borderRadius: "10px", border: "none",
+                background: "rgba(196,151,74,0.14)",
+                cursor: isThinking || !inputValue.trim() ? "default" : "pointer",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                flexShrink: 0,
+                opacity: isThinking || !inputValue.trim() ? 0.4 : 1,
+                transition: "opacity 0.15s",
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                stroke="var(--amber)" strokeWidth={2}
+                strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+          <div style={{
+            textAlign: "center", marginTop: "8px",
+            fontSize: "12px", fontFamily: "var(--font-mono)",
+            color: "var(--muted)", opacity: 0.6, lineHeight: 1.5,
+          }}>
+            by talking to [them], an AI, you agree to our{" "}
+            <a href="/terms" style={{ color: "inherit", textDecoration: "underline" }}>[terms]</a>
+            {" "}and{" "}
+            <a href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>[privacy policy]</a>
+          </div>
         </div>
-      </main>
+      )}
+
+      <style>{`
+        @keyframes blink { 0%, 100% { opacity: 0.7; } 50% { opacity: 0; } }
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(6px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   )
 }
