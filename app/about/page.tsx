@@ -1,14 +1,15 @@
 "use client"
 
 /**
- * /about — hybrid chat delivery
+ * /about — hybrid chat delivery with voice
  *
  * [them] delivers philosophy → mission → FAQs as typed bubbles.
- * After delivery completes, input bar appears for follow-up questions.
+ * After delivery completes, input bar + AmbientOrb appear for follow-up.
  * Re-delivers fresh on every mount (tab switch resets via key={activeThread}).
  */
 
 import { useState, useEffect, useRef, useCallback } from "react"
+import AmbientOrb from "@/components/chat/AmbientOrb"
 
 // ─────────────────────────────────────────────
 // CONTENT
@@ -167,8 +168,6 @@ function FAQBubble({ faq, visible }: { faq: typeof FAQS[0]; visible: boolean }) 
   return (
     <div
       style={{
-        maxWidth: "85%",
-        alignSelf: "flex-start",
         borderRadius: "10px",
         background: "var(--bg2)",
         border: `1px solid ${open ? "var(--amber)" : "var(--border)"}`,
@@ -245,7 +244,7 @@ function FAQBubble({ faq, visible }: { faq: typeof FAQS[0]; visible: boolean }) 
 // 0 = philosophy typing
 // 1 = mission typing
 // 2 = faq intro typing
-// 3 = faqs visible + input unlocked
+// 3 = faqs visible + input + orb unlocked
 // ─────────────────────────────────────────────
 
 const FAQ_INTRO = "you might be wondering..."
@@ -255,15 +254,46 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
   const [inputValue, setInputValue] = useState("")
   const [messages, setMessages] = useState<{ role: "them" | "user"; content: string }[]>([])
   const [isThinking, setIsThinking] = useState(false)
+  const [isRecording, setIsRecording] = useState(false)
+  const [isSpeaking, setIsSpeaking] = useState(false)
+
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+  const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [stage, messages])
 
-  const handleSend = async () => {
-    const text = inputValue.trim()
+  // ── speak response ──────────────────────────
+  const speakResponse = useCallback(async (text: string) => {
+    try {
+      setIsSpeaking(true)
+      const res = await fetch("/api/intake/speak", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      })
+      if (!res.ok) return
+      const blob = await res.blob()
+      const url = URL.createObjectURL(blob)
+      const audio = new Audio(url)
+      audioRef.current = audio
+      audio.onended = () => {
+        setIsSpeaking(false)
+        URL.revokeObjectURL(url)
+      }
+      audio.onerror = () => setIsSpeaking(false)
+      await audio.play()
+    } catch {
+      setIsSpeaking(false)
+    }
+  }, [])
+
+  // ── send to about ───────────────────────────
+  const sendToAbout = useCallback(async (text: string) => {
     if (!text || isThinking) return
     setInputValue("")
     if (inputRef.current) inputRef.current.style.height = "auto"
@@ -300,8 +330,8 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
       while (true) {
         const { done, value } = await reader.read()
         if (done) break
-        const text = decoder.decode(value)
-        const lines = text.split("\n").filter((l) => l.startsWith("data: "))
+        const chunk = decoder.decode(value)
+        const lines = chunk.split("\n").filter((l) => l.startsWith("data: "))
         for (const line of lines) {
           try {
             const json = JSON.parse(line.slice(6))
@@ -316,18 +346,76 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
           } catch { }
         }
       }
+
+      if (fullResponse) {
+        await speakResponse(fullResponse)
+      }
     } catch {
       setMessages((prev) => [...prev, { role: "them", content: "something went wrong. try again." }])
     } finally {
       setIsThinking(false)
     }
-  }
+  }, [isThinking, messages, speakResponse])
 
-  const onPhilosophyDone = useCallback(() => setTimeout(() => setStage(1), 600), [])
-  const onMissionDone    = useCallback(() => setTimeout(() => setStage(2), 600), [])
-  const onFaqIntroDone   = useCallback(() => setTimeout(() => setStage(3), 400), [])
+  // ── text input send ─────────────────────────
+  const handleSend = useCallback(() => {
+    const text = inputValue.trim()
+    if (text) sendToAbout(text)
+  }, [inputValue, sendToAbout])
+
+  // ── recording ──────────────────────────────
+  const startRecording = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mr = new MediaRecorder(stream)
+      audioChunksRef.current = []
+      mr.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data)
+      }
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop())
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" })
+        const form = new FormData()
+        form.append("audio", blob, "voice.webm")
+        try {
+          const res = await fetch("/api/intake/transcribe", { method: "POST", body: form })
+          if (!res.ok) return
+          const { text } = await res.json()
+          if (text?.trim()) sendToAbout(text.trim())
+        } catch { }
+      }
+      mr.start()
+      mediaRecorderRef.current = mr
+      setIsRecording(true)
+    } catch { }
+  }, [sendToAbout])
+
+  const stopRecording = useCallback(() => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      mediaRecorderRef.current.stop()
+    }
+    setIsRecording(false)
+  }, [])
+
+  const handleOrbTap = useCallback(() => {
+    if (isRecording) {
+      stopRecording()
+    } else if (!isThinking && !isSpeaking) {
+      startRecording()
+    }
+  }, [isRecording, isThinking, isSpeaking, startRecording, stopRecording])
+
+  const handleOrbRelease = useCallback(() => {
+    if (isRecording) stopRecording()
+  }, [isRecording, stopRecording])
+
+  // ── stage callbacks ─────────────────────────
+  const onPhilosophyDone = useCallback(() => { setTimeout(() => setStage(1), 600) }, [])
+  const onMissionDone    = useCallback(() => { setTimeout(() => setStage(2), 600) }, [])
+  const onFaqIntroDone   = useCallback(() => { setTimeout(() => setStage(3), 400) }, [])
 
   const inputUnlocked = stage >= 3
+  const orbState = isRecording ? "recording" : isThinking ? "thinking" : isSpeaking ? "speaking" : "idle"
 
   return (
     <div style={{
@@ -379,18 +467,71 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
           />
         )}
 
-        {/* faqs */}
+        {/* stage 3 — two-column: faqs + orb */}
         {stage >= 3 && (
           <div style={{
             display: "flex",
-            flexDirection: "column",
-            gap: "7px",
-            alignSelf: "flex-start",
-            width: "85%",
+            gap: "24px",
+            alignItems: "flex-start",
+            width: "100%",
           }}>
-            {FAQS.map((faq) => (
-              <FAQBubble key={faq.question} faq={faq} visible={stage >= 3} />
-            ))}
+            {/* faqs */}
+            <div style={{
+              flex: "0 0 58%",
+              display: "flex",
+              flexDirection: "column",
+              gap: "7px",
+            }}>
+              {FAQS.map((faq) => (
+                <FAQBubble key={faq.question} faq={faq} visible={stage >= 3} />
+              ))}
+
+              {/* footer */}
+              {messages.length === 0 && (
+                <div style={{
+                  fontSize: "11px",
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--dim)",
+                  lineHeight: 1.7,
+                  opacity: 0.5,
+                  marginTop: "8px",
+                }}>
+                  [us] by One Plus LLC · OMARO PBC · sovereign by design.
+                </div>
+              )}
+            </div>
+
+            {/* orb — sticky */}
+            <div style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              paddingTop: "16px",
+              position: "sticky",
+              top: "40px",
+            }}>
+              <AmbientOrb
+                isRecording={isRecording}
+                orbState={orbState}
+                onHoldStart={handleOrbTap}
+                onHoldEnd={handleOrbRelease}
+              />
+              {orbState === "idle" && (
+                <span style={{
+                  marginTop: "16px",
+                  fontSize: "11px",
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--dim)",
+                  opacity: 0.5,
+                  letterSpacing: "0.05em",
+                  textAlign: "center",
+                }}>
+                  hold to speak
+                </span>
+              )}
+            </div>
           </div>
         )}
 
@@ -421,21 +562,6 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
             )}
           </div>
         ))}
-
-        {/* footer */}
-        {stage >= 3 && messages.length === 0 && (
-          <div style={{
-            fontSize: "11px",
-            fontFamily: "var(--font-mono)",
-            color: "var(--dim)",
-            lineHeight: 1.7,
-            alignSelf: "flex-start",
-            opacity: 0.5,
-            marginTop: "8px",
-          }}>
-            [us] by One Plus LLC · OMARO PBC · sovereign by design.
-          </div>
-        )}
 
         <div ref={messagesEndRef} />
       </div>
