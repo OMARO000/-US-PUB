@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "light" | "charcoal" | "dusk";
+type Theme = "light" | "charcoal";
 
 interface ThemeContextType {
   theme: Theme;
@@ -18,7 +18,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const stored = localStorage.getItem("us-theme") as Theme;
-    const valid: Theme[] = ["light", "charcoal", "dusk"];
+    const valid: Theme[] = ["light", "charcoal"];
     const active = valid.includes(stored) ? stored : "light";
     setThemeState(active);
     document.documentElement.setAttribute("data-theme", active);

@@ -48,20 +48,6 @@
   --border2: rgba(255,255,255,0.12);
 }
 
-[data-theme="dusk"] {
-  --bg: #1A1F2E;
-  --bg2: #202638;
-  --bg3: #272E44;
-  --bg4: #2E3650;
-  --amber: #C4974A;
-  --rose: #C4848A;
-  --text: rgba(255,255,255,0.88);
-  --muted: rgba(255,255,255,0.5);
-  --dim: rgba(255,255,255,0.55);
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.14);
-}
-
 html { font-size: 28px; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

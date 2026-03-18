@@ -38,7 +38,6 @@ interface Voice {
 const THEMES = [
   { id: "light",    label: "[light]",    bg: "#F5F2EE", bg2: "#EDEAE5", amber: "#A67C3A", rose: "#A85860" },
   { id: "charcoal", label: "[charcoal]", bg: "#1C1C1E", bg2: "#242426", amber: "#C4974A", rose: "#C4848A" },
-  { id: "dusk",     label: "[dusk]",     bg: "#1A1F2E", bg2: "#202638", amber: "#C4974A", rose: "#C4848A" },
 ]
 
 // ─────────────────────────────────────────────

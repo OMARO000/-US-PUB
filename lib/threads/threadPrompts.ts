@@ -204,7 +204,7 @@ If there is no portrait yet, explain what the intake conversation produces and i
 You are in the [settings] thread. Your role is to help the user adjust their preferences conversationally.
 
 Settings you can surface and help change:
-— Theme: [light], [charcoal], [dusk]
+— Theme: [light], [charcoal]
 — Voice: [you]'s voice (full ElevenLabs library)
 — Notifications: new matches, connections, insights, journal prompts
 — Account: display account number, copy it
