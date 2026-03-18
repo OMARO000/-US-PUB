@@ -16,17 +16,19 @@ export default function DMAnalysisBanner() {
   if (off) {
     return (
       <div style={{
-        padding: "0 16px",
-        height: "32px",
+        padding: "0 20px",
+        height: "44px",
         display: "flex",
         alignItems: "center",
+        justifyContent: "flex-end",
         borderBottom: "1px solid var(--border)",
         background: "var(--bg2)",
       }}>
         <span style={{
-          fontSize: "11px",
+          fontSize: "12px",
           fontFamily: "var(--font-mono)",
           color: "var(--dim)",
+          letterSpacing: "0.06em",
         }}>
           [analysis off]
         </span>
@@ -36,36 +38,43 @@ export default function DMAnalysisBanner() {
 
   return (
     <div style={{
-      padding: "14px 20px",
-      minHeight: "44px",
+      padding: "0 20px",
+      height: "44px",
       display: "flex",
       alignItems: "center",
       gap: "12px",
       borderBottom: "1px solid var(--border)",
       background: "var(--bg2)",
+      flexShrink: 0,
     }}>
       <span style={{
         flex: 1,
-        fontSize: "14px",
+        fontSize: "12px",
         fontFamily: "var(--font-mono)",
-        color: "var(--text)",
+        color: "var(--muted)",
         opacity: 0.85,
         lineHeight: 1.5,
+        letterSpacing: "0.02em",
       }}>
         [us] observes patterns in this conversation to improve your connection insights — not the content, just how you connect.
       </span>
+
+      {/* [turn off] — matches TOGGLE_BUTTON_STYLE exactly so it squares up with [lock voice] */}
       <button
         onClick={turnOff}
         style={{
           background: "transparent",
-          border: "none",
+          border: "1px solid var(--border)",
+          borderRadius: "6px",
           cursor: "pointer",
-          fontSize: "14px",
+          fontSize: "12px",
           fontFamily: "var(--font-mono)",
           color: "var(--muted)",
-          padding: "0",
-          flexShrink: 0,
+          letterSpacing: "0.06em",
+          padding: "6px 10px",
           minHeight: "44px",
+          flexShrink: 0,
+          transition: "border-color 0.15s, color 0.15s",
         }}
       >
         [turn off]
