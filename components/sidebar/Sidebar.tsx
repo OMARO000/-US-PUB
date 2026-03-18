@@ -262,10 +262,9 @@ export default function Sidebar() {
           <span style={{
             fontFamily: "var(--font-mono)",
             fontSize: "13px",
-            letterSpacing: "0.05em",
-            color: "var(--dim)",
+            color: "var(--muted)",
           }}>
-            {collapsed ? "»" : "«"}
+            {collapsed ? "[>|<]" : "[<|>]"}
           </span>
         </button>
       )}
