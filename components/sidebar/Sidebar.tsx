@@ -1,4 +1,5 @@
 "use client";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -76,23 +77,46 @@ const navItems = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return localStorage.getItem("us_sidebar_collapsed") === "true";
+  });
+
+  // Sync CSS variable on mount and on change
+  useEffect(() => {
+    const width = collapsed ? "64px" : "220px";
+    document.documentElement.style.setProperty("--sidebar-width", width);
+  }, [collapsed]);
+
+  function toggle() {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem("us_sidebar_collapsed", String(next));
+      document.documentElement.style.setProperty("--sidebar-width", next ? "64px" : "220px");
+      return next;
+    });
+  }
+
+  const w = collapsed ? "64px" : "220px";
 
   return (
     <aside style={{
-      width: "220px",
+      width: w,
       height: "100dvh",
       background: "var(--bg)",
       borderRight: "1px solid var(--border)",
       display: "flex",
       flexDirection: "column",
       alignItems: "stretch",
-      padding: "20px 12px",
+      padding: collapsed ? "20px 0" : "20px 12px",
       gap: "4px",
       flexShrink: 0,
       position: "fixed",
       left: 0,
       top: 0,
       zIndex: 50,
+      transition: "width 0.2s ease",
+      overflow: "hidden",
     }}>
 
       {/* Logo */}
@@ -109,11 +133,17 @@ export default function Sidebar() {
         fontSize: "38px",
         fontWeight: 300,
         letterSpacing: "-0.5px",
+        flexShrink: 0,
       }}>
-        [us]
+        {!collapsed && "[us]"}
+        {collapsed && (
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        )}
       </Link>
 
-      <div style={{ width: "100%", height: "1px", background: "var(--border)", margin: "4px 0" }} />
+      <div style={{ width: collapsed ? "40px" : "100%", height: "1px", background: "var(--border)", margin: "4px auto" }} />
 
       {/* Nav items */}
       {navItems.map((item) => {
@@ -130,8 +160,9 @@ export default function Sidebar() {
               borderRadius: "10px",
               display: "flex",
               alignItems: "center",
-              gap: "12px",
-              padding: "0 12px",
+              justifyContent: collapsed ? "center" : "flex-start",
+              gap: collapsed ? 0 : "12px",
+              padding: collapsed ? "0" : "0 12px",
               position: "relative",
               background: active ? "var(--bg3)" : "transparent",
               color: active ? "var(--amber)" : "var(--muted)",
@@ -142,15 +173,17 @@ export default function Sidebar() {
             <span style={{ width: "18px", height: "18px", display: "flex", flexShrink: 0 }}>
               {item.icon}
             </span>
-            <span style={{
-              fontSize: "12px",
-              fontFamily: "var(--font-mono)",
-              letterSpacing: "0.03em",
-              whiteSpace: "nowrap",
-            }}>
-              {item.label}
-            </span>
-            {item.badge && (
+            {!collapsed && (
+              <span style={{
+                fontSize: "12px",
+                fontFamily: "var(--font-mono)",
+                letterSpacing: "0.03em",
+                whiteSpace: "nowrap",
+              }}>
+                {item.label}
+              </span>
+            )}
+            {!collapsed && item.badge && (
               <span aria-label="new" style={{
                 marginLeft: "auto",
                 width: "7px",
@@ -160,11 +193,22 @@ export default function Sidebar() {
                 flexShrink: 0,
               }} />
             )}
+            {collapsed && item.badge && (
+              <span aria-label="new" style={{
+                position: "absolute",
+                top: "8px",
+                right: "10px",
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                background: "var(--rose)",
+              }} />
+            )}
           </Link>
         );
       })}
 
-      <div style={{ width: "100%", height: "1px", background: "var(--border)", margin: "4px 0" }} />
+      <div style={{ width: collapsed ? "40px" : "100%", height: "1px", background: "var(--border)", margin: "4px auto" }} />
 
       {/* Settings */}
       <Link
@@ -177,8 +221,9 @@ export default function Sidebar() {
           borderRadius: "10px",
           display: "flex",
           alignItems: "center",
-          gap: "12px",
-          padding: "0 12px",
+          justifyContent: collapsed ? "center" : "flex-start",
+          gap: collapsed ? 0 : "12px",
+          padding: collapsed ? "0" : "0 12px",
           background: pathname === "/settings" ? "var(--bg3)" : "transparent",
           color: pathname === "/settings" ? "var(--amber)" : "var(--muted)",
           transition: "background 0.15s",
@@ -191,17 +236,45 @@ export default function Sidebar() {
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </span>
-        <span style={{
-          fontSize: "12px",
-          fontFamily: "var(--font-mono)",
-          letterSpacing: "0.03em",
-          whiteSpace: "nowrap",
-        }}>
-          [settings]
-        </span>
+        {!collapsed && (
+          <span style={{
+            fontSize: "12px",
+            fontFamily: "var(--font-mono)",
+            letterSpacing: "0.03em",
+            whiteSpace: "nowrap",
+          }}>
+            [settings]
+          </span>
+        )}
       </Link>
 
       <div style={{ flex: 1 }} />
+
+      {/* Collapse toggle */}
+      <button
+        onClick={toggle}
+        aria-label={collapsed ? "expand sidebar" : "collapse sidebar"}
+        style={{
+          width: "100%",
+          height: "36px",
+          borderRadius: "10px",
+          background: "transparent",
+          border: "1px solid var(--border)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          color: "var(--dim)",
+          marginBottom: "4px",
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          {collapsed
+            ? <path d="M9 18l6-6-6-6"/>
+            : <path d="M15 18l-6-6 6-6"/>
+          }
+        </svg>
+      </button>
 
       {/* Avatar */}
       <button
@@ -214,8 +287,9 @@ export default function Sidebar() {
           border: "1.5px solid var(--border2)",
           display: "flex",
           alignItems: "center",
-          gap: "12px",
-          padding: "0 12px",
+          justifyContent: collapsed ? "center" : "flex-start",
+          gap: collapsed ? 0 : "12px",
+          padding: collapsed ? "0" : "0 12px",
           cursor: "pointer",
           fontFamily: "var(--font-sans)",
         }}
@@ -234,14 +308,16 @@ export default function Sidebar() {
           color: "var(--muted)",
           flexShrink: 0,
         }}>B</span>
-        <span style={{
-          fontSize: "12px",
-          fontFamily: "var(--font-mono)",
-          color: "var(--muted)",
-          letterSpacing: "0.03em",
-        }}>
-          [you]
-        </span>
+        {!collapsed && (
+          <span style={{
+            fontSize: "12px",
+            fontFamily: "var(--font-mono)",
+            color: "var(--muted)",
+            letterSpacing: "0.03em",
+          }}>
+            [you]
+          </span>
+        )}
       </button>
     </aside>
   );

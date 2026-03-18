@@ -292,7 +292,7 @@ export default function InsightsPage() {
     <div style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
       <Sidebar />
       <main style={{
-        marginLeft: "220px",
+        marginLeft: "var(--sidebar-width)",
         flex: 1,
         display: "flex",
         flexDirection: "column",

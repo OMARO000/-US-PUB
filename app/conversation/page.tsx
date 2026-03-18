@@ -60,7 +60,7 @@ export default function ConversationPage() {
   return (
     <div style={{ display: "flex", height: "100dvh", overflow: "hidden" }}>
       <Sidebar />
-      <main style={{ flex: 1, marginLeft: "220px", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", alignItems: "center" }}>
+      <main style={{ flex: 1, marginLeft: "var(--sidebar-width)", display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", alignItems: "center" }}>
         <div style={{ width: "100%", maxWidth: "680px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
 
           {/* ── error banner ── */}
