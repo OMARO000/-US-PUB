@@ -64,6 +64,8 @@ export default function PortraitPage() {
     } catch {
       // non-blocking — portrait is already saved, confirmation is best-effort
     }
+
+    router.push("/waiting?state=portrait")
   }
 
   const handleMint = async (walletAddress: string | null) => {
