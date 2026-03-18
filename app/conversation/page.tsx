@@ -110,7 +110,7 @@ export default function ConversationPage() {
   const [portraitAsBackground, setPortraitAsBackground] = useState(false)
   const [archetype, setArchetype]                       = useState<string | null>(null)
   const [journalShared, setJournalShared]               = useState(false)
-  const [openingBubble] = useState(
+  const [openingBubble, setOpeningBubble] = useState(
     () => CONVERSATION_PROMPTS[Math.floor(Math.random() * CONVERSATION_PROMPTS.length)]
   )
 
@@ -206,6 +206,16 @@ export default function ConversationPage() {
     }, 18)
     return () => clearInterval(interval)
   }, [openingBubble])
+
+  useEffect(() => {
+    if (!bubbleDone) return
+    const timeout = setTimeout(() => {
+      setOpeningBubble(
+        CONVERSATION_PROMPTS[Math.floor(Math.random() * CONVERSATION_PROMPTS.length)]
+      )
+    }, 3000)
+    return () => clearTimeout(timeout)
+  }, [bubbleDone])
 
   // Lock voice toggle top — below banner on messages thread
   // Banner is ~44px tall + 16px top margin = 60px, plus 16px gap = 76px
