@@ -38,8 +38,12 @@ export async function GET(req: NextRequest) {
       .orderBy(desc(matchScores.totalScore))
 
     const freshCached = cached.filter((r) => new Date(r.scoredAt) > cutoff)
+
     if (freshCached.length > 0) {
-      return NextResponse.json({ matches: freshCached.map(serializeMatchRow), fromCache: true })
+      return NextResponse.json({
+        matches: sortWithIntentFirst(freshCached).map(serializeMatchRow),
+        fromCache: true,
+      })
     }
 
     const candidates = await db
@@ -68,6 +72,7 @@ export async function GET(req: NextRequest) {
       archetypeA: r.archetypeA,
       archetypeB: r.archetypeB,
       goDeeper,
+      intentSignal: false,
       status: "pending" as const,
       outcomeRecorded: false,
       scoredAt: now,
@@ -86,6 +91,7 @@ export async function GET(req: NextRequest) {
         mutualSignals: JSON.parse(r.mutualSignals),
         archetypeA: r.archetypeA,
         archetypeB: r.archetypeB,
+        intentSignal: r.intentSignal,
         status: r.status,
         scoredAt: r.scoredAt,
       })),
@@ -95,6 +101,14 @@ export async function GET(req: NextRequest) {
     console.error("[us] matches GET error:", err)
     return NextResponse.json({ error: "failed to fetch matches" }, { status: 500 })
   }
+}
+
+function sortWithIntentFirst(rows: typeof matchScores.$inferSelect[]) {
+  return [...rows].sort((a, b) => {
+    if (a.intentSignal && !b.intentSignal) return -1
+    if (!a.intentSignal && b.intentSignal) return 1
+    return b.totalScore - a.totalScore
+  })
 }
 
 function serializeMatchRow(r: typeof matchScores.$inferSelect) {
@@ -107,6 +121,7 @@ function serializeMatchRow(r: typeof matchScores.$inferSelect) {
     mutualSignals: (() => { try { return JSON.parse(r.mutualSignals) } catch { return [] } })(),
     archetypeA: r.archetypeA,
     archetypeB: r.archetypeB,
+    intentSignal: r.intentSignal,
     status: r.status,
     scoredAt: r.scoredAt,
   }

@@ -24,8 +24,17 @@ export async function POST(req: NextRequest) {
 
     const targetUserId = matchRow.userIdB
 
+    // mark this user's row as connected
     await db.update(matchScores).set({ status: "connected", updatedAt: now }).where(eq(matchScores.id, matchId))
 
+    // set intentSignal = true on mirror row (B→A) to elevate visibility
+    // does not reveal that A connected — just surfaces the match higher in B's list
+    await db
+      .update(matchScores)
+      .set({ intentSignal: true, updatedAt: now })
+      .where(and(eq(matchScores.userIdA, targetUserId), eq(matchScores.userIdB, userId)))
+
+    // check for mirror match (target → user, status = connected)
     const [mirrorMatch] = await db
       .select()
       .from(matchScores)
@@ -34,6 +43,7 @@ export async function POST(req: NextRequest) {
 
     if (!mirrorMatch) return NextResponse.json({ mutual: false })
 
+    // check if conversation already exists
     const [existingConvo] = await db
       .select()
       .from(conversations)
@@ -44,6 +54,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ mutual: true, conversationId: existingConvo.id, firstPrompt: existingConvo.firstPrompt })
     }
 
+    // create new conversation
     const conversationId = uuid()
     await db.insert(conversations).values({
       id: conversationId,
