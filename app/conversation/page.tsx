@@ -19,6 +19,7 @@ import { useIntake } from "@/hooks/useIntake"
 import { useThread } from "@/hooks/useThread"
 import Sidebar from "@/components/sidebar/Sidebar"
 import AmbientOrb from "@/components/chat/AmbientOrb"
+import DMAnalysisBanner from "@/components/chat/DMAnalysisBanner"
 import type { ThreadType } from "@/lib/threads/threadPrompts"
 import { THREAD_CONFIGS } from "@/lib/threads/threadPrompts"
 
@@ -65,6 +66,7 @@ const ARCHETYPE_GRADIENTS: Record<string, string> = {
 // ─────────────────────────────────────────────
 
 function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId: string }) {
+  const isMessages = threadType === "messages"
   const thread = useThread(threadType, userId)
   const [input, setInput] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -89,6 +91,9 @@ function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId
       width: "100%",
       margin: "0 auto",
     }}>
+
+      {/* DM analysis banner — messages thread only */}
+      {isMessages && <DMAnalysisBanner />}
 
       {/* Messages */}
       <div style={{

@@ -12,6 +12,7 @@
 export type ThreadType =
   | "conversation"
   | "connections"
+  | "messages"
   | "insights"
   | "journal"
   | "about"
@@ -78,6 +79,17 @@ What you never do:
 If there are no matches yet, tell the user honestly and explain that completing their portrait in [conversation] will help.`,
     pageRoute: "/connections",
     hasPageView: true,
+  },
+
+  messages: {
+    type: "messages",
+    label: "[messages]",
+    openingPrompt: "you have a new connection. [you] suggested a place to start — take it wherever feels right.",
+    systemPrompt: `${IDENTITY}
+
+You are in the [messages] thread. This is where matched users communicate directly. Your role here is minimal — you introduced them, now you get out of the way. You may surface the firstPrompt from the conversation record on first open. After that, step back. Only speak if the user explicitly asks [you] something. What you can do: surface the firstPrompt on first open, answer questions about the match if asked, offer a debrief after a conversation ends. What you never do: interrupt an ongoing conversation, offer unsolicited observations, act as a moderator. TRANSPARENCY: Every [messages] thread shows a persistent banner telling users that [us] observes conversation patterns (not content) to improve match insights. This can be toggled off. When a user toggles it off, acknowledge warmly via SETTING_UPDATE:dm_analysis:off`,
+    pageRoute: "/messages",
+    hasPageView: false,
   },
 
   insights: {
@@ -265,6 +277,7 @@ export function getThreadConfig(type: ThreadType): ThreadConfig {
 export const SIDEBAR_THREADS: ThreadType[] = [
   "conversation",
   "connections",
+  "messages",
   "insights",
   "journal",
   "about",
