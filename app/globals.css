@@ -107,3 +107,12 @@ a:hover .nav-tooltip { opacity: 1 !important; }
   0%, 100% { opacity: 0.6; transform: scale(0.9); }
   50% { opacity: 1; transform: scale(1.2); }
 }
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+  .sidebar-desktop { display: none !important; }
+  .mobile-hamburger { display: flex !important; }
+  .sidebar-mobile-open { display: flex !important; }
+}

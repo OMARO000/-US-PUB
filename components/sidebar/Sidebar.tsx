@@ -78,6 +78,7 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Read localStorage after mount and sync CSS variable
   useEffect(() => {
@@ -90,6 +91,11 @@ export default function Sidebar() {
     document.documentElement.style.setProperty("--sidebar-width", width);
   }, [collapsed]);
 
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   function toggle() {
     setCollapsed((prev) => {
       const next = !prev;
@@ -101,26 +107,8 @@ export default function Sidebar() {
 
   const w = collapsed ? "112px" : "480px";
 
-  return (
-    <aside suppressHydrationWarning style={{
-      width: w,
-      height: "100dvh",
-      background: "var(--bg)",
-      borderRight: "1px solid var(--border)",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "stretch",
-      padding: collapsed ? "36px 0" : "36px 20px",
-      gap: "8px",
-      flexShrink: 0,
-      position: "fixed",
-      left: 0,
-      top: 0,
-      zIndex: 50,
-      transition: "width 0.2s ease",
-      overflow: "hidden",
-    }}>
-
+  const navContent = (isMobile: boolean) => (
+    <>
       {/* Logo */}
       <Link href="/conversation" aria-label="[us] home" style={{
         width: "100%",
@@ -137,15 +125,15 @@ export default function Sidebar() {
         letterSpacing: "-0.5px",
         flexShrink: 0,
       }}>
-        {!collapsed && "[us]"}
-        {collapsed && (
+        {(!collapsed || isMobile) && "[us]"}
+        {collapsed && !isMobile && (
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
         )}
       </Link>
 
-      <div style={{ width: collapsed ? "40px" : "100%", height: "1px", background: "var(--border)", margin: "4px auto" }} />
+      <div style={{ width: "100%", height: "1px", background: "var(--border)", margin: "4px auto" }} />
 
       {/* Nav items */}
       {navItems.map((item) => {
@@ -162,9 +150,9 @@ export default function Sidebar() {
               borderRadius: "10px",
               display: "flex",
               alignItems: "center",
-              justifyContent: collapsed ? "center" : "flex-start",
-              gap: collapsed ? 0 : "12px",
-              padding: collapsed ? "0" : "0 12px",
+              justifyContent: (collapsed && !isMobile) ? "center" : "flex-start",
+              gap: (collapsed && !isMobile) ? 0 : "12px",
+              padding: (collapsed && !isMobile) ? "0" : "0 12px",
               position: "relative",
               background: active ? "var(--bg3)" : "transparent",
               color: active ? "var(--amber)" : "var(--muted)",
@@ -175,7 +163,7 @@ export default function Sidebar() {
             <span style={{ width: "28px", height: "28px", display: "flex", flexShrink: 0 }}>
               {item.icon}
             </span>
-            {!collapsed && (
+            {(!collapsed || isMobile) && (
               <span style={{
                 fontSize: "18px",
                 fontFamily: "var(--font-mono)",
@@ -185,7 +173,7 @@ export default function Sidebar() {
                 {item.label}
               </span>
             )}
-            {!collapsed && item.badge && (
+            {(!collapsed || isMobile) && item.badge && (
               <span aria-label="new" style={{
                 marginLeft: "auto",
                 width: "7px",
@@ -195,7 +183,7 @@ export default function Sidebar() {
                 flexShrink: 0,
               }} />
             )}
-            {collapsed && item.badge && (
+            {collapsed && !isMobile && item.badge && (
               <span aria-label="new" style={{
                 position: "absolute",
                 top: "8px",
@@ -210,7 +198,7 @@ export default function Sidebar() {
         );
       })}
 
-      <div style={{ width: collapsed ? "40px" : "100%", height: "1px", background: "var(--border)", margin: "4px auto" }} />
+      <div style={{ width: "100%", height: "1px", background: "var(--border)", margin: "4px auto" }} />
 
       {/* Settings */}
       <Link
@@ -223,9 +211,9 @@ export default function Sidebar() {
           borderRadius: "10px",
           display: "flex",
           alignItems: "center",
-          justifyContent: collapsed ? "center" : "flex-start",
-          gap: collapsed ? 0 : "12px",
-          padding: collapsed ? "0" : "0 12px",
+          justifyContent: (collapsed && !isMobile) ? "center" : "flex-start",
+          gap: (collapsed && !isMobile) ? 0 : "12px",
+          padding: (collapsed && !isMobile) ? "0" : "0 12px",
           background: pathname === "/settings" ? "var(--bg3)" : "transparent",
           color: pathname === "/settings" ? "var(--amber)" : "var(--muted)",
           transition: "background 0.15s",
@@ -238,7 +226,7 @@ export default function Sidebar() {
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
           </svg>
         </span>
-        {!collapsed && (
+        {(!collapsed || isMobile) && (
           <span style={{
             fontSize: "18px",
             fontFamily: "var(--font-mono)",
@@ -252,32 +240,123 @@ export default function Sidebar() {
 
       <div style={{ flex: 1 }} />
 
-      {/* Collapse toggle */}
+      {/* Collapse toggle — desktop only */}
+      {!isMobile && (
+        <button
+          onClick={toggle}
+          aria-label={collapsed ? "expand sidebar" : "collapse sidebar"}
+          style={{
+            width: "100%",
+            height: "36px",
+            borderRadius: "10px",
+            background: "transparent",
+            border: "1px solid var(--border)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            color: "var(--dim)",
+            marginBottom: "4px",
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            {collapsed
+              ? <path d="M9 18l6-6-6-6"/>
+              : <path d="M15 18l-6-6 6-6"/>
+            }
+          </svg>
+        </button>
+      )}
+    </>
+  );
+
+  return (
+    <>
+      {/* Hamburger button — mobile only, hidden on desktop via CSS */}
       <button
-        onClick={toggle}
-        aria-label={collapsed ? "expand sidebar" : "collapse sidebar"}
+        className="mobile-hamburger"
+        onClick={() => setMobileOpen(true)}
+        aria-label="open menu"
         style={{
-          width: "100%",
-          height: "36px",
+          display: "none", // overridden by CSS media query
+          position: "fixed",
+          top: "16px",
+          left: "16px",
+          zIndex: 60,
+          width: "44px",
+          height: "44px",
           borderRadius: "10px",
-          background: "transparent",
+          background: "var(--bg2)",
           border: "1px solid var(--border)",
-          display: "flex",
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          color: "var(--dim)",
-          marginBottom: "4px",
+          color: "var(--text)",
         }}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          {collapsed
-            ? <path d="M9 18l6-6-6-6"/>
-            : <path d="M15 18l-6-6 6-6"/>
-          }
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 12h18M3 6h18M3 18h18"/>
         </svg>
       </button>
 
-    </aside>
+      {/* Desktop sidebar — hidden on mobile via CSS */}
+      <aside suppressHydrationWarning className="sidebar-desktop" style={{
+        width: w,
+        height: "100dvh",
+        background: "var(--bg)",
+        borderRight: "1px solid var(--border)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "stretch",
+        padding: collapsed ? "36px 0" : "36px 20px",
+        gap: "8px",
+        flexShrink: 0,
+        position: "fixed",
+        left: 0,
+        top: 0,
+        zIndex: 50,
+        transition: "width 0.2s ease",
+        overflow: "hidden",
+      }}>
+        {navContent(false)}
+      </aside>
+
+      {/* Mobile overlay backdrop */}
+      {mobileOpen && (
+        <div
+          onClick={() => setMobileOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 55,
+          }}
+        />
+      )}
+
+      {/* Mobile drawer */}
+      <aside
+        className="sidebar-mobile-open"
+        style={{
+          display: mobileOpen ? "flex" : "none",
+          width: "300px",
+          height: "100dvh",
+          background: "var(--bg)",
+          borderRight: "1px solid var(--border)",
+          flexDirection: "column",
+          alignItems: "stretch",
+          padding: "36px 20px",
+          gap: "8px",
+          flexShrink: 0,
+          position: "fixed",
+          left: 0,
+          top: 0,
+          zIndex: 60,
+          overflow: "hidden",
+        }}
+      >
+        {navContent(true)}
+      </aside>
+    </>
   );
 }
