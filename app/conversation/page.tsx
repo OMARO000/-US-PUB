@@ -16,6 +16,7 @@ import { useIntake } from "@/hooks/useIntake"
 import { useThread } from "@/hooks/useThread"
 import Sidebar from "@/components/sidebar/Sidebar"
 import AmbientOrb from "@/components/chat/AmbientOrb"
+import DMAnalysisBanner from "@/components/chat/DMAnalysisBanner"
 import type { ThreadType } from "@/lib/threads/threadPrompts"
 import { THREAD_CONFIGS } from "@/lib/threads/threadPrompts"
 import { CONVERSATION_PROMPTS, THREAD_CONTEXT_PROMPTS } from "@/lib/threads/conversationPrompts"
@@ -223,6 +224,9 @@ function ThreadChatView({
           border-radius: 4px;
         }
       `}</style>
+
+      {/* DM analysis banner — messages thread only, sits in normal flow */}
+      {isMessagesThread && <DMAnalysisBanner />}
 
       {/* ── Empty state — pinned to 28vh, identical to conversation tab ── */}
       {/* On messages thread, banner is 44px in normal flow above this absolute div,
