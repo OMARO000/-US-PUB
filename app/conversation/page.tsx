@@ -31,6 +31,9 @@ const SettingsPageView    = dynamic(() => import("@/app/settings/PageView"),    
 const TermsPageView       = dynamic(() => import("@/app/terms/PageView"),       { ssr: false })
 const PrivacyPageView     = dynamic(() => import("@/app/privacy/PageView"),     { ssr: false })
 
+import { useSearchParams } from "next/navigation"
+const MatchedConversation = dynamic(() => import("@/components/chat/MatchedConversation"), { ssr: false })
+
 // ─────────────────────────────────────────────
 // HELPERS
 // ─────────────────────────────────────────────
@@ -106,6 +109,9 @@ export default function ConversationPage() {
   const [archetype, setArchetype]                       = useState<string | null>(null)
   const [journalShared, setJournalShared]               = useState(false)
   const [placeholder, setPlaceholder]                   = useState(CONVERSATION_PROMPTS[0])
+
+  const searchParams = useSearchParams()
+  const matchedConversationId = searchParams.get("c")
 
   const intake      = useIntake()
   const initialized = useRef(false)
@@ -296,7 +302,19 @@ export default function ConversationPage() {
         )}
 
         {/* ── CONVERSATION THREAD ── */}
-        {isConversationThread && (
+        {isConversationThread && matchedConversationId ? (
+          <div style={{
+            width: "100%", maxWidth: "1100px", flex: 1,
+            display: "flex", flexDirection: "column",
+            overflow: "hidden", position: "relative", zIndex: 1,
+          }}>
+            <MatchedConversation
+              conversationId={matchedConversationId}
+              userId={userId ?? "anon"}
+              firstPrompt={null}
+            />
+          </div>
+        ) : isConversationThread && (
           <div style={{
             width: "100%",
             maxWidth: "1100px",

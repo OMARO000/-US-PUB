@@ -12,35 +12,39 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "userId and type required" }, { status: 400 })
   }
 
-  // find existing thread
-  let [thread] = await db
-    .select()
-    .from(threads)
-    .where(and(eq(threads.userId, userId), eq(threads.threadType, type)))
-    .limit(1)
-
-  // create if not exists
-  if (!thread) {
+  try {
     const now = new Date()
-    const [created] = await db
-      .insert(threads)
-      .values({
-        id: uuid(),
+
+    // find or create thread
+    const existing = await db
+      .select()
+      .from(threads)
+      .where(and(eq(threads.userId, userId), eq(threads.threadType, type)))
+      .limit(1)
+
+    let thread = existing[0]
+
+    if (!thread) {
+      const id = uuid()
+      await db.insert(threads).values({
+        id,
         userId,
         threadType: type,
         createdAt: now,
         lastActiveAt: now,
       })
-      .returning()
-    thread = created
+      thread = { id, userId, threadType: type, createdAt: now, lastActiveAt: now }
+    }
+
+    const messages = await db
+      .select()
+      .from(threadMessages)
+      .where(eq(threadMessages.threadId, thread.id))
+      .orderBy(asc(threadMessages.createdAt))
+
+    return NextResponse.json({ thread, messages })
+  } catch (err) {
+    console.error("[us] threads GET error:", err)
+    return NextResponse.json({ error: "failed to get thread" }, { status: 500 })
   }
-
-  // fetch messages
-  const messages = await db
-    .select()
-    .from(threadMessages)
-    .where(eq(threadMessages.threadId, thread.id))
-    .orderBy(asc(threadMessages.createdAt))
-
-  return NextResponse.json({ thread, messages })
 }
