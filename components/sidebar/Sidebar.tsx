@@ -97,13 +97,12 @@ export default function Sidebar() {
 
       {/* Logo */}
       <Link href="/conversation" aria-label="[us] home" style={{
-        width: "110px",
+        width: "100%",
         height: "110px",
         display: "flex",
         alignItems: "center",
-        justifyContent: "flex-start",
+        justifyContent: "center",
         marginBottom: "4px",
-        paddingLeft: "8px",
         textDecoration: "none",
         color: "var(--amber)",
         fontFamily: "var(--font-sans)",
