@@ -501,36 +501,44 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
               )}
             </div>
 
-            {/* orb — sticky */}
+            {/* Orb — right column */}
             <div style={{
-              flex: 1,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              paddingTop: "16px",
-              position: "sticky",
-              top: "40px",
+              flex: 1, display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center",
+              gap: "24px", position: "sticky", top: "0",
+              minHeight: "400px",
             }}>
-              <AmbientOrb
-                isRecording={isRecording}
-                orbState={orbState}
-                onHoldStart={handleOrbTap}
-                onHoldEnd={handleOrbRelease}
-              />
-              {orbState === "idle" && (
+              <div
+                style={{ transform: "scale(2)", transformOrigin: "center center", marginBottom: "40px" }}
+                onMouseDown={handleOrbTap}
+                onMouseUp={handleOrbRelease}
+                onMouseLeave={handleOrbRelease}
+                onTouchStart={(e) => { e.preventDefault(); handleOrbTap() }}
+                onTouchEnd={handleOrbRelease}
+              >
+                <AmbientOrb
+                  isRecording={isRecording}
+                  orbState={orbState}
+                  isLocked={false}
+                  onToggleLock={() => {}}
+                />
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
                 <span style={{
-                  marginTop: "16px",
-                  fontSize: "11px",
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--dim)",
-                  opacity: 0.5,
-                  letterSpacing: "0.05em",
-                  textAlign: "center",
+                  fontFamily: "var(--font-mono)", fontSize: "12px",
+                  color: "var(--muted)", letterSpacing: "0.06em", opacity: 0.7,
                 }}>
-                  hold to speak
+                  {isRecording ? "release to send" : isThinking ? "thinking..." : isSpeaking ? "speaking..." : "hold anywhere to speak"}
                 </span>
-              )}
+                {!isRecording && !isThinking && !isSpeaking && (
+                  <span style={{
+                    fontFamily: "var(--font-mono)", fontSize: "12px",
+                    color: "var(--muted)", letterSpacing: "0.06em", opacity: 0.7,
+                  }}>
+                    or type below
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         )}
