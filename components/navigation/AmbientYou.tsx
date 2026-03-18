@@ -428,13 +428,13 @@ export default function AmbientYou() {
             onTouchStart={(e) => { e.preventDefault(); onPillPointerDown(e) }}
             onTouchEnd={onPillPointerUp}
             style={{
-              height: "44px",
-              padding: "0 24px",
-              borderRadius: "24px",
+              height: "52px",
+              padding: "16px 32px",
+              borderRadius: "26px",
               border: `1.5px solid ${isRecording ? "var(--amber)" : "var(--amber)"}`,
               background: isRecording ? "rgba(196,151,74,0.15)" : "var(--bg2)",
               cursor: "pointer",
-              fontSize: "13px",
+              fontSize: "16px",
               fontFamily: "var(--font-mono)",
               color: "var(--amber)",
               letterSpacing: "0.05em",

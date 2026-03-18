@@ -40,7 +40,7 @@ export default function RootLayout({
     <html lang="en" data-theme="light" suppressHydrationWarning>
       {/* Blocking script — sets data-theme before first paint to prevent flash */}
       <head>
-        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('us-theme');var v=['light','charcoal','dusk'];document.documentElement.setAttribute('data-theme',v.includes(t)?t:'light');})();` }} />
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('us-theme');var v=['light','charcoal','dusk'];document.documentElement.setAttribute('data-theme',v.includes(t)?t:'light');var sc=localStorage.getItem('us_sidebar_collapsed')==='true';document.documentElement.style.setProperty('--sidebar-width',sc?'112px':'480px');})();` }} />
       </head>
       <body className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
         <ThemeProvider>

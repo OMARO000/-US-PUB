@@ -175,7 +175,7 @@ export default function UnifiedChat({
 
       {/* BOTTOM INPUT */}
       <div className="no-record" style={{
-        padding: "14px 20px 20px",
+        padding: "20px 24px 24px",
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
@@ -226,7 +226,7 @@ export default function UnifiedChat({
               background: "transparent",
               border: "none",
               outline: "none",
-              fontSize: "15px",
+              fontSize: "20px",
               fontWeight: 300,
               color: "var(--text)",
               fontFamily: "var(--font-sans)",

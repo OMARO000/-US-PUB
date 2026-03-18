@@ -304,7 +304,7 @@ export default function InsightsPage() {
           flex: 1,
           overflowY: "auto",
           padding: "32px 40px",
-          maxWidth: "800px",
+          maxWidth: "1100px",
           width: "100%",
           margin: "0 auto",
           display: "flex",

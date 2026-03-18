@@ -84,7 +84,7 @@ export default function Sidebar() {
 
   // Sync CSS variable on mount and on change
   useEffect(() => {
-    const width = collapsed ? "80px" : "340px";
+    const width = collapsed ? "112px" : "480px";
     document.documentElement.style.setProperty("--sidebar-width", width);
   }, [collapsed]);
 
@@ -92,12 +92,12 @@ export default function Sidebar() {
     setCollapsed((prev) => {
       const next = !prev;
       localStorage.setItem("us_sidebar_collapsed", String(next));
-      document.documentElement.style.setProperty("--sidebar-width", next ? "80px" : "340px");
+      document.documentElement.style.setProperty("--sidebar-width", next ? "112px" : "480px");
       return next;
     });
   }
 
-  const w = collapsed ? "80px" : "340px";
+  const w = collapsed ? "112px" : "480px";
 
   return (
     <aside style={{
@@ -108,8 +108,8 @@ export default function Sidebar() {
       display: "flex",
       flexDirection: "column",
       alignItems: "stretch",
-      padding: collapsed ? "28px 0" : "28px 16px",
-      gap: "4px",
+      padding: collapsed ? "36px 0" : "36px 20px",
+      gap: "8px",
       flexShrink: 0,
       position: "fixed",
       left: 0,
@@ -130,7 +130,7 @@ export default function Sidebar() {
         textDecoration: "none",
         color: "var(--amber)",
         fontFamily: "var(--font-sans)",
-        fontSize: "48px",
+        fontSize: "64px",
         fontWeight: 300,
         letterSpacing: "-0.5px",
         flexShrink: 0,
@@ -156,7 +156,7 @@ export default function Sidebar() {
             aria-current={active ? "page" : undefined}
             style={{
               width: "100%",
-              height: "56px",
+              height: "72px",
               borderRadius: "10px",
               display: "flex",
               alignItems: "center",
@@ -170,12 +170,12 @@ export default function Sidebar() {
               textDecoration: "none",
             }}
           >
-            <span style={{ width: "22px", height: "22px", display: "flex", flexShrink: 0 }}>
+            <span style={{ width: "28px", height: "28px", display: "flex", flexShrink: 0 }}>
               {item.icon}
             </span>
             {!collapsed && (
               <span style={{
-                fontSize: "15px",
+                fontSize: "18px",
                 fontFamily: "var(--font-mono)",
                 letterSpacing: "0.03em",
                 whiteSpace: "nowrap",
@@ -230,7 +230,7 @@ export default function Sidebar() {
           textDecoration: "none",
         }}
       >
-        <span style={{ width: "22px", height: "22px", display: "flex", flexShrink: 0 }}>
+        <span style={{ width: "28px", height: "28px", display: "flex", flexShrink: 0 }}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="3"/>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -238,7 +238,7 @@ export default function Sidebar() {
         </span>
         {!collapsed && (
           <span style={{
-            fontSize: "15px",
+            fontSize: "18px",
             fontFamily: "var(--font-mono)",
             letterSpacing: "0.03em",
             whiteSpace: "nowrap",

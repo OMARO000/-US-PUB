@@ -202,7 +202,7 @@ export default function ConversationPage() {
           {portraitAsBackground ? "[portrait on]" : "[portrait]"}
         </button>
 
-        <div style={{ width: "100%", maxWidth: "680px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", zIndex: 1 }}>
+        <div style={{ width: "100%", maxWidth: "1100px", flex: 1, display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", zIndex: 1 }}>
 
           {/* ── error banner ── */}
           {intake.error && (
