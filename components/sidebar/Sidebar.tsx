@@ -259,12 +259,14 @@ export default function Sidebar() {
             marginBottom: "4px",
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            {collapsed
-              ? <path d="M9 18l6-6-6-6"/>
-              : <path d="M15 18l-6-6 6-6"/>
-            }
-          </svg>
+          <span style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "13px",
+            letterSpacing: "0.05em",
+            color: "var(--dim)",
+          }}>
+            {collapsed ? "»" : "«"}
+          </span>
         </button>
       )}
     </>
