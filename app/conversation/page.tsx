@@ -87,13 +87,23 @@ function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId
       display: "flex",
       flexDirection: "column",
       height: "100%",
-      maxWidth: "860px",
       width: "100%",
-      margin: "0 auto",
+      overflow: "hidden",
     }}>
 
-      {/* DM analysis banner — messages thread only */}
+      {/* DM analysis banner — messages thread only, full width */}
       {isMessages && <DMAnalysisBanner />}
+
+      {/* Centered content column */}
+      <div style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        maxWidth: "860px",
+        width: "100%",
+        margin: "0 auto",
+        overflow: "hidden",
+      }}>
 
       {/* Messages */}
       <div style={{
@@ -224,6 +234,7 @@ function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId
           50% { opacity: 0; }
         }
       `}</style>
+      </div>{/* end centered content column */}
     </div>
   )
 }
@@ -363,6 +374,11 @@ export default function ConversationPage() {
     const uid = getOrCreateUserId()
     setUserId(uid)
     setPortraitAsBackground(localStorage.getItem("us_portrait_bg") === "true")
+
+    // clear any stale thread view preferences — always start in chat mode
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith("us_thread_view_")) localStorage.removeItem(key)
+    })
 
     fetch("/api/user", {
       method: "POST",

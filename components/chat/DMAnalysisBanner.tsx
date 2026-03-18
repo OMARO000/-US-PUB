@@ -36,7 +36,7 @@ export default function DMAnalysisBanner() {
 
   return (
     <div style={{
-      padding: "0 16px",
+      padding: "14px 20px",
       minHeight: "44px",
       display: "flex",
       alignItems: "center",
@@ -46,9 +46,10 @@ export default function DMAnalysisBanner() {
     }}>
       <span style={{
         flex: 1,
-        fontSize: "11px",
+        fontSize: "14px",
         fontFamily: "var(--font-mono)",
-        color: "var(--muted)",
+        color: "var(--text)",
+        opacity: 0.85,
         lineHeight: 1.5,
       }}>
         [us] observes patterns in this conversation to improve your connection insights — not the content, just how you connect.
@@ -59,9 +60,9 @@ export default function DMAnalysisBanner() {
           background: "transparent",
           border: "none",
           cursor: "pointer",
-          fontSize: "11px",
+          fontSize: "14px",
           fontFamily: "var(--font-mono)",
-          color: "var(--dim)",
+          color: "var(--muted)",
           padding: "0",
           flexShrink: 0,
           minHeight: "44px",

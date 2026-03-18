@@ -104,7 +104,11 @@ export function useThread(
 
   // ── initialize thread ──
   useEffect(() => {
-    if (!userId || initialized.current) return
+    if (!userId) return
+    // reset state on thread switch
+    initialized.current = false
+    setMessages([])
+    setThreadId(null)
     initialized.current = true
 
     const initThread = async () => {
