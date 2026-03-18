@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/themes/ThemeProvider";
-import AmbientYouWrapper from "@/components/navigation/AmbientYouWrapper";
 import CookieBanner from "@/components/navigation/CookieBanner";
 import "./globals.css";
 
@@ -46,7 +45,6 @@ export default function RootLayout({
       <body className={`${ibmPlexSans.variable} ${ibmPlexMono.variable}`}>
         <ThemeProvider>
           {children}
-          <AmbientYouWrapper />
           <CookieBanner />
         </ThemeProvider>
       </body>

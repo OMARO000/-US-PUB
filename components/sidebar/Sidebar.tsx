@@ -2,10 +2,17 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { ThreadType } from "@/lib/threads/threadPrompts";
+
+interface SidebarProps {
+  activeThread?: ThreadType
+  onThreadSelect?: (t: ThreadType) => void
+}
 
 const navItems = [
   {
     href: "/conversation",
+    threadType: "conversation" as ThreadType,
     label: "[conversation]",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -16,6 +23,7 @@ const navItems = [
   },
   {
     href: "/connections",
+    threadType: "connections" as ThreadType,
     label: "[connections]",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -29,6 +37,7 @@ const navItems = [
   },
   {
     href: "/insights",
+    threadType: "insights" as ThreadType,
     label: "[insights]",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -41,6 +50,7 @@ const navItems = [
   },
   {
     href: "/journal",
+    threadType: "journal" as ThreadType,
     label: "[journal]",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -52,6 +62,7 @@ const navItems = [
   },
   {
     href: "/about",
+    threadType: "about" as ThreadType,
     label: "[about]",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -64,6 +75,7 @@ const navItems = [
   },
   {
     href: "/profile",
+    threadType: "profile" as ThreadType,
     label: "[profile]",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -75,7 +87,7 @@ const navItems = [
   },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps = {}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -137,29 +149,31 @@ export default function Sidebar() {
 
       {/* Nav items */}
       {navItems.map((item) => {
-        const active = pathname === item.href;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-label={item.label}
-            aria-current={active ? "page" : undefined}
-            style={{
-              width: "100%",
-              height: "72px",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: (collapsed && !isMobile) ? "center" : "flex-start",
-              gap: (collapsed && !isMobile) ? 0 : "12px",
-              padding: (collapsed && !isMobile) ? "0" : "0 12px",
-              position: "relative",
-              background: active ? "var(--bg3)" : "transparent",
-              color: active ? "var(--amber)" : "var(--muted)",
-              transition: "background 0.15s, color 0.15s",
-              textDecoration: "none",
-            }}
-          >
+        const active = activeThread
+          ? activeThread === item.threadType
+          : pathname === item.href;
+        const navItemStyle = {
+          width: "100%",
+          height: "72px",
+          borderRadius: "10px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: (collapsed && !isMobile) ? "center" : "flex-start",
+          gap: (collapsed && !isMobile) ? 0 : "12px",
+          padding: (collapsed && !isMobile) ? "0" : "0 12px",
+          position: "relative" as const,
+          background: active ? "var(--bg3)" : "transparent",
+          color: active ? "var(--amber)" : "var(--muted)",
+          transition: "background 0.15s, color 0.15s",
+          textDecoration: "none",
+          cursor: "pointer",
+          border: "none",
+          font: "inherit",
+          textAlign: "left" as const,
+          boxSizing: "border-box" as const,
+        };
+        const inner = (
+          <>
             <span style={{ width: "28px", height: "28px", display: "flex", flexShrink: 0 }}>
               {item.icon}
             </span>
@@ -194,6 +208,27 @@ export default function Sidebar() {
                 background: "var(--rose)",
               }} />
             )}
+          </>
+        );
+        return onThreadSelect ? (
+          <button
+            key={item.href}
+            onClick={() => onThreadSelect(item.threadType)}
+            aria-label={item.label}
+            aria-current={active ? "page" : undefined}
+            style={navItemStyle}
+          >
+            {inner}
+          </button>
+        ) : (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-label={item.label}
+            aria-current={active ? "page" : undefined}
+            style={navItemStyle}
+          >
+            {inner}
           </Link>
         );
       })}

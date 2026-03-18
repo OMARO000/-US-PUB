@@ -246,3 +246,25 @@ export const matchOutcomes = sqliteTable("match_outcomes", {
   notes: text("notes"),                               // free text, nullable
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
+
+// ─────────────────────────────────────────────
+// THREADS
+// Persistent [you] conversations scoped to a topic.
+// One thread per user per thread type.
+// ─────────────────────────────────────────────
+export const threads = sqliteTable("threads", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  threadType: text("thread_type").notNull(), // conversation, connections, insights, etc.
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  lastActiveAt: integer("last_active_at", { mode: "timestamp" }).notNull(),
+})
+
+export const threadMessages = sqliteTable("thread_messages", {
+  id: text("id").primaryKey(),
+  threadId: text("thread_id").notNull().references(() => threads.id, { onDelete: "cascade" }),
+  role: text("role", { enum: ["you", "user"] }).notNull(),
+  content: text("content").notNull(),
+  metadata: text("metadata"),  // JSON — for MATCH_CARD, SETTING_UPDATE etc
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+})
