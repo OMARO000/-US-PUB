@@ -3,13 +3,11 @@
 /**
  * /conversation — the [us] app shell
  *
- * FIXES APPLIED (round 4):
- * 1. threadPrompts.ts: settings hasPageView set to false (handled separately)
- * 2. viewMode (permanent fix): replaced single viewMode state with threadViewModes —
- *    a per-thread map. viewMode is derived as threadViewModes[activeThread] ?? "chat"
- *    on every render — cannot be stale or bleed between tabs. switchThread explicitly
- *    clears the destination thread to "chat" before navigating.
- * 3. Input cloned from UnifiedChat exactly: fontSize 20px, var(--font-sans), rounded
+ * FIXES APPLIED (round 7):
+ * 1. activeThread + viewMode are plain useState — no URL, no router, no searchParams.
+ *    switchThread calls setViewMode("chat") and setActiveThread(thread) in one
+ *    synchronous handler. React batches both into one render. No race possible.
+ * 2. Input clones UnifiedChat exactly: fontSize 20px, var(--font-sans), rounded
  *    bg2 container, borderRadius 13px, padding 9px 13px, amber SVG send button with
  *    rgba(196,151,74,0.14) background, disclaimer at 12px var(--muted) opacity 0.6.
  *    Orb at scale(2) with marginBottom: 80px, anchored at paddingTop: 28vh.
@@ -17,7 +15,6 @@
 
 import { useEffect, useRef, useState, Suspense } from "react"
 import dynamic from "next/dynamic"
-import { useSearchParams, useRouter } from "next/navigation"
 import { useIntake } from "@/hooks/useIntake"
 import { useThread } from "@/hooks/useThread"
 import Sidebar from "@/components/sidebar/Sidebar"
@@ -118,7 +115,7 @@ function ThreadChatView({
 
   const hasConversation = thread.messages.length > 1
 
-  // Input block — cloned from UnifiedChat exactly
+  // ── Cloned UnifiedChat input block ──
   const InputBlock = (
     <div className="no-record" style={{
       padding: "20px 24px 24px",
@@ -412,9 +409,10 @@ function PageViewRenderer({ threadType }: { threadType: ThreadType }) {
 // ─────────────────────────────────────────────
 
 export default function ConversationPage() {
-  const router       = useRouter()
-  const searchParams = useSearchParams()
-  const activeThread = (searchParams.get("thread") ?? "conversation") as ThreadType
+  // Tab state is pure local state — no URL params, no router.
+  // Eliminates the Next.js App Router searchParams re-render race entirely.
+  const [activeThread, setActiveThread] = useState<ThreadType>("conversation")
+  const [viewMode, setViewMode]         = useState<"chat" | "page">("chat")
 
   const [userId, setUserId]                             = useState<string | null>(null)
   const [isLocked, setIsLocked]                         = useState(false)
@@ -422,15 +420,6 @@ export default function ConversationPage() {
   const [archetype, setArchetype]                       = useState<string | null>(null)
   const [journalShared, setJournalShared]               = useState(false)
   const [placeholder, setPlaceholder]                   = useState(CONVERSATION_PROMPTS[0])
-
-  // FIX 2: viewMode is derived directly from activeThread on every render.
-  // A separate piece of state tracks user's explicit toggle choice,
-  // keyed per thread so it can never bleed across tabs.
-  const [threadViewModes, setThreadViewModes] = useState<Partial<Record<ThreadType, "chat" | "page">>>({})
-
-  // The effective viewMode for the current thread is always "chat" unless
-  // the user has explicitly toggled this specific thread to "page".
-  const viewMode: "chat" | "page" = threadViewModes[activeThread] ?? "chat"
 
   const intake      = useIntake()
   const initialized = useRef(false)
@@ -445,18 +434,15 @@ export default function ConversationPage() {
     : intake.isSpeaking ? "speaking"
     : "idle"
 
-  // switchThread: navigate only — viewMode auto-resets because threadViewModes
-  // for the new thread defaults to "chat" unless user toggled it previously.
-  // We also clear the target thread's viewMode to guarantee chat on arrival.
+  // Both state updates are synchronous in the same handler — React batches
+  // them into one render. viewMode is always "chat" when new thread renders.
   const switchThread = (thread: ThreadType) => {
-    // Reset ALL threads to chat on every switch — no stale page state anywhere
-    setThreadViewModes({})
-    router.push(`/conversation?thread=${thread}`)
+    setViewMode("chat")
+    setActiveThread(thread)
   }
 
   const toggleViewMode = () => {
-    const next = viewMode === "chat" ? "page" : "chat"
-    setThreadViewModes((prev) => ({ ...prev, [activeThread]: next }))
+    setViewMode((prev) => prev === "chat" ? "page" : "chat")
   }
 
   const handleToggleLock = () => {
