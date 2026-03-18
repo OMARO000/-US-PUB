@@ -7,6 +7,7 @@ import type { ThreadType } from "@/lib/threads/threadPrompts";
 interface SidebarProps {
   activeThread?: ThreadType
   onThreadSelect?: (t: ThreadType) => void
+  intentSignal?: boolean
 }
 
 const navItems = [
@@ -99,7 +100,7 @@ const navItems = [
   },
 ];
 
-export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps = {}) {
+export default function Sidebar({ activeThread, onThreadSelect, intentSignal = false }: SidebarProps = {}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -202,17 +203,18 @@ export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps =
                 {item.label}
               </span>
             )}
-            {(!collapsed || isMobile) && item.badge && (
+            {(!collapsed || isMobile) && item.badge && intentSignal && (
               <span aria-label="new" style={{
                 marginLeft: "auto",
                 width: "7px",
                 height: "7px",
                 borderRadius: "50%",
-                background: "var(--rose)",
+                background: "var(--amber)",
                 flexShrink: 0,
+                animation: "intentPulse 2s ease-in-out infinite",
               }} />
             )}
-            {collapsed && !isMobile && item.badge && (
+            {collapsed && !isMobile && item.badge && intentSignal && (
               <span aria-label="new" style={{
                 position: "absolute",
                 top: "8px",
@@ -220,7 +222,8 @@ export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps =
                 width: "6px",
                 height: "6px",
                 borderRadius: "50%",
-                background: "var(--rose)",
+                background: "var(--amber)",
+                animation: "intentPulse 2s ease-in-out infinite",
               }} />
             )}
           </>
@@ -322,6 +325,12 @@ export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps =
           </span>
         </button>
       )}
+      <style>{`
+        @keyframes intentPulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
+      `}</style>
     </>
   );
 

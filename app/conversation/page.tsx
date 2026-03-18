@@ -32,6 +32,7 @@ const TermsPageView       = dynamic(() => import("@/app/terms/PageView"),       
 const PrivacyPageView     = dynamic(() => import("@/app/privacy/PageView"),     { ssr: false })
 
 import { useSearchParams } from "next/navigation"
+import { useIntentSignal } from "@/hooks/useIntentSignal"
 const MatchedConversation = dynamic(() => import("@/components/chat/MatchedConversation"), { ssr: false })
 
 // ─────────────────────────────────────────────
@@ -112,6 +113,8 @@ export default function ConversationPage() {
 
   const searchParams = useSearchParams()
   const matchedConversationId = searchParams.get("c")
+
+  const intentSignal = useIntentSignal(userId, activeThread === "connections")
 
   const intake      = useIntake()
   const initialized = useRef(false)
@@ -198,7 +201,7 @@ export default function ConversationPage() {
 
   return (
     <div style={{ display: "flex", height: "100dvh", overflow: "hidden" }}>
-      <Sidebar activeThread={activeThread} onThreadSelect={switchThread} />
+      <Sidebar activeThread={activeThread} onThreadSelect={switchThread} intentSignal={intentSignal} />
 
       <main
         onMouseDown={isConversationThread ? handleTap : undefined}
