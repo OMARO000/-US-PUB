@@ -175,17 +175,17 @@ Sovereign by design.`,
   },
 ]
 
-export default function PrivacyPage() {
+export default function PrivacyPage({ embedded }: { embedded?: boolean } = {}) {
   return (
-    <div style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
-      <Sidebar />
+    <div style={{ display: "flex", minHeight: embedded ? undefined : "100dvh", background: "var(--bg)" }}>
+      {!embedded && <Sidebar />}
       <main style={{
-        marginLeft: "var(--sidebar-width)",
+        marginLeft: embedded ? 0 : "var(--sidebar-width)",
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        minHeight: "100dvh",
-        width: "calc(100vw - var(--sidebar-width))",
+        minHeight: embedded ? undefined : "100dvh",
+        width: embedded ? "100%" : "calc(100vw - var(--sidebar-width))",
       }}>
         <div style={{
           flex: 1,

@@ -534,7 +534,7 @@ function NotificationsSection() {
 // PAGE
 // ─────────────────────────────────────────────
 
-export default function SettingsPage() {
+export default function SettingsPage({ embedded }: { embedded?: boolean } = {}) {
   const pathname = usePathname()
   const narration = useYouNarration(pathname)
 
@@ -558,14 +558,14 @@ export default function SettingsPage() {
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
-      <Sidebar />
+    <div style={{ display: "flex", minHeight: embedded ? undefined : "100dvh", background: "var(--bg)" }}>
+      {!embedded && <Sidebar />}
       <main style={{
-        marginLeft: "var(--sidebar-width)",
+        marginLeft: embedded ? 0 : "var(--sidebar-width)",
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        minHeight: "100dvh",
+        minHeight: embedded ? undefined : "100dvh",
       }}>
         <YouNarrationBanner narration={narration} />
 

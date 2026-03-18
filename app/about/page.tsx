@@ -202,19 +202,19 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 // PAGE
 // ─────────────────────────────────────────────
 
-export default function AboutPage() {
+export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
   const pathname = usePathname()
   const narration = useYouNarration(pathname)
 
   return (
-    <div style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
-      <Sidebar />
+    <div style={{ display: "flex", minHeight: embedded ? undefined : "100dvh", background: "var(--bg)" }}>
+      {!embedded && <Sidebar />}
       <main style={{
-        marginLeft: "var(--sidebar-width)",
+        marginLeft: embedded ? 0 : "var(--sidebar-width)",
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        minHeight: "100dvh",
+        minHeight: embedded ? undefined : "100dvh",
       }}>
         <YouNarrationBanner narration={narration} />
 

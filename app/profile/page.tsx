@@ -751,7 +751,7 @@ function EmptyState() {
 // PAGE
 // ─────────────────────────────────────────────
 
-export default function ProfilePage() {
+export default function ProfilePage({ embedded }: { embedded?: boolean } = {}) {
   const pathname = usePathname()
   const narration = useYouNarration(pathname)
   const [portrait, setPortrait] = useState<Portrait | null>(null)
@@ -778,14 +778,14 @@ export default function ProfilePage() {
   const frameworkSignals = portrait ? buildFrameworkSignals(portrait) : []
 
   return (
-    <div style={{ display: "flex", minHeight: "100dvh", background: "var(--bg)" }}>
-      <Sidebar />
+    <div style={{ display: "flex", minHeight: embedded ? undefined : "100dvh", background: "var(--bg)" }}>
+      {!embedded && <Sidebar />}
       <main style={{
-        marginLeft: "var(--sidebar-width)",
+        marginLeft: embedded ? 0 : "var(--sidebar-width)",
         flex: 1,
         display: "flex",
         flexDirection: "column",
-        minHeight: "100dvh",
+        minHeight: embedded ? undefined : "100dvh",
       }}>
         <YouNarrationBanner narration={narration} />
 
