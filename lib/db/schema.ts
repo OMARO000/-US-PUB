@@ -197,6 +197,7 @@ export const matchScores = sqliteTable("match_scores", {
 
   // go deeper
   goDeeper: integer("go_deeper", { mode: "boolean" }).notNull().default(false),
+  intentSignal: integer("intent_signal", { mode: "boolean" }).notNull().default(false),
 
   // status
   status: text("status", {
