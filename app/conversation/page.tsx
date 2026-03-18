@@ -295,7 +295,7 @@ export default function ConversationPage() {
             {activeThread === "journal" && (
               <button
                 onClick={(e) => { e.stopPropagation(); setJournalShared((p) => !p) }}
-                aria-label={journalShared ? "stop sharing journal" : "share journal with [you]"}
+                aria-label={journalShared ? "stop sharing journal" : "share journal with [u]"}
                 style={{
                   ...TOGGLE_BUTTON_STYLE,
                   top: journalToggleTop,
@@ -445,6 +445,19 @@ export default function ConversationPage() {
                     gap: "6px",
                     marginBottom: "32px",
                   }}>
+                    <span style={{
+                      fontFamily: "var(--font-mono)",
+                      fontSize: "11px",
+                      color: "var(--muted)",
+                      letterSpacing: "0.04em",
+                      opacity: 0.6,
+                      textAlign: "center",
+                      maxWidth: "320px",
+                      lineHeight: 1.7,
+                      marginBottom: "10px",
+                    }}>
+                      [u] is a presence, not a chatbot. it listens, reflects, and helps you understand yourself well enough to find real connection.
+                    </span>
                     <span style={{
                       fontFamily: "var(--font-mono)", fontSize: "12px",
                       color: "var(--muted)", letterSpacing: "0.06em",

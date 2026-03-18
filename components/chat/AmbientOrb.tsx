@@ -28,9 +28,8 @@ export default function AmbientOrb({
     orbState === "speaking"  ? "[speaking…]" :
     null;
 
-  // In locked mode the dot is always rose
-  const dotColor = (isLocked || isRecording) ? "var(--rose)" : "var(--amber)";
   const ringRecording = isLocked || isRecording;
+  const uColor = ringRecording ? "var(--rose)" : "var(--amber)";
 
   return (
     <div
@@ -49,52 +48,46 @@ export default function AmbientOrb({
         if (e.code === "Space" && onHoldEnd) { e.preventDefault(); onHoldEnd(); }
       }}
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: "20px",
-        cursor: onHoldStart ? "pointer" : "default",
-        userSelect: "none",
-        WebkitUserSelect: "none",
+        display: "flex", flexDirection: "column", alignItems: "center",
+        gap: "20px", cursor: onHoldStart ? "pointer" : "default",
+        userSelect: "none", WebkitUserSelect: "none",
       }}
     >
       <div style={{
-        width: "80px",
-        height: "80px",
-        position: "relative",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        width: "80px", height: "80px", position: "relative",
+        display: "flex", alignItems: "center", justifyContent: "center",
       }}>
+        {/* outer ring */}
         <div style={{
-          position: "absolute",
-          inset: 0,
-          borderRadius: "50%",
+          position: "absolute", inset: 0, borderRadius: "50%",
           border: `1px solid ${ringRecording ? "rgba(196,132,138,0.15)" : isSpeaking ? "rgba(196,151,74,0.18)" : "rgba(196,151,74,0.09)"}`,
           animation: "oring 3s ease-in-out infinite 0.5s",
         }} />
+        {/* inner ring */}
         <div style={{
-          position: "absolute",
-          inset: "12px",
-          borderRadius: "50%",
+          position: "absolute", inset: "12px", borderRadius: "50%",
           border: `1px solid ${ringRecording ? "rgba(196,132,138,0.35)" : isSpeaking ? "rgba(196,151,74,0.45)" : "rgba(196,151,74,0.22)"}`,
           animation: `oring ${ringRecording ? "0.9s" : isSpeaking ? "1.4s" : "3s"} ease-in-out infinite`,
         }} />
-        <div style={{
-          width: "22px",
-          height: "22px",
-          borderRadius: "50%",
-          background: dotColor,
+        {/* [u] center — replaces dot */}
+        <span style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "13px",
+          fontWeight: 400,
+          letterSpacing: "0.04em",
+          color: uColor,
           opacity: isThinking ? 0.4 : 1,
           animation: `${ringRecording ? "recpulse 0.9s" : isThinking ? "pulse 1.2s" : isSpeaking ? "obreathe 1.4s" : "obreathe 3s"} ease-in-out infinite`,
-        }} />
+          userSelect: "none",
+          pointerEvents: "none",
+        }}>
+          [u]
+        </span>
       </div>
 
-      {/* State label — only active states, no idle hint */}
       {stateLabel && (
         <span aria-live="polite" aria-atomic="true" style={{
-          fontSize: "13px",
-          fontFamily: "var(--font-mono)",
+          fontSize: "13px", fontFamily: "var(--font-mono)",
           color: orbState === "recording" ? "var(--rose)" : orbState === "speaking" ? "var(--amber)" : "var(--muted)",
           letterSpacing: "0.1em",
           animation: orbState === "thinking" ? "hintpulse 1.2s ease-in-out infinite" :

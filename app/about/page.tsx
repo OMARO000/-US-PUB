@@ -243,9 +243,22 @@ function FAQBubble({ faq, visible }: { faq: typeof FAQS[0]; visible: boolean }) 
 // DELIVERY STAGES
 // 0 = philosophy typing
 // 1 = mission typing
-// 2 = faq intro typing
-// 3 = faqs visible + input + orb unlocked
+// 2 = [u] explanation typing
+// 3 = faq intro typing
+// 4 = faqs visible + input unlocked
 // ─────────────────────────────────────────────
+
+const U_EXPLANATION = `[u] is the presence at the center of [us].
+
+not a chatbot. not a therapist. not an assistant.
+
+a mirror — and a reminder.
+
+during your intake, [u] listens without judgment and reflects back what it observes, not what it assumes. it doesn't label you. it doesn't diagnose you. it notices what you say, how you say it, and what that might mean for the kind of connection you're looking for.
+
+over time, [u] surfaces patterns across your connections — things worth knowing about yourself, offered with care.
+
+[u] is not trying to become the connection. it's trying to make connection between humans possible.`
 
 const FAQ_INTRO = "you might be wondering..."
 
@@ -410,11 +423,12 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
   }, [isRecording, stopRecording])
 
   // ── stage callbacks ─────────────────────────
-  const onPhilosophyDone = useCallback(() => { setTimeout(() => setStage(1), 600) }, [])
-  const onMissionDone    = useCallback(() => { setTimeout(() => setStage(2), 600) }, [])
-  const onFaqIntroDone   = useCallback(() => { setTimeout(() => setStage(3), 400) }, [])
+  const onPhilosophyDone    = useCallback(() => { setTimeout(() => setStage(1), 600) }, [])
+  const onMissionDone       = useCallback(() => { setTimeout(() => setStage(2), 600) }, [])
+  const onUExplanationDone  = useCallback(() => { setTimeout(() => setStage(3), 600) }, [])
+  const onFaqIntroDone      = useCallback(() => { setTimeout(() => setStage(4), 400) }, [])
 
-  const inputUnlocked = stage >= 3
+  const inputUnlocked = stage >= 4
   const orbState = isRecording ? "recording" : isThinking ? "thinking" : isSpeaking ? "speaking" : "idle"
 
   return (
@@ -457,18 +471,28 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
           />
         )}
 
-        {/* faq intro */}
+        {/* [u] explanation */}
         {stage >= 2 && (
           <ThemBubble
-            text={FAQ_INTRO}
+            text={U_EXPLANATION}
             active={stage === 2}
+            onDone={onUExplanationDone}
+            speed={10}
+          />
+        )}
+
+        {/* faq intro */}
+        {stage >= 3 && (
+          <ThemBubble
+            text={FAQ_INTRO}
+            active={stage === 3}
             onDone={onFaqIntroDone}
             speed={18}
           />
         )}
 
-        {/* stage 3 — two-column: faqs + orb */}
-        {stage >= 3 && (
+        {/* stage 4 — two-column: faqs + orb */}
+        {stage >= 4 && (
           <div style={{
             display: "flex",
             gap: "24px",
@@ -483,11 +507,11 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
               gap: "7px",
             }}>
               {FAQS.map((faq) => (
-                <FAQBubble key={faq.question} faq={faq} visible={stage >= 3} />
+                <FAQBubble key={faq.question} faq={faq} visible={stage >= 4} />
               ))}
 
               {/* footer */}
-              {messages.length === 0 && (
+              {stage >= 4 && messages.length === 0 && (
                 <div style={{
                   fontSize: "11px",
                   fontFamily: "var(--font-mono)",
