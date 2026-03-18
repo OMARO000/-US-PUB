@@ -9,7 +9,10 @@
  * - New thread: [you] opens with a short prompt
  * - Returning thread: silent, shows history
  * - Messages persist to DB via /api/threads
- * - [chat]/[page] toggle state persisted in localStorage
+ *
+ * NOTE: viewMode ([chat]/[page]) is intentionally removed from this hook.
+ * It is managed exclusively in ConversationPage to avoid localStorage race
+ * conditions. viewMode always defaults to "chat" unless user explicitly toggles.
  */
 
 import { useState, useEffect, useCallback, useRef } from "react"
@@ -28,14 +31,10 @@ export interface ThreadMessage {
   metadata?: Record<string, string> // for MATCH_CARD, SETTING_UPDATE etc
 }
 
-export type ThreadViewMode = "chat" | "page"
-
 export interface UseThreadReturn {
   messages: ThreadMessage[]
   isStreaming: boolean
   isNew: boolean
-  viewMode: ThreadViewMode
-  setViewMode: (mode: ThreadViewMode) => void
   sendMessage: (text: string) => Promise<void>
   threadId: string | null
 }
@@ -81,34 +80,13 @@ export function useThread(
   const [isStreaming, setIsStreaming] = useState(false)
   const [isNew, setIsNew] = useState(false)
   const [threadId, setThreadId] = useState<string | null>(null)
-  const [viewMode, setViewModeState] = useState<ThreadViewMode>("chat")
   const initialized = useRef(false)
 
   const config = getThreadConfig(threadType)
 
-  // ── load view mode from localStorage ──
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    const saved = localStorage.getItem(`us_thread_view_${threadType}`)
-    if (saved === "page" || saved === "chat") {
-      setViewModeState(saved)
-    }
-  }, [threadType])
-
-  const setViewMode = useCallback((mode: ThreadViewMode) => {
-    setViewModeState(mode)
-    if (typeof window !== "undefined") {
-      localStorage.setItem(`us_thread_view_${threadType}`, mode)
-    }
-  }, [threadType])
-
   // ── initialize thread ──
   useEffect(() => {
-    if (!userId) return
-    // reset state on thread switch
-    initialized.current = false
-    setMessages([])
-    setThreadId(null)
+    if (!userId || initialized.current) return
     initialized.current = true
 
     const initThread = async () => {
@@ -233,8 +211,8 @@ export function useThread(
         const { done, value } = await reader.read()
         if (done) break
 
-        const text = decoder.decode(value)
-        const lines = text.split("\n").filter((l) => l.startsWith("data: "))
+        const chunk = decoder.decode(value)
+        const lines = chunk.split("\n").filter((l) => l.startsWith("data: "))
 
         for (const line of lines) {
           try {
@@ -280,8 +258,6 @@ export function useThread(
     messages,
     isStreaming,
     isNew,
-    viewMode,
-    setViewMode,
     sendMessage,
     threadId,
   }

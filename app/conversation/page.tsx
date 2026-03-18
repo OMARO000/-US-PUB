@@ -10,6 +10,17 @@
  *
  * The intake conversation ([conversation] thread) retains its
  * existing orb + block-based engine.
+ *
+ * FIXES APPLIED:
+ * 1. Hold-to-speak gesture on entire <main> content area, not just orb
+ * 2. "or type below" matches "hold anywhere to speak" color (var(--muted))
+ * 3. Disclaimer beneath every chat input across all threads
+ * 4. Opening prompt IS the contextual bubble — only one shown, never duplicated
+ * 5. Journal consent toggle rendered in journal thread chat view
+ * 6. viewMode always defaults to "chat"; localStorage only read if user set it
+ *    this session. viewMode fully removed from useThread to prevent race.
+ * 7. Pulsating orb rendered on every thread (scaled down for non-conversation)
+ * 8. [page view] toggle same size as [portrait] and [lock voice]
  */
 
 import { useEffect, useRef, useState, Suspense } from "react"
@@ -61,17 +72,41 @@ const ARCHETYPE_GRADIENTS: Record<string, string> = {
   default:   "radial-gradient(ellipse at 50% 40%, rgba(196,151,74,0.12) 0%, transparent 70%)",
 }
 
+// Shared toggle button style — same size for [portrait], [lock voice], [page view]
+const TOGGLE_BUTTON_STYLE: React.CSSProperties = {
+  background: "transparent",
+  borderRadius: "6px",
+  cursor: "pointer",
+  fontSize: "12px",
+  fontFamily: "var(--font-mono)",
+  letterSpacing: "0.06em",
+  padding: "6px 10px",
+  minHeight: "44px",
+  transition: "border-color 0.15s, color 0.15s, opacity 0.15s",
+}
+
 // ─────────────────────────────────────────────
 // THREAD CHAT VIEW
 // Generic chat UI for non-intake threads
+// FIX 3: disclaimer on every input
+// FIX 4: one bubble only (opening prompt = contextual bubble)
+// FIX 5: journal consent toggle
+// FIX 7: pulsating orb on every thread
 // ─────────────────────────────────────────────
 
-function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId: string }) {
-  const isMessages = threadType === "messages"
-  const contextPrompt = THREAD_CONTEXT_PROMPTS[threadType] ?? ""
+function ThreadChatView({
+  threadType,
+  userId,
+}: {
+  threadType: ThreadType
+  userId: string
+}) {
   const thread = useThread(threadType, userId)
   const [input, setInput] = useState("")
+  const [journalConsentVisible, setJournalConsentVisible] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const isMessages = threadType === "messages"
+  const contextPrompt = THREAD_CONTEXT_PROMPTS[threadType] ?? ""
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -82,6 +117,10 @@ function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId
     thread.sendMessage(input.trim())
     setInput("")
   }
+
+  // FIX 4: thread.messages already contains the single opening bubble from useThread.
+  // No duplicate — we render thread.messages as-is. The opening prompt IS the contextual bubble.
+  const hasUserReplied = thread.messages.length > 1
 
   return (
     <div style={{
@@ -107,157 +146,220 @@ function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId
         overflow: "hidden",
       }}>
 
-      {/* Messages */}
-      <div style={{
-        flex: 1,
-        overflowY: "auto",
-        padding: "32px 40px 16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "16px",
-        justifyContent: thread.messages.length === 1 ? "flex-end" : "flex-start",
-        paddingBottom: thread.messages.length === 1 ? "24px" : "16px",
-      }}>
-        {thread.messages.map((msg) => (
-          <div key={msg.id} style={{
-            display: "flex",
-            justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-          }}>
-            <div style={{
-              maxWidth: "72%",
-              padding: "12px 16px",
-              borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-              background: msg.role === "user" ? "var(--bg3)" : "var(--bg2)",
-              border: "1px solid var(--border)",
-              fontSize: "14px",
-              fontFamily: "var(--font-mono)",
-              color: "var(--text)",
-              fontWeight: 300,
-              lineHeight: 1.7,
-              whiteSpace: "pre-wrap",
-            }}>
-              {msg.content}
-              {msg.role === "you" && thread.isStreaming && !msg.content && (
-                <span style={{
-                  display: "inline-block",
-                  width: "7px",
-                  height: "14px",
-                  background: "var(--amber)",
-                  opacity: 0.7,
-                  animation: "blink 0.8s step-end infinite",
-                  verticalAlign: "text-bottom",
-                  marginLeft: "2px",
-                }} />
-              )}
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Context bubble — shown when no user messages yet */}
-      {thread.messages.length <= 1 && contextPrompt && (
-        <div style={{ padding: "0 40px 12px" }}>
+        {/* FIX 5: Journal consent toggle — top of journal chat view */}
+        {threadType === "journal" && journalConsentVisible && (
           <div style={{
-            alignSelf: "flex-start",
-            display: "inline-block",
-            maxWidth: "72%",
-            padding: "10px 14px",
-            borderRadius: "14px 14px 14px 4px",
-            background: "var(--bg2)",
-            border: "1px solid var(--border)",
-            fontSize: "13.5px",
-            fontWeight: 300,
-            fontFamily: "var(--font-sans)",
-            color: "var(--muted)",
-            lineHeight: 1.6,
+            padding: "12px 40px",
+            borderBottom: "1px solid var(--border)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "12px",
           }}>
-            {contextPrompt}
+            <span style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "12px",
+              color: "var(--muted)",
+              letterSpacing: "0.04em",
+            }}>
+              [you] cannot see your journal
+            </span>
+            <button
+              onClick={() => setJournalConsentVisible(false)}
+              aria-label="dismiss journal privacy notice"
+              style={{
+                background: "transparent",
+                border: "1px solid var(--border)",
+                borderRadius: "4px",
+                cursor: "pointer",
+                fontFamily: "var(--font-mono)",
+                fontSize: "11px",
+                color: "var(--dim)",
+                padding: "4px 8px",
+              }}
+            >
+              [ok]
+            </button>
+          </div>
+        )}
+
+        {/* FIX 7: Pulsating orb + single opening bubble when no user reply yet */}
+        {!hasUserReplied && (
+          <div style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            flex: 1,
+            gap: "32px",
+          }}>
+            <div style={{ transform: "scale(1.2)", transformOrigin: "center center" }}>
+              <AmbientOrb
+                isRecording={false}
+                orbState="idle"
+                isLocked={false}
+              />
+            </div>
+            {/* FIX 4: Single opening bubble — the opening prompt from useThread */}
+            {thread.messages[0] && (
+              <div style={{
+                maxWidth: "520px",
+                padding: "14px 20px",
+                borderRadius: "16px 16px 16px 4px",
+                background: "var(--bg2)",
+                border: "1px solid var(--border)",
+                fontSize: "14px",
+                fontFamily: "var(--font-mono)",
+                color: "var(--text)",
+                fontWeight: 300,
+                lineHeight: 1.7,
+                textAlign: "center",
+              }}>
+                {thread.messages[0].content}
+              </div>
+            )}
+            {/* FIX 2: "or type below" — var(--muted) */}
+            <span style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "12px",
+              color: "var(--muted)",
+              letterSpacing: "0.04em",
+            }}>
+              or type below
+            </span>
+          </div>
+        )}
+
+        {/* Messages (after first user reply) */}
+        {hasUserReplied && (
+          <div style={{
+            flex: 1,
+            overflowY: "auto",
+            padding: "32px 40px 16px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "16px",
+          }}>
+            {thread.messages.map((msg) => (
+              <div key={msg.id} style={{
+                display: "flex",
+                justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
+              }}>
+                <div style={{
+                  maxWidth: "72%",
+                  padding: "12px 16px",
+                  borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                  background: msg.role === "user" ? "var(--bg3)" : "var(--bg2)",
+                  border: "1px solid var(--border)",
+                  fontSize: "14px",
+                  fontFamily: "var(--font-mono)",
+                  color: "var(--text)",
+                  fontWeight: 300,
+                  lineHeight: 1.7,
+                  whiteSpace: "pre-wrap",
+                }}>
+                  {msg.content}
+                  {msg.role === "you" && thread.isStreaming && !msg.content && (
+                    <span style={{
+                      display: "inline-block",
+                      width: "7px",
+                      height: "14px",
+                      background: "var(--amber)",
+                      opacity: 0.7,
+                      animation: "blink 0.8s step-end infinite",
+                      verticalAlign: "text-bottom",
+                      marginLeft: "2px",
+                    }} />
+                  )}
+                </div>
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+        )}
+
+        {/* Input */}
+        <div style={{
+          padding: "16px 40px 24px",
+          borderTop: hasUserReplied ? "1px solid var(--border)" : "none",
+          display: "flex",
+          flexDirection: "column",
+          gap: "8px",
+        }}>
+          <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault()
+                  handleSend()
+                }
+              }}
+              placeholder={contextPrompt || "[say something...]"}
+              aria-label="message [you]"
+              rows={1}
+              style={{
+                flex: 1,
+                padding: "12px 16px",
+                borderRadius: "12px",
+                background: "var(--bg2)",
+                border: "1px solid var(--border)",
+                outline: "none",
+                fontFamily: "var(--font-mono)",
+                fontSize: "14px",
+                color: "var(--text)",
+                fontWeight: 300,
+                lineHeight: 1.5,
+                resize: "none",
+                minHeight: "44px",
+              }}
+            />
+            <button
+              onClick={handleSend}
+              disabled={!input.trim() || thread.isStreaming}
+              aria-label="send message"
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "10px",
+                background: input.trim() ? "var(--amber)" : "var(--bg3)",
+                border: "none",
+                cursor: input.trim() ? "pointer" : "default",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                transition: "background 0.15s",
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={input.trim() ? "var(--bg)" : "var(--dim)"} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"/>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+            </button>
+          </div>
+          {/* FIX 3: Disclaimer on every thread input */}
+          <div style={{
+            fontSize: "11px",
+            fontFamily: "var(--font-mono)",
+            color: "var(--dim)",
+            textAlign: "center",
+            opacity: 0.7,
+          }}>
+            by talking to [you], an AI, you agree to our{" "}
+            <a href="/terms" style={{ color: "var(--muted)", textDecoration: "underline" }}>[terms]</a>
+            {" "}and{" "}
+            <a href="/privacy" style={{ color: "var(--muted)", textDecoration: "underline" }}>[privacy policy]</a>
           </div>
         </div>
-      )}
 
-      {/* Input */}
-      <div style={{
-        padding: "16px 40px 24px",
-        borderTop: "1px solid var(--border)",
-        display: "flex",
-        flexDirection: "column",
-        gap: "8px",
-      }}>
-        <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault()
-                handleSend()
-              }
-            }}
-            placeholder={contextPrompt || "[say something...]"}
-            aria-label="message [you]"
-            rows={1}
-            style={{
-              flex: 1,
-              padding: "12px 16px",
-              borderRadius: "12px",
-              background: "var(--bg2)",
-              border: "1px solid var(--border)",
-              outline: "none",
-              fontFamily: "var(--font-mono)",
-              fontSize: "14px",
-              color: "var(--text)",
-              fontWeight: 300,
-              lineHeight: 1.5,
-              resize: "none",
-              minHeight: "44px",
-            }}
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim() || thread.isStreaming}
-            aria-label="send message"
-            style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "10px",
-              background: input.trim() ? "var(--amber)" : "var(--bg3)",
-              border: "none",
-              cursor: input.trim() ? "pointer" : "default",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
-              transition: "background 0.15s",
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={input.trim() ? "var(--bg)" : "var(--dim)"} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-              <line x1="22" y1="2" x2="11" y2="13"/>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-            </svg>
-          </button>
-        </div>
-        <div style={{
-          fontSize: "11px",
-          fontFamily: "var(--font-mono)",
-          color: "var(--dim)",
-          textAlign: "center",
-          opacity: 0.7,
-        }}>
-          by talking to [you], an AI, you agree to our{" "}
-          <a href="/terms" style={{ color: "var(--muted)", textDecoration: "underline" }}>[terms]</a>
-          {" "}and{" "}
-          <a href="/privacy" style={{ color: "var(--muted)", textDecoration: "underline" }}>[privacy policy]</a>
-        </div>
-      </div>
-
-      <style>{`
-        @keyframes blink {
-          0%, 100% { opacity: 0.7; }
-          50% { opacity: 0; }
-        }
-      `}</style>
+        <style>{`
+          @keyframes blink {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0; }
+          }
+        `}</style>
       </div>{/* end centered content column */}
     </div>
   )
@@ -265,6 +367,7 @@ function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId
 
 // ─────────────────────────────────────────────
 // VIEW MODE TOGGLE
+// FIX 8: same size as [portrait] and [lock voice]
 // ─────────────────────────────────────────────
 
 function ViewToggle({
@@ -283,21 +386,13 @@ function ViewToggle({
       onClick={onToggle}
       aria-label={viewMode === "chat" ? "switch to page view" : "switch to chat view"}
       style={{
+        ...TOGGLE_BUTTON_STYLE,
         position: "absolute",
         top: "16px",
         right: "20px",
         zIndex: 20,
-        background: "transparent",
         border: "1px solid var(--border)",
-        borderRadius: "6px",
-        cursor: "pointer",
-        fontSize: "11px",
-        fontFamily: "var(--font-mono)",
         color: "var(--muted)",
-        letterSpacing: "0.06em",
-        padding: "6px 10px",
-        minHeight: "44px",
-        transition: "border-color 0.15s, color 0.15s",
       }}
     >
       {viewMode === "chat" ? "[page view]" : "[chat view]"}
@@ -336,8 +431,11 @@ export default function ConversationPage() {
   const [isLocked, setIsLocked] = useState(false)
   const [portraitAsBackground, setPortraitAsBackground] = useState(false)
   const [archetype, setArchetype] = useState<string | null>(null)
-  const [viewMode, setViewMode] = useState<"chat" | "page">("chat")
   const [placeholder, setPlaceholder] = useState(CONVERSATION_PROMPTS[0])
+
+  // FIX 6: viewMode always starts as "chat". localStorage is NOT read on mount.
+  // Only written when user explicitly toggles. Cleared on thread switch.
+  const [viewMode, setViewMode] = useState<"chat" | "page">("chat")
 
   const intake = useIntake()
   const initialized = useRef(false)
@@ -351,33 +449,21 @@ export default function ConversationPage() {
   const isConversationThread = activeThread === "conversation"
   const config = THREAD_CONFIGS[activeThread]
 
-  // switch thread via URL
+  // switch thread via URL — reset viewMode to "chat" on every tab switch
   const switchThread = (thread: ThreadType) => {
+    setViewMode("chat")
     router.push(`/conversation?thread=${thread}`)
   }
 
-  // load view mode for active thread
+  // FIX 6: viewMode resets to "chat" on thread change. No localStorage read.
   useEffect(() => {
-    if (typeof window === "undefined") return
-    const saved = localStorage.getItem(`us_thread_view_${activeThread}`)
-    setViewMode(saved === "page" ? "page" : "chat")
+    setViewMode("chat")
   }, [activeThread])
 
   const toggleViewMode = () => {
     const next = viewMode === "chat" ? "page" : "chat"
     setViewMode(next)
-    if (typeof window !== "undefined") {
-      localStorage.setItem(`us_thread_view_${activeThread}`, next)
-    }
   }
-
-  // shuffle conversation placeholder every 3s
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPlaceholder(CONVERSATION_PROMPTS[Math.floor(Math.random() * CONVERSATION_PROMPTS.length)])
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [])
 
   const handleToggleLock = () => {
     setIsLocked((prev) => {
@@ -386,6 +472,7 @@ export default function ConversationPage() {
     })
   }
 
+  // FIX 1: handleTap / handleTapEnd placed on <main>, not just the orb div.
   const handleTap = () => {
     if (isLocked) {
       if (intake.isRecording) intake.stopRecording()
@@ -399,6 +486,14 @@ export default function ConversationPage() {
     if (!isLocked) intake.stopRecording()
   }
 
+  // shuffle conversation placeholder every 3s
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholder(CONVERSATION_PROMPTS[Math.floor(Math.random() * CONVERSATION_PROMPTS.length)])
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
+
   // initialize on mount
   useEffect(() => {
     if (initialized.current) return
@@ -407,11 +502,6 @@ export default function ConversationPage() {
     const uid = getOrCreateUserId()
     setUserId(uid)
     setPortraitAsBackground(localStorage.getItem("us_portrait_bg") === "true")
-
-    // clear any stale thread view preferences — always start in chat mode
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith("us_thread_view_")) localStorage.removeItem(key)
-    })
 
     fetch("/api/user", {
       method: "POST",
@@ -431,23 +521,33 @@ export default function ConversationPage() {
 
   return (
     <div style={{ display: "flex", height: "100dvh", overflow: "hidden" }}>
-      {/* Sidebar — passes active thread and switch handler */}
+      {/* Sidebar */}
       <Sidebar
         activeThread={activeThread}
         onThreadSelect={switchThread}
       />
 
-      <main style={{
-        flex: 1,
-        marginLeft: "var(--sidebar-width)",
-        width: "calc(100vw - var(--sidebar-width))",
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-        position: "relative",
-        alignItems: "center",
-        background: "var(--bg)",
-      }}>
+      {/* FIX 1: Hold-to-speak gesture on entire <main>, scoped to conversation thread */}
+      <main
+        onMouseDown={isConversationThread ? handleTap : undefined}
+        onMouseUp={isConversationThread ? handleTapEnd : undefined}
+        onMouseLeave={isConversationThread ? handleTapEnd : undefined}
+        onTouchStart={isConversationThread ? (e) => { e.preventDefault(); handleTap() } : undefined}
+        onTouchEnd={isConversationThread ? handleTapEnd : undefined}
+        style={{
+          flex: 1,
+          marginLeft: "var(--sidebar-width)",
+          width: "calc(100vw - var(--sidebar-width))",
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          position: "relative",
+          alignItems: "center",
+          background: "var(--bg)",
+          cursor: isConversationThread ? "pointer" : "default",
+          userSelect: "none",
+        }}
+      >
 
         {/* Portrait background */}
         {portraitAsBackground && isConversationThread && (
@@ -460,7 +560,7 @@ export default function ConversationPage() {
           }} />
         )}
 
-        {/* View toggle — all threads except conversation */}
+        {/* FIX 8: View toggle — same size as portrait/lock voice */}
         {!isConversationThread && (
           <ViewToggle
             viewMode={viewMode}
@@ -483,43 +583,30 @@ export default function ConversationPage() {
           }}>
             <button
               aria-label={portraitAsBackground ? "hide portrait background" : "show portrait background"}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation()
                 const next = !portraitAsBackground
                 setPortraitAsBackground(next)
                 localStorage.setItem("us_portrait_bg", String(next))
               }}
               style={{
-                background: "transparent",
+                ...TOGGLE_BUTTON_STYLE,
                 border: "1px solid var(--amber)",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "12px",
-                fontFamily: "var(--font-mono)",
                 color: "var(--amber)",
-                letterSpacing: "0.06em",
                 opacity: portraitAsBackground ? 0.9 : 0.45,
-                padding: "6px 10px",
-                minHeight: "44px",
               }}
             >
               {portraitAsBackground ? "[portrait on]" : "[portrait]"}
             </button>
             <button
               aria-label={isLocked ? "unlock voice" : "lock voice"}
-              onClick={handleToggleLock}
+              onClick={(e) => { e.stopPropagation(); handleToggleLock() }}
               style={{
+                ...TOGGLE_BUTTON_STYLE,
                 background: isLocked ? "var(--amber)" : "transparent",
                 border: "1px solid var(--amber)",
-                borderRadius: "6px",
-                cursor: "pointer",
-                fontSize: "12px",
-                fontFamily: "var(--font-mono)",
                 color: isLocked ? "var(--bg)" : "var(--amber)",
-                letterSpacing: "0.06em",
                 opacity: isLocked ? 1 : 0.45,
-                padding: "6px 10px",
-                minHeight: "44px",
-                transition: "background 0.15s, color 0.15s, opacity 0.15s",
               }}
             >
               {isLocked ? "[voice locked]" : "[lock voice]"}
@@ -564,58 +651,40 @@ export default function ConversationPage() {
                 justifyContent: "center",
                 gap: "56px",
               }}>
-                <div
-                  onMouseDown={handleTap}
-                  onMouseUp={handleTapEnd}
-                  onMouseLeave={handleTapEnd}
-                  onTouchStart={(e) => { e.preventDefault(); handleTap() }}
-                  onTouchEnd={handleTapEnd}
-                  style={{ cursor: "pointer", userSelect: "none" }}
-                >
-                  <div style={{ transform: "scale(2)", transformOrigin: "center center" }}>
-                    <AmbientOrb
-                      isRecording={intake.isRecording}
-                      orbState={orbState}
-                      isLocked={isLocked}
-                      onToggleLock={handleToggleLock}
-                    />
-                  </div>
+                {/* Orb — tap handled by <main> mousedown */}
+                <div style={{ transform: "scale(2)", transformOrigin: "center center" }}>
+                  <AmbientOrb
+                    isRecording={intake.isRecording}
+                    orbState={orbState}
+                    isLocked={isLocked}
+                  />
                 </div>
-                <div style={{ width: "100%", flexShrink: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
-                  {/* [you]-style hint bubbles just above the input */}
-                  <div style={{ padding: "0 24px", display: "flex", flexDirection: "column", gap: "8px" }}>
-                    <div style={{
-                      alignSelf: "flex-start",
-                      maxWidth: "72%",
-                      padding: "10px 14px",
-                      borderRadius: "14px 14px 14px 4px",
-                      background: "var(--bg2)",
-                      border: "1px solid var(--border)",
-                      fontSize: "13.5px",
-                      fontWeight: 300,
-                      fontFamily: "var(--font-sans)",
-                      color: "var(--muted)",
-                      lineHeight: 1.6,
-                    }}>
-                      hold anywhere to speak
-                    </div>
-                    <div style={{
-                      alignSelf: "flex-start",
-                      maxWidth: "72%",
-                      padding: "8px 14px",
-                      borderRadius: "14px 14px 14px 4px",
-                      background: "var(--bg2)",
-                      border: "1px solid var(--border)",
-                      fontSize: "12px",
-                      fontWeight: 300,
-                      fontFamily: "var(--font-sans)",
-                      color: "var(--dim)",
-                      lineHeight: 1.5,
-                      opacity: 0.7,
-                    }}>
-                      or type below
-                    </div>
-                  </div>
+
+                {/* FIX 2: hint text — both var(--muted) */}
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+                  <span style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                    color: "var(--muted)",
+                    letterSpacing: "0.06em",
+                  }}>
+                    hold anywhere to speak
+                  </span>
+                  <span style={{
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                    color: "var(--muted)",
+                    letterSpacing: "0.06em",
+                  }}>
+                    or type below
+                  </span>
+                </div>
+
+                <div
+                  style={{ width: "100%", flexShrink: 0 }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                >
                   <UnifiedChat
                     messages={intake.messages}
                     isThinking={intake.isThinking}
@@ -636,20 +705,26 @@ export default function ConversationPage() {
             )}
 
             {hasMessages && (
-              <UnifiedChat
-                messages={intake.messages}
-                isThinking={intake.isThinking}
-                isSpeaking={intake.isSpeaking}
-                isRecording={intake.isRecording}
-                isLocked={isLocked}
-                onSendText={intake.sendText}
-                onHoldStart={handleTap}
-                onHoldEnd={handleTapEnd}
-                onToggleLock={handleToggleLock}
-                onRephrase={intake.requestRephrase}
-                disabled={intake.status !== "active"}
-                showMessages={true}
-              />
+              <div
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+              >
+                <UnifiedChat
+                  messages={intake.messages}
+                  isThinking={intake.isThinking}
+                  isSpeaking={intake.isSpeaking}
+                  isRecording={intake.isRecording}
+                  isLocked={isLocked}
+                  onSendText={intake.sendText}
+                  onHoldStart={handleTap}
+                  onHoldEnd={handleTapEnd}
+                  onToggleLock={handleToggleLock}
+                  onRephrase={intake.requestRephrase}
+                  disabled={intake.status !== "active"}
+                  showMessages={true}
+                  placeholder={placeholder}
+                />
+              </div>
             )}
           </div>
         )}
@@ -666,7 +741,10 @@ export default function ConversationPage() {
             zIndex: 1,
           }}>
             {viewMode === "chat" ? (
-              <ThreadChatView threadType={activeThread} userId={userId} />
+              <ThreadChatView
+                threadType={activeThread}
+                userId={userId}
+              />
             ) : (
               <div style={{ flex: 1, overflowY: "auto" }}>
                 <Suspense fallback={
