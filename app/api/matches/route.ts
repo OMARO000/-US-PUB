@@ -1,12 +1,6 @@
 /**
  * GET /api/matches?userId=...&connectionType=...&goDeeper=false
- *
- * Returns scored matches for a user.
- * Checks match_scores table first — returns cached if fresh.
- * Re-scores if portrait has been updated since last score.
- *
- * POST /api/matches/action
- * Records connect or not_a_fit action on a match.
+ * POST /api/matches — record connect or not_a_fit action
  */
 
 import { NextRequest, NextResponse } from "next/server"
@@ -17,182 +11,121 @@ import { rankMatches } from "@/lib/match/matchEngine"
 import { v4 as uuid } from "uuid"
 import type { ConnectionType } from "@/lib/match/matchEngine"
 
-// ─────────────────────────────────────────────
-// GET — fetch matches
-// ─────────────────────────────────────────────
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
 export async function GET(req: NextRequest) {
   const userId = req.nextUrl.searchParams.get("userId")
   const connectionType = (req.nextUrl.searchParams.get("connectionType") ?? "open") as ConnectionType
   const goDeeper = req.nextUrl.searchParams.get("goDeeper") === "true"
 
-  if (!userId) {
-    return NextResponse.json({ error: "userId required" }, { status: 400 })
-  }
+  if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 })
 
   try {
-    // ── get user's portrait ──
     const [userPortrait] = await db
       .select()
       .from(intakePortraits)
-      .where(
-        and(
-          eq(intakePortraits.userId, userId),
-          eq(intakePortraits.readyForMatching, true)
-        )
-      )
+      .where(and(eq(intakePortraits.userId, userId), eq(intakePortraits.readyForMatching, true)))
       .orderBy(desc(intakePortraits.createdAt))
       .limit(1)
 
-    if (!userPortrait) {
-      return NextResponse.json({
-        matches: [],
-        reason: "portrait_not_ready",
-      })
-    }
+    if (!userPortrait) return NextResponse.json({ matches: [], fromCache: false, noPortrait: true })
 
-    // ── check for cached scores ──
+    const cutoff = new Date(Date.now() - CACHE_TTL_MS)
     const cached = await db
       .select()
       .from(matchScores)
-      .where(
-        and(
-          eq(matchScores.userIdA, userId),
-          eq(matchScores.connectionType, connectionType),
-          eq(matchScores.goDeeper, goDeeper),
-          ne(matchScores.status, "not_a_fit")
-        )
-      )
+      .where(and(eq(matchScores.userIdA, userId), eq(matchScores.connectionType, connectionType), ne(matchScores.status, "not_a_fit")))
       .orderBy(desc(matchScores.totalScore))
 
-    // use cache if fresh (scored within 24h and portrait hasn't changed)
-    const cacheAge = cached.length > 0
-      ? Date.now() - new Date(cached[0].scoredAt).getTime()
-      : Infinity
-    const cacheValid = cacheAge < 86400000 // 24 hours
-
-    if (cacheValid && cached.length > 0) {
-      const matches = cached.map((m) => ({
-        id: m.id,
-        targetUserId: m.userIdB,
-        connectionType: m.connectionType,
-        resonanceSignals: JSON.parse(m.resonanceSignals),
-        mutualSignals: JSON.parse(m.mutualSignals),
-        archetypeA: m.archetypeA,
-        archetypeB: m.archetypeB,
-        status: m.status,
-        goDeeper: m.goDeeper,
-        scoredAt: m.scoredAt,
-      }))
-
-      return NextResponse.json({ matches, fromCache: true })
+    const freshCached = cached.filter((r) => new Date(r.scoredAt) > cutoff)
+    if (freshCached.length > 0) {
+      return NextResponse.json({ matches: freshCached.map(serializeMatchRow), fromCache: true })
     }
 
-    // ── score fresh matches ──
-    const allPortraits = await db
+    const candidates = await db
       .select()
       .from(intakePortraits)
-      .where(
-        and(
-          ne(intakePortraits.userId, userId),
-          eq(intakePortraits.readyForMatching, true)
-        )
-      )
+      .where(and(ne(intakePortraits.userId, userId), eq(intakePortraits.readyForMatching, true)))
 
-    if (!allPortraits.length) {
-      return NextResponse.json({ matches: [], reason: "no_candidates" })
+    if (candidates.length === 0) return NextResponse.json({ matches: [], fromCache: false })
+
+    const results = rankMatches(userPortrait, candidates, connectionType, goDeeper)
+
+    for (const row of cached) {
+      await db.delete(matchScores).where(eq(matchScores.id, row.id))
     }
 
-    const results = rankMatches(userPortrait, allPortraits, connectionType, goDeeper)
-
-    // ── persist scores ──
     const now = new Date()
-    const matchRows = results.map((r) => ({
+    const rows = results.map((r) => ({
       id: uuid(),
       userIdA: userId,
       userIdB: r.targetUserId,
       connectionType,
       totalScore: r.totalScore,
-      layerScores: JSON.stringify(
-        Object.fromEntries(r.layers.map((l) => [l.layer, l.weightedScore]))
-      ),
+      layerScores: JSON.stringify(r.layers),
       resonanceSignals: JSON.stringify(r.resonanceSignals),
       mutualSignals: JSON.stringify(r.mutualSignals),
       archetypeA: r.archetypeA,
       archetypeB: r.archetypeB,
       goDeeper,
       status: "pending" as const,
+      outcomeRecorded: false,
       scoredAt: now,
       updatedAt: now,
     }))
 
-    // upsert — delete old scores and insert fresh
-    if (matchRows.length > 0) {
-      // delete stale scores for this user+type+goDeeper combination
-      await db
-        .delete(matchScores)
-        .where(
-          and(
-            eq(matchScores.userIdA, userId),
-            eq(matchScores.connectionType, connectionType),
-            eq(matchScores.goDeeper, goDeeper)
-          )
-        )
+    if (rows.length > 0) await db.insert(matchScores).values(rows)
 
-      await db.insert(matchScores).values(matchRows)
-    }
-
-    const matches = results.map((r, i) => ({
-      id: matchRows[i].id,
-      targetUserId: r.targetUserId,
-      connectionType: r.connectionType,
-      resonanceSignals: r.resonanceSignals,
-      mutualSignals: r.mutualSignals,
-      archetypeA: r.archetypeA,
-      archetypeB: r.archetypeB,
-      status: "pending",
-      goDeeper: r.goDeeper,
-      scoredAt: now,
-    }))
-
-    return NextResponse.json({ matches, fromCache: false })
+    return NextResponse.json({
+      matches: rows.map((r) => ({
+        id: r.id,
+        targetUserId: r.userIdB,
+        connectionType: r.connectionType,
+        totalScore: r.totalScore,
+        resonanceSignals: JSON.parse(r.resonanceSignals),
+        mutualSignals: JSON.parse(r.mutualSignals),
+        archetypeA: r.archetypeA,
+        archetypeB: r.archetypeB,
+        status: r.status,
+        scoredAt: r.scoredAt,
+      })),
+      fromCache: false,
+    })
   } catch (err) {
-    console.error("[us] matches error:", err)
+    console.error("[us] matches GET error:", err)
     return NextResponse.json({ error: "failed to fetch matches" }, { status: 500 })
   }
 }
 
-// ─────────────────────────────────────────────
-// POST /api/matches — connect or not_a_fit
-// ─────────────────────────────────────────────
+function serializeMatchRow(r: typeof matchScores.$inferSelect) {
+  return {
+    id: r.id,
+    targetUserId: r.userIdB,
+    connectionType: r.connectionType,
+    totalScore: r.totalScore,
+    resonanceSignals: (() => { try { return JSON.parse(r.resonanceSignals) } catch { return [] } })(),
+    mutualSignals: (() => { try { return JSON.parse(r.mutualSignals) } catch { return [] } })(),
+    archetypeA: r.archetypeA,
+    archetypeB: r.archetypeB,
+    status: r.status,
+    scoredAt: r.scoredAt,
+  }
+}
 
 export async function POST(req: NextRequest) {
-  let body: {
-    matchId: string
-    action: "connected" | "not_a_fit"
-  }
-
-  try {
-    body = await req.json()
-  } catch {
-    return NextResponse.json({ error: "invalid request" }, { status: 400 })
-  }
+  let body: { matchId: string; action: "connected" | "not_a_fit" }
+  try { body = await req.json() } catch { return NextResponse.json({ error: "invalid request" }, { status: 400 }) }
 
   const { matchId, action } = body
-
-  if (!matchId || !action) {
-    return NextResponse.json({ error: "matchId and action required" }, { status: 400 })
+  if (!matchId || !["connected", "not_a_fit"].includes(action)) {
+    return NextResponse.json({ error: "matchId and valid action required" }, { status: 400 })
   }
 
   try {
-    await db
-      .update(matchScores)
-      .set({ status: action, updatedAt: new Date() })
-      .where(eq(matchScores.id, matchId))
-
+    await db.update(matchScores).set({ status: action, updatedAt: new Date() }).where(eq(matchScores.id, matchId))
     return NextResponse.json({ ok: true })
   } catch (err) {
-    console.error("[us] match action error:", err)
+    console.error("[us] matches POST error:", err)
     return NextResponse.json({ error: "failed to update match" }, { status: 500 })
   }
 }

@@ -1,114 +1,94 @@
 /**
  * generateFirstPrompt(conversationId)
- *
- * 1. Fetches the conversation row
- * 2. Fetches both users' portraits
- * 3. Fetches their match score row
- * 4. Calls Claude Sonnet to write an opening prompt
- * 5. Updates conversations.firstPrompt
- * 6. Returns the prompt text
  */
 
 import Anthropic from "@anthropic-ai/sdk"
 import { db } from "@/lib/db"
 import { conversations, intakePortraits, matchScores } from "@/lib/db/schema"
-import { eq, and } from "drizzle-orm"
+import { eq, and, asc } from "drizzle-orm"
 
 const anthropic = new Anthropic()
 
-function parseSignals(json: string | null): string[] {
-  try { return JSON.parse(json ?? "[]") } catch { return [] }
-}
+const FALLBACK = "[something worth exploring just came into view.]"
 
 export async function generateFirstPrompt(conversationId: string): Promise<string> {
-  // ── fetch conversation ──
-  const [conversation] = await db
-    .select()
-    .from(conversations)
-    .where(eq(conversations.id, conversationId))
-    .limit(1)
+  try {
+    const [convo] = await db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.id, conversationId))
+      .limit(1)
+    if (!convo) return FALLBACK
 
-  if (!conversation) throw new Error(`conversation not found: ${conversationId}`)
+    const { userIdA, userIdB } = convo
 
-  const { userIdA, userIdB } = conversation
+    const [portraitA] = await db
+      .select()
+      .from(intakePortraits)
+      .where(eq(intakePortraits.userId, userIdA))
+      .orderBy(asc(intakePortraits.createdAt))
+      .limit(1)
 
-  // ── fetch both portraits ──
-  const [portraitA] = await db
-    .select()
-    .from(intakePortraits)
-    .where(eq(intakePortraits.userId, userIdA))
-    .orderBy(intakePortraits.createdAt)
-    .limit(1)
+    const [portraitB] = await db
+      .select()
+      .from(intakePortraits)
+      .where(eq(intakePortraits.userId, userIdB))
+      .orderBy(asc(intakePortraits.createdAt))
+      .limit(1)
 
-  const [portraitB] = await db
-    .select()
-    .from(intakePortraits)
-    .where(eq(intakePortraits.userId, userIdB))
-    .orderBy(intakePortraits.createdAt)
-    .limit(1)
+    if (!portraitA || !portraitB) return FALLBACK
 
-  // ── fetch match score row ──
-  const [matchScore] = await db
-    .select()
-    .from(matchScores)
-    .where(
-      and(
-        eq(matchScores.userIdA, userIdA),
-        eq(matchScores.userIdB, userIdB)
-      )
-    )
-    .limit(1)
+    const [matchRow] = await db
+      .select()
+      .from(matchScores)
+      .where(and(eq(matchScores.userIdA, userIdA), eq(matchScores.userIdB, userIdB)))
+      .limit(1)
 
-  // ── build context for prompt ──
-  const resonanceSignals = parseSignals(matchScore?.resonanceSignals ?? null)
-  const topSignal = resonanceSignals[0] ?? null
+    const resonanceSignals: string[] = matchRow?.resonanceSignals
+      ? (() => { try { return JSON.parse(matchRow.resonanceSignals) } catch { return [] } })()
+      : []
 
-  const portraitAText = portraitA?.portraitText ?? ""
-  const portraitBText = portraitB?.portraitText ?? ""
+    const topSignal = resonanceSignals[0] ?? null
 
-  const userMessage = [
-    topSignal
-      ? `shared resonance signal: "${topSignal}"`
-      : "no resonance signal available",
-    portraitAText
-      ? `person A portrait: ${portraitAText.slice(0, 300)}`
-      : "",
-    portraitBText
-      ? `person B portrait: ${portraitBText.slice(0, 300)}`
-      : "",
-  ]
-    .filter(Boolean)
-    .join("\n\n")
+    const context = [
+      topSignal ? `top resonance signal: ${topSignal}` : "",
+      `person a: ${portraitA.portraitText.slice(0, 300)}`,
+      `person b: ${portraitB.portraitText.slice(0, 300)}`,
+    ].filter(Boolean).join("\n\n")
 
-  // ── call Claude Sonnet ──
-  const response = await anthropic.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 120,
-    system:
-      "you are [you], a presence that holds space for real connection. " +
-      "generate a single opening prompt (1–2 sentences) for two people who just matched. " +
-      "surface one specific resonance signal from their match. " +
-      "frame it as an invitation, not a statement. " +
-      "warm and unhurried. use bracket language like [you] does — lowercase, minimal punctuation. " +
-      "no assumptions about what they'll talk about. no questions that begin with 'do you'.",
-    messages: [
-      {
-        role: "user",
-        content: userMessage,
-      },
-    ],
-  })
+    const response = await anthropic.messages.create({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 120,
+      system: `You write opening prompts for two people who just matched on [us], a human connection platform.
 
-  const text =
-    response.content[0]?.type === "text"
-      ? response.content[0].text.trim()
-      : "[something worth exploring just came into view.]"
+Rules:
+- 1–2 sentences only
+- Surfaces one resonance signal naturally — don't explain it, just open it
+- Invitation, not statement — they should want to respond
+- Lowercase bracket language: [like this] for any interface references
+- No "do you" questions
+- Warm, unhurried, genderless tone
+- Do not mention the platform name or that they matched
+- Feels like something worth leaning into, not a chat opener`,
+      messages: [{ role: "user", content: `write an opening prompt for this pair.\n\n${context}` }],
+    })
 
-  // ── persist to conversations row ──
-  await db
-    .update(conversations)
-    .set({ firstPrompt: text, updatedAt: new Date() })
-    .where(eq(conversations.id, conversationId))
+    const text = response.content
+      .filter((b) => b.type === "text")
+      .map((b) => b.text)
+      .join("")
+      .trim()
 
-  return text
+    if (!text) return FALLBACK
+
+    await db
+      .update(conversations)
+      .set({ firstPrompt: text })
+      .where(eq(conversations.id, conversationId))
+
+    return text
+  } catch (err) {
+    console.error("[us] generateFirstPrompt error:", err)
+    return FALLBACK
+  }
 }

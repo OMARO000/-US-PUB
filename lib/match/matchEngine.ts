@@ -1,34 +1,19 @@
 /**
- * [us] match engine — full 7-layer scoring
- *
- * Scores compatibility between two users across all 7 free layers.
- * Paid users get 4 additional layers when "go deeper" is active.
- *
- * Never returns a score to the user — only resonance signals.
- * Internal scores are used for ranking only.
- *
- * Weight distributions per connection type are locked in US_MATCH_ENGINE.md.
+ * [us] match engine — full 7-layer scoring (free) + 4-layer (paid)
  */
 
 import type { InferSelectModel } from "drizzle-orm"
 import type { intakePortraits } from "@/lib/db/schema"
 
-// ─────────────────────────────────────────────
-// TYPES
-// ─────────────────────────────────────────────
-
 export type ConnectionType = "romantic" | "platonic" | "professional" | "open"
 export type Portrait = InferSelectModel<typeof intakePortraits>
 
 export interface SignalVector {
-  // parsed from portrait JSON columns
   values: string[]
   narrative: string[]
   relational: string[]
   communication: string[]
-  friction: string[]        // from block 4 — may be empty
-
-  // derived from portrait fields
+  friction: string[]
   archetype: string
   connectionType: ConnectionType
   userId: string
@@ -36,439 +21,267 @@ export interface SignalVector {
 
 export interface LayerScore {
   layer: string
-  score: number             // 0–1
-  weight: number            // 0–1 (from weight table)
-  weightedScore: number     // score * weight
-  resonanceSignals: string[] // human-readable observations
+  score: number
+  weight: number
+  weightedScore: number
+  resonanceSignals: string[]
 }
 
 export interface MatchResult {
   userId: string
   targetUserId: string
   connectionType: ConnectionType
-  totalScore: number        // 0–1, internal only — never shown to user
+  totalScore: number
   layers: LayerScore[]
-  resonanceSignals: string[] // top signals to show user (3 free, 8 paid)
-  mutualSignals: string[]   // what both users share — shown to both
+  resonanceSignals: string[]
+  mutualSignals: string[]
   archetypeA: string
   archetypeB: string
-  goDeeper: boolean         // whether paid layers were used
+  goDeeper: boolean
 }
 
-// ─────────────────────────────────────────────
-// WEIGHT TABLES
-// Locked in US_MATCH_ENGINE.md
-// ─────────────────────────────────────────────
-
-const FREE_WEIGHTS: Record<string, Record<ConnectionType, number>> = {
-  values:        { romantic: 0.25, platonic: 0.25, professional: 0.30, open: 0.25 },
-  narrative:     { romantic: 0.20, platonic: 0.15, professional: 0.20, open: 0.18 },
-  personality:   { romantic: 0.15, platonic: 0.20, professional: 0.15, open: 0.17 },
-  relational:    { romantic: 0.20, platonic: 0.15, professional: 0.10, open: 0.17 },
-  communication: { romantic: 0.10, platonic: 0.15, professional: 0.15, open: 0.13 },
-  mbti:          { romantic: 0.05, platonic: 0.05, professional: 0.05, open: 0.05 },
-  astrological:  { romantic: 0.05, platonic: 0.05, professional: 0.05, open: 0.05 },
+const FREE_WEIGHTS: Record<ConnectionType, Record<string, number>> = {
+  romantic:     { values: 0.22, narrative: 0.18, personality: 0.16, relational: 0.20, communication: 0.14, mbti: 0.06, astrological: 0.04 },
+  platonic:     { values: 0.25, narrative: 0.20, personality: 0.18, relational: 0.16, communication: 0.12, mbti: 0.06, astrological: 0.03 },
+  professional: { values: 0.28, narrative: 0.22, personality: 0.14, relational: 0.12, communication: 0.18, mbti: 0.05, astrological: 0.01 },
+  open:         { values: 0.24, narrative: 0.19, personality: 0.16, relational: 0.18, communication: 0.13, mbti: 0.06, astrological: 0.04 },
 }
 
-const PAID_WEIGHTS: Record<string, Record<ConnectionType, number>> = {
-  values:        { romantic: 0.20, platonic: 0.20, professional: 0.29, open: 0.20 },
-  narrative:     { romantic: 0.16, platonic: 0.12, professional: 0.16, open: 0.15 },
-  personality:   { romantic: 0.12, platonic: 0.16, professional: 0.12, open: 0.13 },
-  relational:    { romantic: 0.16, platonic: 0.12, professional: 0.08, open: 0.13 },
-  communication: { romantic: 0.08, platonic: 0.12, professional: 0.12, open: 0.10 },
-  mbti:          { romantic: 0.03, platonic: 0.04, professional: 0.04, open: 0.04 },
-  astrological:  { romantic: 0.01, platonic: 0.04, professional: 0.04, open: 0.03 },
-  conflict:      { romantic: 0.08, platonic: 0.05, professional: 0.03, open: 0.06 },
-  lifeStage:     { romantic: 0.06, platonic: 0.05, professional: 0.05, open: 0.05 },
-  energyExchange:{ romantic: 0.06, platonic: 0.05, professional: 0.03, open: 0.05 },
-  mediumPref:    { romantic: 0.04, platonic: 0.05, professional: 0.04, open: 0.04 },
+const PAID_WEIGHTS: Record<ConnectionType, Record<string, number>> = {
+  romantic:     { conflict: 0.12, lifeStage: 0.10, energyExchange: 0.10, mediumPreference: 0.08 },
+  platonic:     { conflict: 0.10, lifeStage: 0.08, energyExchange: 0.12, mediumPreference: 0.10 },
+  professional: { conflict: 0.08, lifeStage: 0.12, energyExchange: 0.08, mediumPreference: 0.12 },
+  open:         { conflict: 0.10, lifeStage: 0.10, energyExchange: 0.10, mediumPreference: 0.10 },
 }
-
-// ─────────────────────────────────────────────
-// SIGNAL PARSING
-// Extracts typed signal vectors from portrait JSON columns
-// ─────────────────────────────────────────────
 
 export function parseSignalVector(portrait: Portrait): SignalVector {
-  const parse = (json: string): string[] => {
-    try { return JSON.parse(json) } catch { return [] }
+  const safe = (raw: string | null | undefined): string[] => {
+    if (!raw) return []
+    try { return JSON.parse(raw) as string[] } catch { return [] }
   }
-
   return {
-    values: parse(portrait.valuesSignals),
-    narrative: parse(portrait.narrativeSignals),
-    relational: parse(portrait.relationalSignals),
-    communication: parse(portrait.communicationSignals),
-    friction: parse(portrait.frictionSignals),
+    values: safe(portrait.valuesSignals),
+    narrative: safe(portrait.narrativeSignals),
+    relational: safe(portrait.relationalSignals),
+    communication: safe(portrait.communicationSignals),
+    friction: safe(portrait.frictionSignals),
     archetype: portrait.archetype ?? "composite",
     connectionType: (portrait.connectionType ?? "open") as ConnectionType,
     userId: portrait.userId,
   }
 }
 
-// ─────────────────────────────────────────────
-// LAYER SCORING FUNCTIONS
-// Each returns a score 0–1 and resonance signals
-// ─────────────────────────────────────────────
-
-/**
- * Jaccard similarity between two string arrays
- * Normalized to 0–1
- */
 function jaccardSimilarity(a: string[], b: string[]): number {
   if (!a.length && !b.length) return 0.5
   if (!a.length || !b.length) return 0.1
-
-  const setA = new Set(a.map((s) => s.toLowerCase().trim()))
-  const setB = new Set(b.map((s) => s.toLowerCase().trim()))
-
+  const setA = new Set(a.map((s) => s.toLowerCase()))
+  const setB = new Set(b.map((s) => s.toLowerCase()))
   const intersection = [...setA].filter((x) => setB.has(x)).length
   const union = new Set([...setA, ...setB]).size
-
-  return union === 0 ? 0 : intersection / union
+  return intersection / union
 }
 
-/**
- * Keyword overlap score — counts shared meaningful terms
- */
-function keywordOverlap(a: string[], b: string[]): number {
-  const wordsA = a.join(" ").toLowerCase().split(/\s+/).filter((w) => w.length > 4)
-  const wordsB = b.join(" ").toLowerCase().split(/\s+/).filter((w) => w.length > 4)
+function keywordOverlap(a: string[], b: string[]): { score: number; shared: string[] } {
+  if (!a.length || !b.length) return { score: 0.3, shared: [] }
+  const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim()
+  const wordsA = new Set(a.flatMap((s) => normalize(s).split(/\s+/)).filter((w) => w.length > 3))
+  const wordsB = new Set(b.flatMap((s) => normalize(s).split(/\s+/)).filter((w) => w.length > 3))
+  const shared = [...wordsA].filter((w) => wordsB.has(w))
+  const score = shared.length / Math.max(Math.min(wordsA.size, wordsB.size), 1)
+  return { score: Math.min(score, 1), shared }
+}
 
-  if (!wordsA.length || !wordsB.length) return 0.2
-
-  const setA = new Set(wordsA)
-  const setB = new Set(wordsB)
-  const shared = [...setA].filter((w) => setB.has(w)).length
-
-  return Math.min(shared / Math.max(setA.size, setB.size), 1)
+function complementarity(a: string[], b: string[]): number {
+  const giverA = a.some((s) => /give|support|care|nurture|there for/i.test(s))
+  const giverB = b.some((s) => /give|support|care|nurture|there for/i.test(s))
+  const receiverA = a.some((s) => /need|receive|looking for|want someone/i.test(s))
+  const receiverB = b.some((s) => /need|receive|looking for|want someone/i.test(s))
+  if ((giverA && receiverB) || (giverB && receiverA)) return 0.85
+  if (giverA && giverB) return 0.70
+  return 0.50
 }
 
 function scoreValues(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  const similarity = keywordOverlap(a.values, b.values)
-  const signals: string[] = []
-
-  if (similarity > 0.6) {
-    signals.push("values alignment is unusually high — what you protect, they protect too")
-  } else if (similarity > 0.35) {
-    signals.push("overlapping values — different expressions of similar priorities")
-  } else if (similarity > 0.15) {
-    signals.push("values are adjacent — close enough to understand each other, different enough to interest")
-  }
-
-  return { score: similarity, signals }
+  const { score, shared } = keywordOverlap(a.values, b.values)
+  return { score: Math.max(score, 0.2), signals: shared.slice(0, 3).map((w) => `shared value: ${w}`) }
 }
 
 function scoreNarrative(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  const overlap = keywordOverlap(a.narrative, b.narrative)
-  const signals: string[] = []
-
-  // narrative: directional alignment matters more than identical content
-  const score = overlap * 0.6 + 0.4 // base of 0.4 — parallel directions have value even without overlap
-
-  if (overlap > 0.5) {
-    signals.push("you're both building toward something similar — directions aligned")
-  } else if (overlap > 0.2) {
-    signals.push("different trajectories — complementary directions rather than the same one")
-  } else {
-    signals.push("moving in different directions — could expand each other's horizon")
-  }
-
-  return { score, signals }
+  const { score: overlap, shared } = keywordOverlap(a.narrative, b.narrative)
+  return { score: Math.min(0.4 + overlap * 0.6, 1), signals: shared.slice(0, 2).map((w) => `aligned direction: ${w}`) }
 }
 
 function scorePersonality(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  // personality inferred from communication + relational signal tone
-  const combined_a = [...a.communication, ...a.relational]
-  const combined_b = [...b.communication, ...b.relational]
-  const overlap = keywordOverlap(combined_a, combined_b)
+  const commScore = jaccardSimilarity(a.communication, b.communication)
+  const relScore = complementarity(a.relational, b.relational)
   const signals: string[] = []
-
-  // mixed model — some similarity, some complementarity
-  const score = overlap * 0.5 + (1 - overlap) * 0.3 + 0.2
-
-  if (overlap > 0.5) {
-    signals.push("similar energy — you'd recognize each other quickly")
-  } else if (overlap > 0.2) {
-    signals.push("complementary personalities — different approaches, compatible rhythms")
-  }
-
-  return { score, signals }
+  if (commScore > 0.5) signals.push("compatible communication styles")
+  if (relScore > 0.7) signals.push("complementary relational energy")
+  return { score: commScore * 0.4 + relScore * 0.6, signals }
 }
 
 function scoreRelational(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  const overlap = keywordOverlap(a.relational, b.relational)
+  const comp = complementarity(a.relational, b.relational)
+  const overlap = jaccardSimilarity(a.relational, b.relational)
   const signals: string[] = []
-
-  // relational: complementarity weighted more than similarity
-  // high-give + high-receive is a resonance signal
-  const aGiver = a.relational.join(" ").toLowerCase().includes("give") ||
-    a.relational.join(" ").toLowerCase().includes("care")
-  const bReceiver = b.relational.join(" ").toLowerCase().includes("need") ||
-    b.relational.join(" ").toLowerCase().includes("looking")
-
-  let score = overlap * 0.4 + 0.3
-
-  if (aGiver && bReceiver) {
-    score = Math.min(score + 0.3, 1)
-    signals.push("energy exchange dynamic: high-give meets someone who receives well")
-  } else if (overlap > 0.4) {
-    signals.push("similar relational depth — both go beneath the surface")
-  } else {
-    signals.push("different relational styles — one leads, the other holds space differently")
-  }
-
-  return { score, signals }
+  if (comp > 0.8) signals.push("give/receive balance")
+  if (overlap > 0.4) signals.push("shared relational language")
+  return { score: comp * 0.6 + overlap * 0.4, signals }
 }
 
 function scoreCommunication(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  const overlap = keywordOverlap(a.communication, b.communication)
-  const signals: string[] = []
-
-  // communication: similarity preferred, extreme mismatch flagged
-  const aText = a.communication.join(" ").toLowerCase()
-  const bText = b.communication.join(" ").toLowerCase()
-
-  const aDirect = aText.includes("direct") || aText.includes("honest") || aText.includes("straight")
-  const bDirect = bText.includes("direct") || bText.includes("honest") || bText.includes("straight")
-
-  let score = overlap * 0.6 + 0.2
-
-  if (aDirect && bDirect) {
-    score = Math.min(score + 0.2, 1)
-    signals.push("similar communication directness — both say the hard thing without waiting for permission")
-  } else if (aDirect !== bDirect) {
-    score = Math.max(score - 0.1, 0)
-    signals.push("different communication styles — direct meets indirect. interesting friction possible")
-  } else {
-    signals.push("communication styles are compatible — similar register")
-  }
-
-  return { score, signals }
+  const directA = a.communication.some((s) => /direct|straight|upfront|honest/i.test(s))
+  const directB = b.communication.some((s) => /direct|straight|upfront|honest/i.test(s))
+  const indirectA = a.communication.some((s) => /indirect|careful|gentle|subtle/i.test(s))
+  const indirectB = b.communication.some((s) => /indirect|careful|gentle|subtle/i.test(s))
+  const match = (directA && directB) || (indirectA && indirectB)
+  const mismatch = (directA && indirectB) || (directB && indirectA)
+  return { score: match ? 0.85 : mismatch ? 0.45 : 0.65, signals: match ? ["matching communication directness"] : [] }
 }
 
 function scoreMBTI(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  // MBTI inferred from combined signal tone
-  // Simplified — full MBTI function analysis requires richer intake data
-  const combined_a = [...a.values, ...a.narrative].join(" ").toLowerCase()
-  const combined_b = [...b.values, ...b.narrative].join(" ").toLowerCase()
-
-  const aIntuitive = combined_a.includes("pattern") || combined_a.includes("future") || combined_a.includes("meaning")
-  const bIntuitive = combined_b.includes("pattern") || combined_b.includes("future") || combined_b.includes("meaning")
-
-  const score = aIntuitive === bIntuitive ? 0.7 : 0.5
-  return { score, signals: [] } // MBTI layer doesn't surface user-visible signals
+  const intuitiveA = [...a.values, ...a.narrative].some((s) => /meaning|purpose|possibility|pattern|why/i.test(s))
+  const intuitiveB = [...b.values, ...b.narrative].some((s) => /meaning|purpose|possibility|pattern|why/i.test(s))
+  return { score: intuitiveA === intuitiveB ? 0.70 : 0.55, signals: [] }
 }
 
-function scoreAstrological(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  // Astrological: declared only — both must have engaged with it
-  // Without birth data in schema yet, score conservatively
+function scoreAstrological(_a: SignalVector, _b: SignalVector): { score: number; signals: string[] } {
   return { score: 0.5, signals: [] }
 }
 
-// ─────────────────────────────────────────────
-// PAID LAYER SCORING
-// ─────────────────────────────────────────────
-
 function scoreConflict(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  const aFriction = a.friction.join(" ").toLowerCase()
-  const bFriction = b.friction.join(" ").toLowerCase()
-
-  const aEngages = aFriction.includes("direct") || aFriction.includes("talk") || aFriction.length > 20
-  const bEngages = bFriction.includes("direct") || bFriction.includes("talk") || bFriction.length > 20
-
-  const signals: string[] = []
-  let score = 0.5
-
-  if (aEngages && bEngages) {
-    score = 0.8
-    signals.push("conflict style is complementary — both engage, both repair")
-  } else if (aEngages !== bEngages) {
-    score = 0.55
-    signals.push("different conflict styles — one engages, the other steadies. can work if the gap is named")
+  const engagedA = a.friction.length > 0
+  const engagedB = b.friction.length > 0
+  if (engagedA && engagedB) {
+    const { score } = keywordOverlap(a.friction, b.friction)
+    return { score: 0.6 + score * 0.4, signals: score > 0.3 ? ["shared approach to repair"] : [] }
   }
-
-  return { score, signals }
+  return { score: !engagedA && !engagedB ? 0.55 : 0.45, signals: [] }
 }
 
 function scoreLifeStage(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  const aNarrative = a.narrative.join(" ").toLowerCase()
-  const bNarrative = b.narrative.join(" ").toLowerCase()
-
-  const aReady = aNarrative.includes("ready") || aNarrative.includes("now")
-  const bReady = bNarrative.includes("ready") || bNarrative.includes("now")
-  const aExploring = aNarrative.includes("figuring") || aNarrative.includes("exploring")
-  const bExploring = bNarrative.includes("figuring") || bNarrative.includes("exploring")
-
-  const signals: string[] = []
-  let score = 0.5
-
-  if (aReady && bReady) {
-    score = 0.85
-    signals.push("timing alignment — both ready, not just available")
-  } else if (aExploring && bExploring) {
-    score = 0.75
-    signals.push("both still figuring it out — that's honest common ground")
-  } else if (aReady !== bReady) {
-    score = 0.35
-    signals.push("timing mismatch — one is ready, the other is still arriving")
-  }
-
-  return { score, signals }
+  const readyA = a.narrative.some((s) => /ready|now|soon|waiting/i.test(s))
+  const readyB = b.narrative.some((s) => /ready|now|soon|waiting/i.test(s))
+  const exploringA = a.narrative.some((s) => /figuring|becoming|exploring|open/i.test(s))
+  const exploringB = b.narrative.some((s) => /figuring|becoming|exploring|open/i.test(s))
+  const aligned = (readyA && readyB) || (exploringA && exploringB)
+  return { score: aligned ? 0.80 : 0.50, signals: aligned ? ["aligned life stage"] : [] }
 }
 
 function scoreEnergyExchange(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  const aText = [...a.relational, ...a.values].join(" ").toLowerCase()
-  const bText = [...b.relational, ...b.values].join(" ").toLowerCase()
-
-  const aGiver = aText.includes("give") || aText.includes("support") || aText.includes("care for")
-  const bGiver = bText.includes("give") || bText.includes("support") || bText.includes("care for")
-
-  const signals: string[] = []
-  let score = 0.5
-
-  if (aGiver && !bGiver) {
-    score = 0.8
-    signals.push("energy exchange dynamic: high-give meets someone who receives well and returns differently")
-  } else if (aGiver && bGiver) {
-    score = 0.55
-    signals.push("both tend to give — worth watching that neither runs dry")
-  }
-
-  return { score, signals }
+  const giveA = [...a.values, ...a.relational].some((s) => /give|support|there for|show up/i.test(s))
+  const giveB = [...b.values, ...b.relational].some((s) => /give|support|there for|show up/i.test(s))
+  return { score: giveA && giveB ? 0.75 : !giveA && !giveB ? 0.55 : 0.70, signals: giveA && giveB ? ["mutual investment orientation"] : [] }
 }
 
 function scoreMediumPreference(a: SignalVector, b: SignalVector): { score: number; signals: string[] } {
-  // medium preference inferred from communication signals
-  const aText = a.communication.join(" ").toLowerCase()
-  const bText = b.communication.join(" ").toLowerCase()
-
-  const aVoice = aText.includes("voice") || aText.includes("speak") || aText.includes("say")
-  const bVoice = bText.includes("voice") || bText.includes("speak") || bText.includes("say")
-
-  const score = aVoice === bVoice ? 0.75 : 0.45
-  return { score, signals: [] }
+  const voiceA = a.communication.some((s) => /voice|speak|say|talk/i.test(s))
+  const voiceB = b.communication.some((s) => /voice|speak|say|talk/i.test(s))
+  return { score: voiceA === voiceB ? 0.75 : 0.55, signals: [] }
 }
 
-// ─────────────────────────────────────────────
-// RESONANCE SIGNAL GENERATION
-// Picks the most meaningful signals to surface to the user
-// ─────────────────────────────────────────────
-
-function generateMutualSignals(a: SignalVector, b: SignalVector): string[] {
-  const mutual: string[] = []
-
-  const aArchetype = a.archetype
-  const bArchetype = b.archetype
-
-  if (aArchetype === bArchetype) {
-    mutual.push(`both ${aArchetype} — similar way of moving through the world`)
-  }
-
-  const sharedValues = a.values.filter((v) =>
-    b.values.some((bv) => bv.toLowerCase().includes(v.toLowerCase().slice(0, 6)))
-  )
-  if (sharedValues.length > 0) {
-    mutual.push(`both lead with ${sharedValues[0]}`)
-  }
-
-  const aVoice = a.communication.join(" ").toLowerCase().includes("voice")
-  const bVoice = b.communication.join(" ").toLowerCase().includes("voice")
-  if (aVoice && bVoice) {
-    mutual.push("both chose voice over text during intake")
-  }
-
-  return mutual.slice(0, 3)
+function generateMutualSignals(a: SignalVector, b: SignalVector, archetypeA: string, archetypeB: string): string[] {
+  const signals: string[] = []
+  if (archetypeA === archetypeB) signals.push(`both ${archetypeA}`)
+  const { shared } = keywordOverlap(a.values, b.values)
+  if (shared.length > 0) signals.push(`both value: ${shared[0]}`)
+  const voiceA = a.communication.some((s) => /voice|speak/i.test(s))
+  const voiceB = b.communication.some((s) => /voice|speak/i.test(s))
+  if (voiceA && voiceB) signals.push("both chose voice")
+  return signals.slice(0, 3)
 }
 
-// ─────────────────────────────────────────────
-// MAIN SCORING FUNCTION
-// ─────────────────────────────────────────────
+const ARCHETYPE_AFFINITY: Record<string, string[]> = {
+  rooted:    ["intimate", "current", "rooted"],
+  horizon:   ["liminal", "horizon", "composite"],
+  intimate:  ["rooted", "celestial", "intimate"],
+  current:   ["rooted", "current", "composite"],
+  liminal:   ["horizon", "celestial", "liminal"],
+  celestial: ["intimate", "liminal", "celestial"],
+  composite: ["composite", "horizon", "current"],
+}
+
+function archetypeBonus(a: string, b: string): number {
+  const affinityA = ARCHETYPE_AFFINITY[a] ?? []
+  const affinityB = ARCHETYPE_AFFINITY[b] ?? []
+  if (affinityA.includes(b) && affinityB.includes(a)) return 0.05
+  if (affinityA.includes(b) || affinityB.includes(a)) return 0.025
+  return 0
+}
 
 export function scoreMatch(
   portraitA: Portrait,
   portraitB: Portrait,
   connectionType: ConnectionType,
-  goDeeper: boolean = false
+  goDeeper: boolean
 ): MatchResult {
   const a = parseSignalVector(portraitA)
   const b = parseSignalVector(portraitB)
 
-  const weights = goDeeper ? PAID_WEIGHTS : FREE_WEIGHTS
+  const freeWeights = FREE_WEIGHTS[connectionType]
+  const paidWeights = PAID_WEIGHTS[connectionType]
 
-  // score all free layers
-  const layerResults = [
-    { layer: "values", ...scoreValues(a, b) },
-    { layer: "narrative", ...scoreNarrative(a, b) },
-    { layer: "personality", ...scorePersonality(a, b) },
-    { layer: "relational", ...scoreRelational(a, b) },
-    { layer: "communication", ...scoreCommunication(a, b) },
-    { layer: "mbti", ...scoreMBTI(a, b) },
-    { layer: "astrological", ...scoreAstrological(a, b) },
+  const freeLayers = [
+    { key: "values",        fn: () => scoreValues(a, b) },
+    { key: "narrative",     fn: () => scoreNarrative(a, b) },
+    { key: "personality",   fn: () => scorePersonality(a, b) },
+    { key: "relational",    fn: () => scoreRelational(a, b) },
+    { key: "communication", fn: () => scoreCommunication(a, b) },
+    { key: "mbti",          fn: () => scoreMBTI(a, b) },
+    { key: "astrological",  fn: () => scoreAstrological(a, b) },
   ]
 
-  // paid layers
-  if (goDeeper) {
-    layerResults.push(
-      { layer: "conflict", ...scoreConflict(a, b) },
-      { layer: "lifeStage", ...scoreLifeStage(a, b) },
-      { layer: "energyExchange", ...scoreEnergyExchange(a, b) },
-      { layer: "mediumPref", ...scoreMediumPreference(a, b) },
-    )
+  const paidLayers = [
+    { key: "conflict",         fn: () => scoreConflict(a, b) },
+    { key: "lifeStage",        fn: () => scoreLifeStage(a, b) },
+    { key: "energyExchange",   fn: () => scoreEnergyExchange(a, b) },
+    { key: "mediumPreference", fn: () => scoreMediumPreference(a, b) },
+  ]
+
+  const activeLayers = goDeeper ? [...freeLayers, ...paidLayers] : freeLayers
+  const activeWeights = goDeeper ? { ...freeWeights, ...paidWeights } : freeWeights
+
+  const weightSum = Object.values(activeWeights).reduce((a, b) => a + b, 0)
+  const normalizedWeights: Record<string, number> = {}
+  for (const [k, v] of Object.entries(activeWeights)) normalizedWeights[k] = v / weightSum
+
+  const layers: LayerScore[] = []
+  let totalScore = 0
+  const allResonanceSignals: string[] = []
+
+  for (const { key, fn } of activeLayers) {
+    const weight = normalizedWeights[key] ?? 0
+    const { score, signals } = fn()
+    const weightedScore = score * weight
+    totalScore += weightedScore
+    allResonanceSignals.push(...signals)
+    layers.push({ layer: key, score, weight, weightedScore, resonanceSignals: signals })
   }
 
-  // build layer score objects
-  const layers: LayerScore[] = layerResults.map(({ layer, score, signals }) => {
-    const weight = weights[layer]?.[connectionType] ?? 0.05
-    return {
-      layer,
-      score,
-      weight,
-      weightedScore: score * weight,
-      resonanceSignals: signals,
-    }
-  })
-
-  // total score
-  const totalScore = layers.reduce((sum, l) => sum + l.weightedScore, 0)
-
-  // collect all resonance signals, sorted by weighted score
-  const allSignals = layers
-    .sort((a, b) => b.weightedScore - a.weightedScore)
-    .flatMap((l) => l.resonanceSignals)
-    .filter(Boolean)
-
-  const mutualSignals = generateMutualSignals(a, b)
+  totalScore = Math.min(totalScore + archetypeBonus(a.archetype, b.archetype), 1)
 
   return {
-    userId: a.userId,
-    targetUserId: b.userId,
+    userId: portraitA.userId,
+    targetUserId: portraitB.userId,
     connectionType,
     totalScore,
     layers,
-    resonanceSignals: allSignals,
-    mutualSignals,
+    resonanceSignals: allResonanceSignals.slice(0, 5),
+    mutualSignals: generateMutualSignals(a, b, a.archetype, b.archetype),
     archetypeA: a.archetype,
     archetypeB: b.archetype,
     goDeeper,
   }
 }
 
-// ─────────────────────────────────────────────
-// BATCH SCORING
-// Scores a user against all available portraits
-// Returns ranked results
-// ─────────────────────────────────────────────
-
 export function rankMatches(
   userPortrait: Portrait,
   candidates: Portrait[],
   connectionType: ConnectionType,
-  goDeeper: boolean = false
+  goDeeper: boolean
 ): MatchResult[] {
   return candidates
     .filter((c) => c.userId !== userPortrait.userId)
-    .filter((c) => c.readyForMatching)
     .map((c) => scoreMatch(userPortrait, c, connectionType, goDeeper))
     .sort((a, b) => b.totalScore - a.totalScore)
 }
