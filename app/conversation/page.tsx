@@ -3,14 +3,11 @@
 /**
  * /conversation — the [us] app shell
  *
- * FIXES APPLIED (round 7):
- * 1. activeThread + viewMode are plain useState — no URL, no router, no searchParams.
- *    switchThread calls setViewMode("chat") and setActiveThread(thread) in one
- *    synchronous handler. React batches both into one render. No race possible.
- * 2. Input clones UnifiedChat exactly: fontSize 20px, var(--font-sans), rounded
- *    bg2 container, borderRadius 13px, padding 9px 13px, amber SVG send button with
- *    rgba(196,151,74,0.14) background, disclaimer at 12px var(--muted) opacity 0.6.
- *    Orb at scale(2) with marginBottom: 80px, anchored at paddingTop: 28vh.
+ * FIXES APPLIED (round 8):
+ * 1. Messages orb position: paddingTop is calc(28vh - 44px) on messages thread,
+ *    28vh on all others — subtracts banner height so orb lands at same position.
+ * 2. Lock voice gap: messages lockVoiceTop increased to 76px (banner 44 + top 16 + gap 16).
+ * 3. Settings: always renders SettingsPageView directly. No chat interface, no toggles.
  */
 
 import { useEffect, useRef, useState, Suspense } from "react"
@@ -19,7 +16,6 @@ import { useIntake } from "@/hooks/useIntake"
 import { useThread } from "@/hooks/useThread"
 import Sidebar from "@/components/sidebar/Sidebar"
 import AmbientOrb from "@/components/chat/AmbientOrb"
-import DMAnalysisBanner from "@/components/chat/DMAnalysisBanner"
 import type { ThreadType } from "@/lib/threads/threadPrompts"
 import { THREAD_CONFIGS } from "@/lib/threads/threadPrompts"
 import { CONVERSATION_PROMPTS, THREAD_CONTEXT_PROMPTS } from "@/lib/threads/conversationPrompts"
@@ -211,9 +207,6 @@ function ThreadChatView({
     </div>
   )
 
-  // Banner height offset for empty-state absolute positioning
-  const bannerHeight = isMessagesThread ? 44 : 0
-
   return (
     <div style={{
       flex: 1,
@@ -231,21 +224,17 @@ function ThreadChatView({
         }
       `}</style>
 
-      {/* DM analysis banner — messages thread only, sits in normal flow */}
-      {isMessagesThread && <DMAnalysisBanner />}
-
-      {/* ── Empty state — pinned at 28vh, identical to conversation tab ── */}
+      {/* ── Empty state — pinned to 28vh, identical to conversation tab ── */}
+      {/* On messages thread, banner is 44px in normal flow above this absolute div,
+          so we reduce paddingTop by 44px to keep orb at same visual position */}
       {!hasConversation && (
         <div style={{
           position: "absolute",
-          top: `${bannerHeight}px`,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          inset: 0,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          paddingTop: "28vh",
+          paddingTop: isMessagesThread ? "calc(28vh - 44px)" : "28vh",
         }}>
           <div style={{
             display: "flex",
@@ -269,7 +258,7 @@ function ThreadChatView({
               />
             </div>
 
-            {/* Opening bubble — matches UnifiedChat message style */}
+            {/* Opening bubble */}
             {thread.messages[0] && (
               <div style={{
                 maxWidth: "520px",
@@ -498,8 +487,9 @@ export default function ConversationPage() {
   const gradient = ARCHETYPE_GRADIENTS[archetype?.toLowerCase() ?? ""] ?? ARCHETYPE_GRADIENTS.default
 
   // Lock voice toggle top — below banner on messages thread
+  // Banner is ~44px tall + 16px top margin = 60px, plus 16px gap = 76px
   const lockVoiceTop = isMessagesThread
-    ? "68px"
+    ? "76px"
     : config.hasPageView ? "72px" : "16px"
   const journalToggleTop = config.hasPageView ? "128px" : "72px"
 
@@ -538,8 +528,8 @@ export default function ConversationPage() {
           }} />
         )}
 
-        {/* ── Top-right toggles — non-conversation threads ── */}
-        {!isConversationThread && (
+        {/* ── Top-right toggles — non-conversation threads (not settings) ── */}
+        {!isConversationThread && activeThread !== "settings" && (
           <>
             {config.hasPageView && (
               <button
@@ -760,7 +750,22 @@ export default function ConversationPage() {
             position: "relative",
             zIndex: 1,
           }}>
-            {viewMode === "chat" ? (
+            {/* Settings always shows SettingsPageView — no chat interface */}
+            {activeThread === "settings" ? (
+              <div style={{ flex: 1, overflowY: "auto" }}>
+                <Suspense fallback={
+                  <div style={{
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    height: "100%", fontFamily: "var(--font-mono)",
+                    fontSize: "12px", color: "var(--dim)",
+                  }}>
+                    [loading...]
+                  </div>
+                }>
+                  <SettingsPageView />
+                </Suspense>
+              </div>
+            ) : viewMode === "chat" ? (
               <ThreadChatView
                 key={activeThread}
                 threadType={activeThread}
