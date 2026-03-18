@@ -4,7 +4,7 @@
 @tailwind utilities;
 
 :root {
-  --sidebar-width: 220px;
+  --sidebar-width: 260px;
   --font-size-base: 15px;
   --font-size-sm: 13px;
   --font-size-xs: 11px;
@@ -61,6 +61,8 @@
   --border: rgba(255,255,255,0.08);
   --border2: rgba(255,255,255,0.14);
 }
+
+html { font-size: 18px; }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
