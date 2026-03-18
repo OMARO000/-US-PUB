@@ -3,24 +3,17 @@
 /**
  * /conversation — the [us] app shell
  *
- * The entire app lives here as tabbed [you] threads.
- * Sidebar tabs select threads, not routes.
- * Each thread is a persistent conversation with [you] scoped to a topic.
- * [chat]/[page] toggle available per thread.
- *
- * The intake conversation ([conversation] thread) retains its
- * existing orb + block-based engine.
- *
- * FIXES APPLIED:
- * 1. Hold-to-speak gesture on entire <main> content area, not just orb
- * 2. "or type below" matches "hold anywhere to speak" color (var(--muted))
- * 3. Disclaimer beneath every chat input across all threads
- * 4. Opening prompt IS the contextual bubble — only one shown, never duplicated
- * 5. Journal consent toggle rendered in journal thread chat view
- * 6. viewMode always defaults to "chat"; localStorage only read if user set it
- *    this session. viewMode fully removed from useThread to prevent race.
- * 7. Pulsating orb rendered on every thread (scaled down for non-conversation)
- * 8. [page view] toggle same size as [portrait] and [lock voice]
+ * FIXES APPLIED (round 2):
+ * 1. Journal tab: remove "[you] cannot see your journal" bar.
+ *    Replace with a "[share journal with [you]]" toggle in the top-right,
+ *    positioned below [lock voice] toggle with gap.
+ * 2. viewMode bug: eliminated useEffect reset (fires after render = flash).
+ *    viewMode is now a ref, not state. Render reads ref.current directly.
+ *    switchThread sets ref synchronously before navigation. No flash possible.
+ * 3. All thread chat views show "hold anywhere to speak" + "or type below"
+ *    exactly as on conversation page — both lines, same color (var(--muted)).
+ * 4. [lock voice] toggle on every chat view, below [page view] with gap.
+ * 5. Chatbox positioned directly under hint text — same layout as conversation page.
  */
 
 import { useEffect, useRef, useState, Suspense } from "react"
@@ -37,15 +30,14 @@ import { CONVERSATION_PROMPTS, THREAD_CONTEXT_PROMPTS } from "@/lib/threads/conv
 
 const UnifiedChat = dynamic(() => import("@/components/chat/UnifiedChat"), { ssr: false })
 
-// Lazy-load page views for each thread
 const ConnectionsPageView = dynamic(() => import("@/app/connections/PageView"), { ssr: false })
-const InsightsPageView = dynamic(() => import("@/app/insights/PageView"), { ssr: false })
-const JournalPageView = dynamic(() => import("@/app/journal/PageView"), { ssr: false })
-const AboutPageView = dynamic(() => import("@/app/about/PageView"), { ssr: false })
-const ProfilePageView = dynamic(() => import("@/app/profile/PageView"), { ssr: false })
-const SettingsPageView = dynamic(() => import("@/app/settings/PageView"), { ssr: false })
-const TermsPageView = dynamic(() => import("@/app/terms/PageView"), { ssr: false })
-const PrivacyPageView = dynamic(() => import("@/app/privacy/PageView"), { ssr: false })
+const InsightsPageView    = dynamic(() => import("@/app/insights/PageView"),    { ssr: false })
+const JournalPageView     = dynamic(() => import("@/app/journal/PageView"),     { ssr: false })
+const AboutPageView       = dynamic(() => import("@/app/about/PageView"),       { ssr: false })
+const ProfilePageView     = dynamic(() => import("@/app/profile/PageView"),     { ssr: false })
+const SettingsPageView    = dynamic(() => import("@/app/settings/PageView"),    { ssr: false })
+const TermsPageView       = dynamic(() => import("@/app/terms/PageView"),       { ssr: false })
+const PrivacyPageView     = dynamic(() => import("@/app/privacy/PageView"),     { ssr: false })
 
 // ─────────────────────────────────────────────
 // HELPERS
@@ -72,8 +64,8 @@ const ARCHETYPE_GRADIENTS: Record<string, string> = {
   default:   "radial-gradient(ellipse at 50% 40%, rgba(196,151,74,0.12) 0%, transparent 70%)",
 }
 
-// Shared toggle button style — same size for [portrait], [lock voice], [page view]
-const TOGGLE_BUTTON_STYLE: React.CSSProperties = {
+// Shared toggle button style
+const TOGGLE_BTN: React.CSSProperties = {
   background: "transparent",
   borderRadius: "6px",
   cursor: "pointer",
@@ -83,30 +75,165 @@ const TOGGLE_BUTTON_STYLE: React.CSSProperties = {
   padding: "6px 10px",
   minHeight: "44px",
   transition: "border-color 0.15s, color 0.15s, opacity 0.15s",
+  whiteSpace: "nowrap",
+}
+
+// ─────────────────────────────────────────────
+// JOURNAL SHARE TOGGLE
+// FIX 1: Replaces "[you] cannot see your journal" bar.
+// Rendered as a toggle in the top-right stack.
+// ─────────────────────────────────────────────
+
+function JournalShareToggle() {
+  const [shared, setShared] = useState(false)
+  return (
+    <button
+      onClick={() => setShared((s) => !s)}
+      aria-label={shared ? "stop sharing journal with [you]" : "share journal with [you]"}
+      style={{
+        ...TOGGLE_BTN,
+        border: `1px solid ${shared ? "var(--amber)" : "var(--border)"}`,
+        color: shared ? "var(--amber)" : "var(--muted)",
+        opacity: shared ? 0.9 : 0.55,
+      }}
+    >
+      {shared ? "[journal shared]" : "[share journal with [you]]"}
+    </button>
+  )
+}
+
+// ─────────────────────────────────────────────
+// PAGE VIEW RENDERER
+// ─────────────────────────────────────────────
+
+function PageViewRenderer({ threadType }: { threadType: ThreadType }) {
+  switch (threadType) {
+    case "connections": return <ConnectionsPageView />
+    case "insights":    return <InsightsPageView />
+    case "journal":     return <JournalPageView />
+    case "about":       return <AboutPageView />
+    case "profile":     return <ProfilePageView />
+    case "settings":    return <SettingsPageView />
+    case "terms":       return <TermsPageView />
+    case "privacy":     return <PrivacyPageView />
+    default:            return null
+  }
+}
+
+// ─────────────────────────────────────────────
+// CHAT INPUT — shared between empty and active state
+// FIX 5: Chatbox positioned directly under hint text
+// ─────────────────────────────────────────────
+
+function ChatInput({
+  value,
+  onChange,
+  onSend,
+  isStreaming,
+  placeholder,
+}: {
+  value: string
+  onChange: (v: string) => void
+  onSend: () => void
+  isStreaming: boolean
+  placeholder?: string
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault()
+              onSend()
+            }
+          }}
+          placeholder={placeholder ?? "[say something...]"}
+          aria-label="message [you]"
+          rows={1}
+          style={{
+            flex: 1,
+            padding: "12px 16px",
+            borderRadius: "12px",
+            background: "var(--bg2)",
+            border: "1px solid var(--border)",
+            outline: "none",
+            fontFamily: "var(--font-mono)",
+            fontSize: "14px",
+            color: "var(--text)",
+            fontWeight: 300,
+            lineHeight: 1.5,
+            resize: "none",
+            minHeight: "44px",
+          }}
+        />
+        <button
+          onClick={onSend}
+          disabled={!value.trim() || isStreaming}
+          aria-label="send message"
+          style={{
+            width: "44px",
+            height: "44px",
+            borderRadius: "10px",
+            background: value.trim() ? "var(--amber)" : "var(--bg3)",
+            border: "none",
+            cursor: value.trim() ? "pointer" : "default",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+            transition: "background 0.15s",
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke={value.trim() ? "var(--bg)" : "var(--dim)"}
+            strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+      <div style={{
+        fontSize: "11px",
+        fontFamily: "var(--font-mono)",
+        color: "var(--dim)",
+        textAlign: "center",
+        opacity: 0.7,
+      }}>
+        by talking to [you], an AI, you agree to our{" "}
+        <a href="/terms" style={{ color: "var(--muted)", textDecoration: "underline" }}>[terms]</a>
+        {" "}and{" "}
+        <a href="/privacy" style={{ color: "var(--muted)", textDecoration: "underline" }}>[privacy policy]</a>
+      </div>
+    </div>
+  )
 }
 
 // ─────────────────────────────────────────────
 // THREAD CHAT VIEW
-// Generic chat UI for non-intake threads
-// FIX 3: disclaimer on every input
-// FIX 4: one bubble only (opening prompt = contextual bubble)
-// FIX 5: journal consent toggle
-// FIX 7: pulsating orb on every thread
+// Layout: orb → hint text → chatbox (mirrors conversation page exactly)
+// FIX 3: Both hint lines on all threads
+// FIX 5: Chatbox directly under hints
 // ─────────────────────────────────────────────
 
 function ThreadChatView({
   threadType,
   userId,
+  isLocked,
+  onToggleLock,
 }: {
   threadType: ThreadType
   userId: string
+  isLocked: boolean
+  onToggleLock: () => void
 }) {
   const thread = useThread(threadType, userId)
   const [input, setInput] = useState("")
-  const [journalConsentVisible, setJournalConsentVisible] = useState(true)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isMessages = threadType === "messages"
-  const contextPrompt = THREAD_CONTEXT_PROMPTS[threadType] ?? ""
+  const contextPrompt = THREAD_CONTEXT_PROMPTS[threadType] ?? undefined
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -118,9 +245,8 @@ function ThreadChatView({
     setInput("")
   }
 
-  // FIX 4: thread.messages already contains the single opening bubble from useThread.
-  // No duplicate — we render thread.messages as-is. The opening prompt IS the contextual bubble.
-  const hasUserReplied = thread.messages.length > 1
+  // hasConversation = user has replied at least once
+  const hasConversation = thread.messages.length > 1
 
   return (
     <div style={{
@@ -146,61 +272,28 @@ function ThreadChatView({
         overflow: "hidden",
       }}>
 
-        {/* FIX 5: Journal consent toggle — top of journal chat view */}
-        {threadType === "journal" && journalConsentVisible && (
+        {/* ── Empty state: mirrors conversation page layout exactly ── */}
+        {!hasConversation && (
           <div style={{
-            padding: "12px 40px",
-            borderBottom: "1px solid var(--border)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "12px",
-          }}>
-            <span style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "12px",
-              color: "var(--muted)",
-              letterSpacing: "0.04em",
-            }}>
-              [you] cannot see your journal
-            </span>
-            <button
-              onClick={() => setJournalConsentVisible(false)}
-              aria-label="dismiss journal privacy notice"
-              style={{
-                background: "transparent",
-                border: "1px solid var(--border)",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontFamily: "var(--font-mono)",
-                fontSize: "11px",
-                color: "var(--dim)",
-                padding: "4px 8px",
-              }}
-            >
-              [ok]
-            </button>
-          </div>
-        )}
-
-        {/* FIX 7: Pulsating orb + single opening bubble when no user reply yet */}
-        {!hasUserReplied && (
-          <div style={{
+            flex: 1,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            flex: 1,
-            gap: "32px",
+            gap: "40px",
+            padding: "80px 40px 40px", // top padding clears the toggle buttons
           }}>
-            <div style={{ transform: "scale(1.2)", transformOrigin: "center center" }}>
+            {/* Orb */}
+            <div style={{ transform: "scale(1.4)", transformOrigin: "center center" }}>
               <AmbientOrb
                 isRecording={false}
                 orbState="idle"
-                isLocked={false}
+                isLocked={isLocked}
+                onToggleLock={onToggleLock}
               />
             </div>
-            {/* FIX 4: Single opening bubble — the opening prompt from useThread */}
+
+            {/* Opening bubble (single, no duplicate) */}
             {thread.messages[0] && (
               <div style={{
                 maxWidth: "520px",
@@ -218,141 +311,88 @@ function ThreadChatView({
                 {thread.messages[0].content}
               </div>
             )}
-            {/* FIX 2: "or type below" — var(--muted) */}
-            <span style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "12px",
-              color: "var(--muted)",
-              letterSpacing: "0.04em",
+
+            {/* FIX 3: Both hint lines, var(--muted), same as conversation page */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--muted)", letterSpacing: "0.06em" }}>
+                hold anywhere to speak
+              </span>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--muted)", letterSpacing: "0.06em" }}>
+                or type below
+              </span>
+            </div>
+
+            {/* FIX 5: Chatbox directly below hint text */}
+            <div style={{ width: "100%" }}>
+              <ChatInput
+                value={input}
+                onChange={setInput}
+                onSend={handleSend}
+                isStreaming={thread.isStreaming}
+                placeholder={contextPrompt}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ── Active conversation ── */}
+        {hasConversation && (
+          <>
+            <div style={{
+              flex: 1,
+              overflowY: "auto",
+              padding: "32px 40px 16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "16px",
             }}>
-              or type below
-            </span>
-          </div>
-        )}
-
-        {/* Messages (after first user reply) */}
-        {hasUserReplied && (
-          <div style={{
-            flex: 1,
-            overflowY: "auto",
-            padding: "32px 40px 16px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "16px",
-          }}>
-            {thread.messages.map((msg) => (
-              <div key={msg.id} style={{
-                display: "flex",
-                justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
-              }}>
-                <div style={{
-                  maxWidth: "72%",
-                  padding: "12px 16px",
-                  borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
-                  background: msg.role === "user" ? "var(--bg3)" : "var(--bg2)",
-                  border: "1px solid var(--border)",
-                  fontSize: "14px",
-                  fontFamily: "var(--font-mono)",
-                  color: "var(--text)",
-                  fontWeight: 300,
-                  lineHeight: 1.7,
-                  whiteSpace: "pre-wrap",
+              {thread.messages.map((msg) => (
+                <div key={msg.id} style={{
+                  display: "flex",
+                  justifyContent: msg.role === "user" ? "flex-end" : "flex-start",
                 }}>
-                  {msg.content}
-                  {msg.role === "you" && thread.isStreaming && !msg.content && (
-                    <span style={{
-                      display: "inline-block",
-                      width: "7px",
-                      height: "14px",
-                      background: "var(--amber)",
-                      opacity: 0.7,
-                      animation: "blink 0.8s step-end infinite",
-                      verticalAlign: "text-bottom",
-                      marginLeft: "2px",
-                    }} />
-                  )}
+                  <div style={{
+                    maxWidth: "72%",
+                    padding: "12px 16px",
+                    borderRadius: msg.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px",
+                    background: msg.role === "user" ? "var(--bg3)" : "var(--bg2)",
+                    border: "1px solid var(--border)",
+                    fontSize: "14px",
+                    fontFamily: "var(--font-mono)",
+                    color: "var(--text)",
+                    fontWeight: 300,
+                    lineHeight: 1.7,
+                    whiteSpace: "pre-wrap",
+                  }}>
+                    {msg.content}
+                    {msg.role === "you" && thread.isStreaming && !msg.content && (
+                      <span style={{
+                        display: "inline-block",
+                        width: "7px",
+                        height: "14px",
+                        background: "var(--amber)",
+                        opacity: 0.7,
+                        animation: "blink 0.8s step-end infinite",
+                        verticalAlign: "text-bottom",
+                        marginLeft: "2px",
+                      }} />
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-            <div ref={messagesEndRef} />
-          </div>
+              ))}
+              <div ref={messagesEndRef} />
+            </div>
+            <div style={{ padding: "16px 40px 24px", borderTop: "1px solid var(--border)" }}>
+              <ChatInput
+                value={input}
+                onChange={setInput}
+                onSend={handleSend}
+                isStreaming={thread.isStreaming}
+                placeholder={contextPrompt}
+              />
+            </div>
+          </>
         )}
-
-        {/* Input */}
-        <div style={{
-          padding: "16px 40px 24px",
-          borderTop: hasUserReplied ? "1px solid var(--border)" : "none",
-          display: "flex",
-          flexDirection: "column",
-          gap: "8px",
-        }}>
-          <div style={{ display: "flex", gap: "10px", alignItems: "flex-end" }}>
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault()
-                  handleSend()
-                }
-              }}
-              placeholder={contextPrompt || "[say something...]"}
-              aria-label="message [you]"
-              rows={1}
-              style={{
-                flex: 1,
-                padding: "12px 16px",
-                borderRadius: "12px",
-                background: "var(--bg2)",
-                border: "1px solid var(--border)",
-                outline: "none",
-                fontFamily: "var(--font-mono)",
-                fontSize: "14px",
-                color: "var(--text)",
-                fontWeight: 300,
-                lineHeight: 1.5,
-                resize: "none",
-                minHeight: "44px",
-              }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || thread.isStreaming}
-              aria-label="send message"
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "10px",
-                background: input.trim() ? "var(--amber)" : "var(--bg3)",
-                border: "none",
-                cursor: input.trim() ? "pointer" : "default",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                flexShrink: 0,
-                transition: "background 0.15s",
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={input.trim() ? "var(--bg)" : "var(--dim)"} strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-              </svg>
-            </button>
-          </div>
-          {/* FIX 3: Disclaimer on every thread input */}
-          <div style={{
-            fontSize: "11px",
-            fontFamily: "var(--font-mono)",
-            color: "var(--dim)",
-            textAlign: "center",
-            opacity: 0.7,
-          }}>
-            by talking to [you], an AI, you agree to our{" "}
-            <a href="/terms" style={{ color: "var(--muted)", textDecoration: "underline" }}>[terms]</a>
-            {" "}and{" "}
-            <a href="/privacy" style={{ color: "var(--muted)", textDecoration: "underline" }}>[privacy policy]</a>
-          </div>
-        </div>
 
         <style>{`
           @keyframes blink {
@@ -360,62 +400,9 @@ function ThreadChatView({
             50% { opacity: 0; }
           }
         `}</style>
-      </div>{/* end centered content column */}
+      </div>
     </div>
   )
-}
-
-// ─────────────────────────────────────────────
-// VIEW MODE TOGGLE
-// FIX 8: same size as [portrait] and [lock voice]
-// ─────────────────────────────────────────────
-
-function ViewToggle({
-  viewMode,
-  onToggle,
-  hasPageView,
-}: {
-  viewMode: "chat" | "page"
-  onToggle: () => void
-  hasPageView: boolean
-}) {
-  if (!hasPageView) return null
-
-  return (
-    <button
-      onClick={onToggle}
-      aria-label={viewMode === "chat" ? "switch to page view" : "switch to chat view"}
-      style={{
-        ...TOGGLE_BUTTON_STYLE,
-        position: "absolute",
-        top: "16px",
-        right: "20px",
-        zIndex: 20,
-        border: "1px solid var(--border)",
-        color: "var(--muted)",
-      }}
-    >
-      {viewMode === "chat" ? "[page view]" : "[chat view]"}
-    </button>
-  )
-}
-
-// ─────────────────────────────────────────────
-// PAGE VIEW RENDERER
-// ─────────────────────────────────────────────
-
-function PageViewRenderer({ threadType }: { threadType: ThreadType }) {
-  switch (threadType) {
-    case "connections": return <ConnectionsPageView />
-    case "insights": return <InsightsPageView />
-    case "journal": return <JournalPageView />
-    case "about": return <AboutPageView />
-    case "profile": return <ProfilePageView />
-    case "settings": return <SettingsPageView />
-    case "terms": return <TermsPageView />
-    case "privacy": return <PrivacyPageView />
-    default: return null
-  }
 }
 
 // ─────────────────────────────────────────────
@@ -433,9 +420,13 @@ export default function ConversationPage() {
   const [archetype, setArchetype] = useState<string | null>(null)
   const [placeholder, setPlaceholder] = useState(CONVERSATION_PROMPTS[0])
 
-  // FIX 6: viewMode always starts as "chat". localStorage is NOT read on mount.
-  // Only written when user explicitly toggles. Cleared on thread switch.
-  const [viewMode, setViewMode] = useState<"chat" | "page">("chat")
+  // FIX 2: viewMode is a ref — setting it is synchronous with zero re-render latency.
+  // We use a forceRender counter only when the user explicitly clicks a toggle.
+  // switchThread sets the ref to "chat" BEFORE pushing the new route, so by the
+  // time the new thread renders, viewMode is already "chat" — no flash, no race.
+  const viewModeRef = useRef<"chat" | "page">("chat")
+  const [, forceRender] = useState(0)
+  const viewMode = viewModeRef.current
 
   const intake = useIntake()
   const initialized = useRef(false)
@@ -449,20 +440,14 @@ export default function ConversationPage() {
   const isConversationThread = activeThread === "conversation"
   const config = THREAD_CONFIGS[activeThread]
 
-  // switch thread via URL — reset viewMode to "chat" on every tab switch
   const switchThread = (thread: ThreadType) => {
-    setViewMode("chat")
+    viewModeRef.current = "chat" // synchronous — guaranteed before render
     router.push(`/conversation?thread=${thread}`)
   }
 
-  // FIX 6: viewMode resets to "chat" on thread change. No localStorage read.
-  useEffect(() => {
-    setViewMode("chat")
-  }, [activeThread])
-
   const toggleViewMode = () => {
-    const next = viewMode === "chat" ? "page" : "chat"
-    setViewMode(next)
+    viewModeRef.current = viewModeRef.current === "chat" ? "page" : "chat"
+    forceRender((n) => n + 1)
   }
 
   const handleToggleLock = () => {
@@ -472,7 +457,6 @@ export default function ConversationPage() {
     })
   }
 
-  // FIX 1: handleTap / handleTapEnd placed on <main>, not just the orb div.
   const handleTap = () => {
     if (isLocked) {
       if (intake.isRecording) intake.stopRecording()
@@ -494,7 +478,6 @@ export default function ConversationPage() {
     return () => clearInterval(interval)
   }, [])
 
-  // initialize on mount
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
@@ -521,13 +504,8 @@ export default function ConversationPage() {
 
   return (
     <div style={{ display: "flex", height: "100dvh", overflow: "hidden" }}>
-      {/* Sidebar */}
-      <Sidebar
-        activeThread={activeThread}
-        onThreadSelect={switchThread}
-      />
+      <Sidebar activeThread={activeThread} onThreadSelect={switchThread} />
 
-      {/* FIX 1: Hold-to-speak gesture on entire <main>, scoped to conversation thread */}
       <main
         onMouseDown={isConversationThread ? handleTap : undefined}
         onMouseUp={isConversationThread ? handleTapEnd : undefined}
@@ -548,7 +526,6 @@ export default function ConversationPage() {
           userSelect: "none",
         }}
       >
-
         {/* Portrait background */}
         {portraitAsBackground && isConversationThread && (
           <div aria-hidden="true" style={{
@@ -560,17 +537,8 @@ export default function ConversationPage() {
           }} />
         )}
 
-        {/* FIX 8: View toggle — same size as portrait/lock voice */}
+        {/* ── TOP-RIGHT TOGGLE STACK (non-conversation threads) ── */}
         {!isConversationThread && (
-          <ViewToggle
-            viewMode={viewMode}
-            onToggle={toggleViewMode}
-            hasPageView={config.hasPageView}
-          />
-        )}
-
-        {/* Portrait toggle + lock voice — conversation thread only */}
-        {isConversationThread && (
           <div style={{
             position: "absolute",
             top: "16px",
@@ -578,43 +546,73 @@ export default function ConversationPage() {
             zIndex: 20,
             display: "flex",
             flexDirection: "column",
-            gap: "12px",
+            gap: "8px",
             alignItems: "flex-end",
           }}>
-            <button
-              aria-label={portraitAsBackground ? "hide portrait background" : "show portrait background"}
-              onClick={(e) => {
-                e.stopPropagation()
-                const next = !portraitAsBackground
-                setPortraitAsBackground(next)
-                localStorage.setItem("us_portrait_bg", String(next))
-              }}
-              style={{
-                ...TOGGLE_BUTTON_STYLE,
-                border: "1px solid var(--amber)",
-                color: "var(--amber)",
-                opacity: portraitAsBackground ? 0.9 : 0.45,
-              }}
-            >
-              {portraitAsBackground ? "[portrait on]" : "[portrait]"}
-            </button>
-            <button
-              aria-label={isLocked ? "unlock voice" : "lock voice"}
-              onClick={(e) => { e.stopPropagation(); handleToggleLock() }}
-              style={{
-                ...TOGGLE_BUTTON_STYLE,
-                background: isLocked ? "var(--amber)" : "transparent",
-                border: "1px solid var(--amber)",
-                color: isLocked ? "var(--bg)" : "var(--amber)",
-                opacity: isLocked ? 1 : 0.45,
-              }}
-            >
-              {isLocked ? "[voice locked]" : "[lock voice]"}
-            </button>
+            {/* [page view] / [chat view] */}
+            {config.hasPageView && (
+              <button
+                onClick={toggleViewMode}
+                aria-label={viewMode === "chat" ? "switch to page view" : "switch to chat view"}
+                style={{
+                  ...TOGGLE_BTN,
+                  border: "1px solid var(--border)",
+                  color: "var(--muted)",
+                }}
+              >
+                {viewMode === "chat" ? "[page view]" : "[chat view]"}
+              </button>
+            )}
+
+            {/* FIX 4: [lock voice] on every chat view */}
+            {viewMode === "chat" && (
+              <button
+                onClick={handleToggleLock}
+                aria-label={isLocked ? "unlock voice" : "lock voice"}
+                style={{
+                  ...TOGGLE_BTN,
+                  border: `1px solid ${isLocked ? "var(--amber)" : "var(--border)"}`,
+                  color: isLocked ? "var(--amber)" : "var(--muted)",
+                  opacity: isLocked ? 0.9 : 0.55,
+                }}
+              >
+                {isLocked ? "[voice locked]" : "[lock voice]"}
+              </button>
+            )}
+
+            {/* FIX 1: Journal share toggle */}
+            {activeThread === "journal" && viewMode === "chat" && (
+              <JournalShareToggle />
+            )}
           </div>
         )}
 
-        {/* ── CONVERSATION THREAD — intake engine ── */}
+        {/* Portrait toggle — conversation thread only */}
+        {isConversationThread && (
+          <button
+            aria-label={portraitAsBackground ? "hide portrait background" : "show portrait background"}
+            onClick={(e) => {
+              e.stopPropagation()
+              const next = !portraitAsBackground
+              setPortraitAsBackground(next)
+              localStorage.setItem("us_portrait_bg", String(next))
+            }}
+            style={{
+              position: "absolute",
+              top: "16px",
+              right: "20px",
+              zIndex: 20,
+              ...TOGGLE_BTN,
+              border: "1px solid var(--amber)",
+              color: "var(--amber)",
+              opacity: portraitAsBackground ? 0.9 : 0.45,
+            }}
+          >
+            {portraitAsBackground ? "[portrait on]" : "[portrait]"}
+          </button>
+        )}
+
+        {/* ── CONVERSATION THREAD ── */}
         {isConversationThread && (
           <div style={{
             width: "100%",
@@ -651,31 +649,23 @@ export default function ConversationPage() {
                 justifyContent: "center",
                 gap: "56px",
               }}>
-                {/* Orb — tap handled by <main> mousedown */}
                 <div style={{ transform: "scale(2)", transformOrigin: "center center" }}>
                   <AmbientOrb
                     isRecording={intake.isRecording}
                     orbState={orbState}
                     isLocked={isLocked}
+                    onToggleLock={(e) => {
+                      e?.stopPropagation()
+                      handleToggleLock()
+                    }}
                   />
                 </div>
 
-                {/* FIX 2: hint text — both var(--muted) */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-                  <span style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "12px",
-                    color: "var(--muted)",
-                    letterSpacing: "0.06em",
-                  }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--muted)", letterSpacing: "0.06em" }}>
                     hold anywhere to speak
                   </span>
-                  <span style={{
-                    fontFamily: "var(--font-mono)",
-                    fontSize: "12px",
-                    color: "var(--muted)",
-                    letterSpacing: "0.06em",
-                  }}>
+                  <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--muted)", letterSpacing: "0.06em" }}>
                     or type below
                   </span>
                 </div>
@@ -744,6 +734,8 @@ export default function ConversationPage() {
               <ThreadChatView
                 threadType={activeThread}
                 userId={userId}
+                isLocked={isLocked}
+                onToggleLock={handleToggleLock}
               />
             ) : (
               <div style={{ flex: 1, overflowY: "auto" }}>
