@@ -262,9 +262,9 @@ export default function UnifiedChat({
         <div style={{
           textAlign: "center",
           marginTop: "8px",
-          fontSize: "10px",
+          fontSize: "12px",
           fontFamily: "var(--font-mono)",
-          color: "var(--dim)",
+          color: "var(--muted)",
           opacity: 0.6,
           lineHeight: 1.5,
         }}>
