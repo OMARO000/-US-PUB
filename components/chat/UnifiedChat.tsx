@@ -246,6 +246,20 @@ export default function UnifiedChat({
             </svg>
           </button>
         </div>
+        <div style={{
+          textAlign: "center",
+          marginTop: "8px",
+          fontSize: "10px",
+          fontFamily: "var(--font-mono)",
+          color: "var(--dim)",
+          opacity: 0.6,
+          lineHeight: 1.5,
+        }}>
+          by talking to [you], an AI, you agree to our{" "}
+          <a href="/terms" style={{ color: "inherit", textDecoration: "underline" }}>[terms]</a>
+          {" "}and{" "}
+          <a href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>[privacy policy]</a>
+        </div>
       </div>
     </div>
   );
