@@ -30,6 +30,7 @@ const ProfilePageView     = dynamic(() => import("@/app/profile/PageView"),     
 const SettingsPageView    = dynamic(() => import("@/app/settings/PageView"),    { ssr: false })
 const TermsPageView       = dynamic(() => import("@/app/terms/PageView"),       { ssr: false })
 const PrivacyPageView     = dynamic(() => import("@/app/privacy/PageView"),     { ssr: false })
+const AboutPage           = dynamic(() => import("@/app/about/page"),           { ssr: false })
 
 import { useSearchParams } from "next/navigation"
 import { useIntentSignal } from "@/hooks/useIntentSignal"
@@ -485,6 +486,8 @@ export default function ConversationPage() {
                   <SettingsPageView />
                 </Suspense>
               </div>
+            ) : activeThread === "about" ? (
+              <AboutPage embedded />
             ) : viewMode === "chat" ? (
               <ThreadChatView
                 key={activeThread}
