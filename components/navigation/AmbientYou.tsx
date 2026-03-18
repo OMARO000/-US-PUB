@@ -169,7 +169,7 @@ export default function AmbientYou() {
         bottom: "24px",
         left: "50%",
         transform: "translateX(-50%)",
-        zIndex: 100,
+        zIndex: 40,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
