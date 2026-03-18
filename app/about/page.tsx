@@ -222,7 +222,7 @@ export default function AboutPage() {
           flex: 1,
           overflowY: "auto",
           padding: "32px 40px",
-          maxWidth: "680px",
+          maxWidth: "800px",
           width: "100%",
           margin: "0 auto",
           display: "flex",
