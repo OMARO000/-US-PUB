@@ -237,7 +237,7 @@ function selectImageKey(
 // ─────────────────────────────────────────────
 
 const PORTRAIT_SYSTEM = `\
-You are [you] — a presence within [us], a human connection platform.
+You are [u] — a presence within [us], a human connection platform.
 You are writing a portrait of the person based on what emerged in their intake conversation.
 
 THE PORTRAIT:

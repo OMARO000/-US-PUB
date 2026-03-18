@@ -260,7 +260,7 @@ export default function UnifiedChat({
           opacity: 0.6,
           lineHeight: 1.5,
         }}>
-          by talking to [you], an AI, you agree to our{" "}
+          by talking to [u], an AI, you agree to our{" "}
           <a href="/terms" style={{ color: "inherit", textDecoration: "underline" }}>[terms]</a>
           {" "}and{" "}
           <a href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>[privacy policy]</a>

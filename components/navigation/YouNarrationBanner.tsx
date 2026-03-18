@@ -3,7 +3,7 @@
 /**
  * YouNarrationBanner
  *
- * Displays [you]'s narration at the top of each page.
+ * Displays [u]'s narration at the top of each page.
  * Streams in character by character.
  * Dismisses on tap/click or after 8 seconds.
  * Used in every page layout — receives the narration state from useYouNarration.
@@ -50,7 +50,7 @@ export default function YouNarrationBanner({ narration }: Props) {
         transition: "opacity 0.2s",
       }}
     >
-      {/* [you] indicator */}
+      {/* [u] indicator */}
       <span style={{
         fontSize: "11px",
         fontFamily: "var(--font-mono)",
@@ -60,7 +60,7 @@ export default function YouNarrationBanner({ narration }: Props) {
         flexShrink: 0,
         opacity: 0.8,
       }}>
-        [you]
+        [u]
       </span>
 
       {/* message */}

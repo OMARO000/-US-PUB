@@ -5,12 +5,12 @@
  *
  * Sections:
  * 1. Appearance — theme switcher with live preview
- * 2. Voice — change [you]'s voice
+ * 2. Voice — change [u]'s voice
  * 3. Account — anonymous account number, copy
  * 4. Notifications — match alerts, journal prompts
  *
  * All preferences stored in localStorage.
- * [you] narrates on entry.
+ * [u] narrates on entry.
  */
 
 import { useState, useEffect, useRef } from "react"
@@ -257,7 +257,7 @@ function VoiceSection({ currentVoiceId, onVoiceChange }: {
 
   return (
     <section>
-      <SectionLabel>[[you]'s voice]</SectionLabel>
+      <SectionLabel>[[u]'s voice]</SectionLabel>
       <div style={{
         borderRadius: "12px",
         background: "var(--bg2)",
@@ -513,16 +513,16 @@ function NotificationsSection() {
         border: "1px solid var(--border)",
         overflow: "hidden",
       }}>
-        <SettingRow label="new matches" description="when [you] finds someone who resonates">
+        <SettingRow label="new matches" description="when [u] finds someone who resonates">
           <Toggle value={notifs.newMatches} onChange={(v) => update("newMatches", v)} label="toggle new match notifications" />
         </SettingRow>
         <SettingRow label="connections" description="when someone connects with you">
           <Toggle value={notifs.connections} onChange={(v) => update("connections", v)} label="toggle connection notifications" />
         </SettingRow>
-        <SettingRow label="[you] insights" description="when [you] notices a new pattern">
+        <SettingRow label="[u] insights" description="when [u] notices a new pattern">
           <Toggle value={notifs.youInsights} onChange={(v) => update("youInsights", v)} label="toggle insight notifications" />
         </SettingRow>
-        <SettingRow label="journal prompts" description="occasional prompts from [you]" noBorder>
+        <SettingRow label="journal prompts" description="occasional prompts from [u]" noBorder>
           <Toggle value={notifs.journalPrompts} onChange={(v) => update("journalPrompts", v)} label="toggle journal prompt notifications" />
         </SettingRow>
       </div>

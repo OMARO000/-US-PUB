@@ -3,10 +3,10 @@
 /**
  * useThread
  *
- * Manages state for a single [you] thread.
- * Each thread is a persistent conversation with [you] scoped to a topic.
+ * Manages state for a single [u] thread.
+ * Each thread is a persistent conversation with [u] scoped to a topic.
  *
- * - New thread: [you] opens with a short prompt
+ * - New thread: [u] opens with a short prompt
  * - Returning thread: silent, shows history
  * - Messages persist to DB via /api/threads
  *
@@ -112,7 +112,7 @@ export function useThread(
           })))
           setIsNew(false)
         } else {
-          // new thread — [you] opens with prompt
+          // new thread — [u] opens with prompt
           setThreadId(data.thread?.id ?? null)
           setIsNew(true)
 
@@ -234,7 +234,7 @@ export function useThread(
         m.id === msgId ? { ...m, content: cleanContent, metadata } : m
       ))
 
-      // persist [you] response
+      // persist [u] response
       if (threadId) {
         await fetch("/api/threads/message", {
           method: "POST",

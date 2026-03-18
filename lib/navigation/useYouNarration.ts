@@ -3,9 +3,9 @@
 /**
  * useYouNarration
  *
- * Triggers a [you] narration whenever the user navigates to a new section.
- * Each route has a set of narration prompts — [you] picks one and streams it.
- * The narration is contextual: it references what [you] knows about the user.
+ * Triggers a [u] narration whenever the user navigates to a new section.
+ * Each route has a set of narration prompts — [u] picks one and streams it.
+ * The narration is contextual: it references what [u] knows about the user.
  *
  * Used in each page's layout — fires on mount, not on every render.
  */
@@ -20,8 +20,8 @@ export interface NarrationState {
 
 // ─────────────────────────────────────────────
 // ROUTE NARRATION PROMPTS
-// Each route has a system prompt that tells [you] what to say.
-// [you] should be brief — 1–3 sentences max.
+// Each route has a system prompt that tells [u] what to say.
+// [u] should be brief — 1–3 sentences max.
 // Reference what's actually there, not generic descriptions.
 // ─────────────────────────────────────────────
 
@@ -42,21 +42,21 @@ If nothing is here yet, be honest about that and invite them to complete their p
 
   "/insights": `
 The user has navigated to their insights.
-This is where patterns live — things [you] has noticed across their connections and conversation.
+This is where patterns live — things [u] has noticed across their connections and conversation.
 Orient them briefly: what's visible here, and what it's for.
 1–2 sentences. Thoughtful, not clinical.
   `.trim(),
 
   "/journal": `
 The user has navigated to their journal.
-This is their private space. [you] can see it only with their consent.
+This is their private space. [u] can see it only with their consent.
 Welcome them quietly. Don't overstay.
 1 sentence. Warm, brief.
   `.trim(),
 
   "/profile": `
 The user has navigated to their profile.
-This is their portrait — what [you] has observed and what they've declared.
+This is their portrait — what [u] has observed and what they've declared.
 Tell them what they can do here: see their portrait, correct it, understand the frameworks behind it.
 1–2 sentences.
   `.trim(),
@@ -76,7 +76,7 @@ Invite them to explore. Keep it brief.
 }
 
 const IDENTITY_PREFIX = `
-You are [you] — a presence within [us], a human connection platform.
+You are [u] — a presence within [us], a human connection platform.
 You are warm, low, unhurried. You are not an assistant. You are a mirror.
 You speak in short, natural sentences. No bullet points. No lists. No headers.
 Bracket language when referencing UI: [conversation], [insights], [journal], etc.

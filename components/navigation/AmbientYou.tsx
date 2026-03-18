@@ -3,7 +3,7 @@
 /**
  * AmbientYou
  *
- * Persistent floating [you] access on all pages except /conversation and /onboarding.
+ * Persistent floating [u] access on all pages except /conversation and /onboarding.
  * Collapsed: small amber pill with hold-to-speak.
  * Expanded: voice + text input bar.
  * Response floats as a bubble above the pill, auto-fades after 8s.
@@ -123,7 +123,7 @@ export default function AmbientYou() {
       })
 
       if (!res.ok || !res.body) {
-        setResponse("[you] isn't available right now.")
+        setResponse("[u] isn't available right now.")
         setIsStreaming(false)
         return
       }
@@ -151,7 +151,7 @@ export default function AmbientYou() {
         }
       }
     } catch {
-      setResponse("[you] isn't available right now.")
+      setResponse("[u] isn't available right now.")
     } finally {
       setIsStreaming(false)
     }
@@ -233,7 +233,7 @@ export default function AmbientYou() {
     if (e.key === "Escape") setExpanded(false)
   }
 
-  const pillLabel = isRecording ? "[listening…]" : isTranscribing ? "[thinking…]" : "[speak to [you]]"
+  const pillLabel = isRecording ? "[listening…]" : isTranscribing ? "[thinking…]" : "[speak to [u]]"
   const pillGlow = isRecording
     ? "0 0 0 3px rgba(196,151,74,0.25), 0 2px 12px rgba(196,151,74,0.2)"
     : "none"
@@ -347,7 +347,7 @@ export default function AmbientYou() {
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={handleTextKeyDown}
-            placeholder="[ask [you] anything…]"
+            placeholder="[ask [u] anything…]"
             onInput={(e) => {
               const t = e.currentTarget
               t.style.height = "auto"
@@ -452,7 +452,7 @@ export default function AmbientYou() {
 
           {/* Dismiss */}
           <button
-            aria-label="dismiss [you] assistant"
+            aria-label="dismiss [u] assistant"
             onClick={handleDismiss}
             style={{
               width: "20px",

@@ -6,7 +6,7 @@
  * Free users: 3–5 basic observations from portrait signals
  * Paid users: full pattern recognition, framework visibility, match-as-mirror analysis
  *
- * [you] narrates on entry.
+ * [u] narrates on entry.
  * Sections: Your patterns | What your matches reflect | Framework visibility (paid)
  */
 
@@ -238,7 +238,7 @@ function EmptyState() {
         lineHeight: 1.7,
         maxWidth: "340px",
       }}>
-        complete your intake conversation and [you] will start noticing patterns.
+        complete your intake conversation and [u] will start noticing patterns.
       </div>
       <a
         href="/conversation"
@@ -344,7 +344,7 @@ export default function InsightsPage({ embedded }: { embedded?: boolean } = {}) 
 
               {/* Framework visibility */}
               <section>
-                <SectionLabel>[how [you] sees you]</SectionLabel>
+                <SectionLabel>[how [u] sees you]</SectionLabel>
                 <div style={{
                   padding: "20px",
                   borderRadius: "12px",
@@ -371,7 +371,7 @@ export default function InsightsPage({ embedded }: { embedded?: boolean } = {}) 
                   color: "var(--dim)",
                   lineHeight: 1.6,
                 }}>
-                  [paid] layers are visible to subscribers. these signals are observed, not declared — [you] notices them across your behavior. you can correct them in [profile].
+                  [paid] layers are visible to subscribers. these signals are observed, not declared — [u] notices them across your behavior. you can correct them in [profile].
                 </div>
               </section>
             </>

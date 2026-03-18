@@ -25,7 +25,7 @@ export const CONVERSATION_PROMPTS: string[] = [
   "what do you give in relationships?",
   "what do you need but rarely ask for?",
   "what's something you're figuring out?",
-  "what would you want [you] to know first?",
+  "what would you want [u] to know first?",
   "where are you going?",
   "what does connection mean to you?",
   "what kind of person do you resonate with?",
@@ -42,7 +42,7 @@ export const CONVERSATION_PROMPTS: string[] = [
 
 export const THREAD_CONTEXT_PROMPTS: Record<string, string> = {
   connections: "want me to walk you through your matches?",
-  insights: "want to look at what [you] has been noticing?",
+  insights: "want to look at what [u] has been noticing?",
   journal: "something worth noting?",
   about: "ask me anything about [us].",
   profile: "want to look at your portrait together?",

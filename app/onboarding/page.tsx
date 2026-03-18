@@ -354,7 +354,7 @@ function VoiceScreen({
           letterSpacing: "0.08em",
           opacity: 0.8,
         }}>
-          [choose [you]'s voice]
+          [choose [u]'s voice]
         </div>
         <div style={{
           fontSize: "12px",
@@ -362,7 +362,7 @@ function VoiceScreen({
           color: "var(--muted)",
           fontWeight: 300,
         }}>
-          this is how [you] will speak to you
+          this is how [u] will speak to you
         </div>
       </div>
 

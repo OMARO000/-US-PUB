@@ -3,9 +3,9 @@
 /**
  * /journal — private reflection space
  *
- * Voice or text entries. [you] can reference entries in coaching with user consent.
+ * Voice or text entries. [u] can reference entries in coaching with user consent.
  * Consent toggle: per-session, stored in localStorage.
- * [you] narrates on entry — quiet, brief.
+ * [u] narrates on entry — quiet, brief.
  * Entries stored in SQLite via API (to be wired when DB is ready).
  */
 
@@ -23,8 +23,8 @@ interface JournalEntry {
   id: string
   content: string
   inputMode: "voice" | "text"
-  youPrompt?: string        // the [you] prompt that sparked this entry, if any
-  allowYouAccess: boolean   // whether [you] can reference this entry
+  youPrompt?: string        // the [u] prompt that sparked this entry, if any
+  allowYouAccess: boolean   // whether [u] can reference this entry
   createdAt: Date
 }
 
@@ -42,7 +42,7 @@ function ConsentToggle({ value, onChange }: { value: boolean; onChange: (v: bool
   return (
     <button
       onClick={() => onChange(!value)}
-      aria-label={value ? "disable [you] access to journal" : "enable [you] access to journal"}
+      aria-label={value ? "disable [u] access to journal" : "enable [u] access to journal"}
       aria-pressed={value}
       style={{
         display: "flex",
@@ -82,7 +82,7 @@ function ConsentToggle({ value, onChange }: { value: boolean; onChange: (v: bool
         color: "var(--muted)",
         fontWeight: 300,
       }}>
-        {value ? "[you] can reference your journal in coaching" : "[you] cannot see your journal"}
+        {value ? "[u] can reference your journal in coaching" : "[u] cannot see your journal"}
       </span>
     </button>
   )
@@ -145,7 +145,7 @@ function EntryCard({ entry }: { entry: JournalEntry }) {
           color: entry.allowYouAccess ? "var(--amber)" : "var(--dim)",
           opacity: 0.7,
         }}>
-          {entry.allowYouAccess ? "[you] can see this" : "[private]"}
+          {entry.allowYouAccess ? "[u] can see this" : "[private]"}
         </span>
       </div>
     </div>
@@ -276,7 +276,7 @@ export default function JournalPage({ embedded }: { embedded?: boolean } = {}) {
               marginTop: "4px",
               paddingLeft: "46px",
             }}>
-              when enabled, [you] may reference your journal entries in coaching conversations. [you] observes patterns — it never quotes your entries directly.
+              when enabled, [u] may reference your journal entries in coaching conversations. [u] observes patterns — it never quotes your entries directly.
             </div>
           </section>
 

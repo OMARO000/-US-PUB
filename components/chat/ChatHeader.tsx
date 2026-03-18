@@ -59,7 +59,7 @@ export default function ChatHeader({ mode, isRecording, isLocked }: ChatHeaderPr
             color: "var(--amber)",
             letterSpacing: "-0.01em",
           }}>
-            [you]
+            [u]
           </div>
           <div style={{
             fontSize: "12px",

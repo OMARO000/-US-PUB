@@ -25,7 +25,7 @@ By using [us], you are entering into an agreement with One Plus LLC. References 
     title: "2. what [us] is",
     content: `[us] is a human connection platform that uses AI to help people understand themselves and find meaningful connections with others. The platform includes an intake conversation, a portrait system, a match engine, a journal, and coaching features.
 
-[you] is the AI presence within [us]. [you] is not a therapist, counselor, or mental health professional. [you] is not a substitute for professional mental health support. If you are experiencing a mental health crisis, please contact a qualified professional or crisis line.`,
+[u] is the AI presence within [us]. [u] is not a therapist, counselor, or mental health professional. [u] is not a substitute for professional mental health support. If you are experiencing a mental health crisis, please contact a qualified professional or crisis line.`,
   },
   {
     title: "3. eligibility",
@@ -55,12 +55,12 @@ You may delete your account at any time from [profile] → [delete account]. Del
 We reserve the right to terminate access for users who violate these terms.`,
   },
   {
-    title: "6. AI and [you]",
-    content: `[you] is powered by large language models including Claude (Anthropic). AI responses are generated and may contain errors, inaccuracies, or inappropriate content.
+    title: "6. AI and [u]",
+    content: `[u] is powered by large language models including Claude (Anthropic). AI responses are generated and may contain errors, inaccuracies, or inappropriate content.
 
-[you] is designed to be a supportive presence, not a decision-making authority. Do not rely on [you] for medical, legal, financial, or mental health decisions.
+[u] is designed to be a supportive presence, not a decision-making authority. Do not rely on [u] for medical, legal, financial, or mental health decisions.
 
-We continuously work to improve [you]'s responses, but we cannot guarantee that all responses will be accurate, appropriate, or free from bias.`,
+We continuously work to improve [u]'s responses, but we cannot guarantee that all responses will be accurate, appropriate, or free from bias.`,
   },
   {
     title: "7. your content",

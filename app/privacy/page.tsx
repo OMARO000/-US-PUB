@@ -36,7 +36,7 @@ Privacy inquiries: legal@omaro-pbc.org`,
 DECLARED DATA — what you tell us directly
 This includes: your responses during intake, portrait corrections and additions, journal entries, connection type preferences, theme and voice preferences, and any explicit profile information you provide. Declared data belongs entirely to you. You can view, edit, export, and delete it at any time.
 
-OBSERVED DATA — what [you] notices across your behavior
+OBSERVED DATA — what [u] notices across your behavior
 This includes: how you communicate during conversations (voice vs text, message length, response patterns), signals derived from your intake responses (used to build your match profile), and patterns observed across your connections over time. Observed data is used by the match engine and, for paid users, surfaced as pattern recognition insights.
 
 TECHNICAL DATA — standard operational data
@@ -64,7 +64,7 @@ We do not use your data for advertising, behavioral profiling for third parties,
     title: "5. the two-profile system",
     content: `[us] maintains two distinct profiles for every user:
 
-YOUR DECLARED PROFILE — visible to you at all times in [profile]. You can correct, add to, and export this profile. It includes what you explicitly told [you] during intake and any corrections you've made since.
+YOUR DECLARED PROFILE — visible to you at all times in [profile]. You can correct, add to, and export this profile. It includes what you explicitly told [u] during intake and any corrections you've made since.
 
 YOUR OBSERVED PROFILE — used internally by the match engine. For paid users, this becomes visible as pattern recognition insights in [insights]. We never present observed data as definitive labels — we surface observations, not verdicts. You can correct observed signals in [profile].
 
