@@ -17,8 +17,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "[us]",
-  description: "human connection",
+  title: "[us] — authentic connections",
+  description: "authentic connections. no ads, no algorithms, no performance.",
+  applicationName: "[us]",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

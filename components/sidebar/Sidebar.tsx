@@ -23,6 +23,19 @@ const navItems = [
     badge: false,
   },
   {
+    href: "/about",
+    threadType: "about" as ThreadType,
+    label: "[about]",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <path d="M12 16v-4"/>
+        <path d="M12 8h.01"/>
+      </svg>
+    ),
+    badge: false,
+  },
+  {
     href: "/connections",
     threadType: "connections" as ThreadType,
     label: "[connections]",
@@ -69,19 +82,6 @@ const navItems = [
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
         <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-      </svg>
-    ),
-    badge: false,
-  },
-  {
-    href: "/about",
-    threadType: "about" as ThreadType,
-    label: "[about]",
-    icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 16v-4"/>
-        <path d="M12 8h.01"/>
       </svg>
     ),
     badge: false,
@@ -139,21 +139,41 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
         width: "100%",
         height: "110px",
         display: "flex",
+        flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
         marginBottom: "4px",
         textDecoration: "none",
         color: "var(--amber)",
         fontFamily: "var(--font-sans)",
-        fontSize: "64px",
-        fontWeight: 300,
-        letterSpacing: "-0.5px",
         flexShrink: 0,
         cursor: "pointer",
         background: "transparent",
         border: "none",
+        gap: "6px",
       }}>
-        {(!collapsed || isMobile) && "[us]"}
+        {(!collapsed || isMobile) && (
+          <>
+            <span style={{
+              fontSize: "64px",
+              fontWeight: 300,
+              letterSpacing: "-0.5px",
+              lineHeight: 1,
+            }}>
+              [us]
+            </span>
+            <span style={{
+              fontSize: "10px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--muted)",
+              letterSpacing: "0.08em",
+              opacity: 0.6,
+              fontWeight: 300,
+            }}>
+              authentic connections
+            </span>
+          </>
+        )}
         {collapsed && !isMobile && (
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
