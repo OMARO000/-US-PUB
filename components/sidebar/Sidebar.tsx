@@ -84,7 +84,7 @@ export default function Sidebar() {
 
   // Sync CSS variable on mount and on change
   useEffect(() => {
-    const width = collapsed ? "72px" : "260px";
+    const width = collapsed ? "80px" : "300px";
     document.documentElement.style.setProperty("--sidebar-width", width);
   }, [collapsed]);
 
@@ -92,12 +92,12 @@ export default function Sidebar() {
     setCollapsed((prev) => {
       const next = !prev;
       localStorage.setItem("us_sidebar_collapsed", String(next));
-      document.documentElement.style.setProperty("--sidebar-width", next ? "72px" : "260px");
+      document.documentElement.style.setProperty("--sidebar-width", next ? "80px" : "300px");
       return next;
     });
   }
 
-  const w = collapsed ? "72px" : "260px";
+  const w = collapsed ? "80px" : "300px";
 
   return (
     <aside style={{
