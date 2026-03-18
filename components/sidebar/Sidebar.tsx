@@ -134,7 +134,7 @@ export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps =
   const navContent = (isMobile: boolean) => (
     <>
       {/* Logo */}
-      <Link href="/conversation" aria-label="[us] home" style={{
+      <button onClick={() => onThreadSelect?.("conversation")} aria-label="[us] home" style={{
         width: "100%",
         height: "110px",
         display: "flex",
@@ -148,6 +148,9 @@ export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps =
         fontWeight: 300,
         letterSpacing: "-0.5px",
         flexShrink: 0,
+        cursor: "pointer",
+        background: "transparent",
+        border: "none",
       }}>
         {(!collapsed || isMobile) && "[us]"}
         {collapsed && !isMobile && (
@@ -155,7 +158,7 @@ export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps =
             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
           </svg>
         )}
-      </Link>
+      </button>
 
       <div style={{ width: "100%", height: "1px", background: "var(--border)", margin: "4px auto" }} />
 
@@ -248,10 +251,10 @@ export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps =
       <div style={{ width: "100%", height: "1px", background: "var(--border)", margin: "4px auto" }} />
 
       {/* Settings */}
-      <Link
-        href="/settings"
+      <button
+        onClick={() => onThreadSelect?.("settings")}
         aria-label="[settings]"
-        aria-current={pathname === "/settings" ? "page" : undefined}
+        aria-current={activeThread === "settings" ? "page" : undefined}
         style={{
           width: "100%",
           height: "48px",
@@ -261,10 +264,14 @@ export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps =
           justifyContent: (collapsed && !isMobile) ? "center" : "flex-start",
           gap: (collapsed && !isMobile) ? 0 : "12px",
           padding: (collapsed && !isMobile) ? "0" : "0 12px",
-          background: pathname === "/settings" ? "var(--bg3)" : "transparent",
-          color: pathname === "/settings" ? "var(--amber)" : "var(--muted)",
+          background: activeThread === "settings" ? "var(--bg3)" : "transparent",
+          color: activeThread === "settings" ? "var(--amber)" : "var(--muted)",
           transition: "background 0.15s",
-          textDecoration: "none",
+          cursor: "pointer",
+          border: "none",
+          font: "inherit",
+          textAlign: "left",
+          boxSizing: "border-box",
         }}
       >
         <span style={{ width: "28px", height: "28px", display: "flex", flexShrink: 0 }}>
@@ -283,7 +290,7 @@ export default function Sidebar({ activeThread, onThreadSelect }: SidebarProps =
             [settings]
           </span>
         )}
-      </Link>
+      </button>
 
       <div style={{ flex: 1 }} />
 
