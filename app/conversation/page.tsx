@@ -98,6 +98,8 @@ function ThreadChatView({ threadType, userId }: { threadType: ThreadType; userId
         display: "flex",
         flexDirection: "column",
         gap: "16px",
+        justifyContent: thread.messages.length === 1 ? "flex-end" : "flex-start",
+        paddingBottom: thread.messages.length === 1 ? "24px" : "16px",
       }}>
         {thread.messages.map((msg) => (
           <div key={msg.id} style={{

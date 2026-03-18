@@ -36,6 +36,18 @@ const navItems = [
     badge: true,
   },
   {
+    href: "/conversation?thread=messages",
+    threadType: "messages" as ThreadType,
+    label: "[messages]",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        <path d="M8 10h.01M12 10h.01M16 10h.01"/>
+      </svg>
+    ),
+    badge: false,
+  },
+  {
     href: "/insights",
     threadType: "insights" as ThreadType,
     label: "[insights]",

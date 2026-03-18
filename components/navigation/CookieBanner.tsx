@@ -21,22 +21,19 @@ export default function CookieBanner() {
   return (
     <div style={{
       position: "fixed",
-      bottom: "80px",
-      left: "calc(var(--sidebar-width) + (100vw - var(--sidebar-width)) / 2)",
-      transform: "translateX(-50%)",
-      zIndex: 39,
-      background: "var(--bg2)",
-      border: "1px solid var(--border)",
-      borderRadius: "12px",
-      padding: "12px 16px",
+      bottom: 0,
+      left: "var(--sidebar-width)",
+      right: 0,
+      zIndex: 30,
+      background: "var(--bg)",
+      borderTop: "1px solid var(--border)",
+      padding: "12px 24px",
       display: "flex",
       alignItems: "center",
       gap: "12px",
       fontSize: "11px",
       fontFamily: "var(--font-mono)",
       color: "var(--muted)",
-      maxWidth: "520px",
-      width: "calc(100vw - var(--sidebar-width) - 48px)",
     }}>
       <span style={{ flex: 1, lineHeight: 1.6 }}>
         we use essential cookies to operate [us]. no tracking, no advertising cookies.
