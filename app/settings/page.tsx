@@ -644,6 +644,7 @@ export default function SettingsPage({ embedded }: { embedded?: boolean } = {}) 
                 localStorage.removeItem("us_onboarded")
                 localStorage.removeItem("us_uid")
                 localStorage.removeItem("us_account_number")
+                localStorage.removeItem("us_cookies_accepted")
                 window.location.href = "/"
               }}
               style={{

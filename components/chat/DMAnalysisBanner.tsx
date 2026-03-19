@@ -61,7 +61,9 @@ export default function DMAnalysisBanner() {
 
       {/* [turn off] — matches TOGGLE_BUTTON_STYLE exactly so it squares up with [lock voice] */}
       <button
-        onClick={turnOff}
+        onClick={(e) => { e.stopPropagation(); turnOff() }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
         style={{
           background: "transparent",
           border: "1px solid var(--border)",

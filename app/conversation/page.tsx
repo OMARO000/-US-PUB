@@ -231,11 +231,11 @@ export default function ConversationPage() {
       <Sidebar activeThread={activeThread} onThreadSelect={switchThread} intentSignal={intentSignal} />
 
       <main
-        onMouseDown={isConversationThread ? handleTap : undefined}
-        onMouseUp={isConversationThread ? handleTapEnd : undefined}
-        onMouseLeave={isConversationThread ? handleTapEnd : undefined}
-        onTouchStart={isConversationThread ? (e) => { e.preventDefault(); handleTap() } : undefined}
-        onTouchEnd={isConversationThread ? handleTapEnd : undefined}
+        onMouseDown={handleTap}
+        onMouseUp={handleTapEnd}
+        onMouseLeave={handleTapEnd}
+        onTouchStart={(e) => { e.preventDefault(); handleTap() }}
+        onTouchEnd={handleTapEnd}
         style={{
           flex: 1,
           marginLeft: "var(--sidebar-width)",

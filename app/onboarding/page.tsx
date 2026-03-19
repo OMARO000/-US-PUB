@@ -83,7 +83,7 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
       justifyContent: "center",
       minHeight: "100dvh",
       padding: "40px 32px",
-      gap: "48px",
+      gap: "56px",
       opacity: visible ? 1 : 0,
       transition: "opacity 0.8s ease",
     }}>
@@ -92,11 +92,11 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
         flexDirection: "column",
         alignItems: "center",
         gap: "24px",
-        maxWidth: "400px",
+        maxWidth: "560px",
         textAlign: "center",
       }}>
         <div style={{
-          fontSize: "48px",
+          fontSize: "72px",
           fontFamily: "var(--font-sans)",
           color: "var(--amber)",
           fontWeight: 300,
@@ -106,7 +106,7 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
           [us]
         </div>
         <div style={{
-          fontSize: "15px",
+          fontSize: "22px",
           fontFamily: "var(--font-mono)",
           color: "var(--text)",
           fontWeight: 300,
@@ -115,7 +115,7 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
           you can only build community through self-awareness.
         </div>
         <div style={{
-          fontSize: "15px",
+          fontSize: "22px",
           fontFamily: "var(--font-mono)",
           color: "var(--muted)",
           fontWeight: 300,
@@ -125,7 +125,7 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
           proceeds with [us].
         </div>
         <div style={{
-          fontSize: "12px",
+          fontSize: "15px",
           fontFamily: "var(--font-mono)",
           color: "var(--muted)",
           fontWeight: 300,
@@ -145,13 +145,13 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
         onClick={onNext}
         aria-label="begin"
         style={{
-          height: "52px",
-          padding: "0 40px",
-          borderRadius: "14px",
+          height: "64px",
+          padding: "0 52px",
+          borderRadius: "16px",
           background: "var(--amber)",
           border: "none",
           fontFamily: "var(--font-mono)",
-          fontSize: "13px",
+          fontSize: "16px",
           color: "var(--bg)",
           cursor: "pointer",
           letterSpacing: "0.05em",
