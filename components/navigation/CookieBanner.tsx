@@ -11,10 +11,17 @@ export default function CookieBanner() {
   const noSidebar = pathname === "/" || pathname === "/onboarding" || pathname === "/waiting" || pathname === "/intake/portrait";
 
   useEffect(() => {
-    if (localStorage.getItem("us_cookies_accepted") !== "true") {
-      setVisible(true);
-    }
-  }, []);
+    const check = () => {
+      if (localStorage.getItem("us_cookies_accepted") === "true") {
+        setVisible(false);
+      } else if (pathname !== "/onboarding") {
+        setVisible(true);
+      }
+    };
+    check();
+    window.addEventListener("storage", check);
+    return () => window.removeEventListener("storage", check);
+  }, [pathname]);
 
   function accept() {
     localStorage.setItem("us_cookies_accepted", "true");

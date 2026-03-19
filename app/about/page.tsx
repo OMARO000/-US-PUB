@@ -432,15 +432,22 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
   const orbState = isRecording ? "recording" : isThinking ? "thinking" : isSpeaking ? "speaking" : "idle"
 
   return (
-    <div style={{
-      flex: 1,
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-      width: "100%",
-      position: "relative",
-      overflow: "hidden",
-    }}>
+    <div
+      style={{
+        flex: 1,
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        width: "100%",
+        position: "relative",
+        overflow: "hidden",
+      }}
+      onMouseDown={handleOrbTap}
+      onMouseUp={handleOrbRelease}
+      onMouseLeave={handleOrbRelease}
+      onTouchStart={(e) => { e.preventDefault(); handleOrbTap() }}
+      onTouchEnd={handleOrbRelease}
+    >
 
       {/* message stream */}
       <div style={{
