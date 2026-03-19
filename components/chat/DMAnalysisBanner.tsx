@@ -1,16 +1,22 @@
 "use client"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 export default function DMAnalysisBanner() {
-  const [off, setOff] = useState(() => {
-    if (typeof window === "undefined") return false
-    return localStorage.getItem("us_dm_analysis_off") === "true"
-  })
+  const [off, setOff] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+    setOff(localStorage.getItem("us_dm_analysis_off") === "true")
+  }, [])
 
   function turnOff() {
     localStorage.setItem("us_dm_analysis_off", "true")
     setOff(true)
   }
+
+  // don't render until mounted to avoid hydration mismatch
+  if (!mounted) return null
 
   if (off) {
     return (

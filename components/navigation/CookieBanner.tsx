@@ -21,7 +21,7 @@ export default function CookieBanner() {
     setVisible(false);
   }
 
-  if (!visible) return null;
+  if (!visible || pathname === "/onboarding") return null;
 
   return (
     <div style={{

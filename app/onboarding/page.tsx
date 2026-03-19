@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation"
 // TYPES
 // ─────────────────────────────────────────────
 
-type Screen = "welcome" | "theme" | "voice"
+type Screen = "welcome" | "cookies" | "theme" | "voice"
 
 interface Theme {
   id: string
@@ -112,20 +112,31 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
           fontWeight: 300,
           lineHeight: 1.9,
         }}>
-          you can only build community through self-awareness.
+          connection is hard.
         </div>
         <div style={{
-          fontSize: "22px",
+          fontSize: "18px",
           fontFamily: "var(--font-mono)",
           color: "var(--muted)",
           fontWeight: 300,
           lineHeight: 1.9,
         }}>
-          it starts with [u].<br />
-          proceeds with [us].
+          not because the right people don't exist —<br />
+          but because most of us don't know ourselves<br />
+          well enough to recognize them.
         </div>
         <div style={{
-          fontSize: "15px",
+          fontSize: "18px",
+          fontFamily: "var(--font-mono)",
+          color: "var(--text)",
+          fontWeight: 300,
+          lineHeight: 1.9,
+          marginTop: "8px",
+        }}>
+          [us] is built to change that.
+        </div>
+        <div style={{
+          fontSize: "14px",
           fontFamily: "var(--font-mono)",
           color: "var(--muted)",
           fontWeight: 300,
@@ -133,11 +144,7 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
           opacity: 0.6,
           marginTop: "8px",
         }}>
-          [u] is a presence — not a chatbot, not a therapist.<br />
-          it listens. it reflects. it helps you do the work<br />
-          of understanding yourself well enough<br />
-          to recognize real connection when it appears.<br /><br />
-          no profile. no account. just a conversation.
+          no profile. no algorithm. just a conversation.
         </div>
       </div>
 
@@ -165,7 +172,111 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
 }
 
 // ─────────────────────────────────────────────
-// SCREEN 2 — THEME PICKER
+// SCREEN 2 — COOKIES
+// ─────────────────────────────────────────────
+
+function CookiesScreen({ onAccept }: { onAccept: () => void }) {
+  return (
+    <div style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "100dvh",
+      padding: "40px 32px",
+      gap: "48px",
+    }}>
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "24px",
+        maxWidth: "520px",
+        textAlign: "center",
+      }}>
+        <div style={{
+          fontSize: "13px",
+          fontFamily: "var(--font-mono)",
+          color: "var(--amber)",
+          letterSpacing: "0.08em",
+          opacity: 0.8,
+        }}>
+          [before we begin]
+        </div>
+        <div style={{
+          fontSize: "18px",
+          fontFamily: "var(--font-mono)",
+          color: "var(--text)",
+          fontWeight: 300,
+          lineHeight: 1.85,
+        }}>
+          [us] uses essential cookies to function. nothing more.
+        </div>
+        <div style={{
+          fontSize: "14px",
+          fontFamily: "var(--font-mono)",
+          color: "var(--muted)",
+          fontWeight: 300,
+          lineHeight: 1.8,
+        }}>
+          we don't track you across the web.<br />
+          we don't serve ads.<br />
+          we don't sell your data to anyone, ever.<br /><br />
+          cookies here are used only to keep your session alive
+          and remember your preferences — theme, voice, and whether
+          you've been here before.<br /><br />
+          that's it. sovereign by design.
+        </div>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "10px",
+          width: "100%",
+          maxWidth: "360px",
+          marginTop: "8px",
+        }}>
+          <button
+            onClick={() => {
+              localStorage.setItem("us_cookies_accepted", "true")
+              onAccept()
+            }}
+            style={{
+              height: "64px",
+              borderRadius: "16px",
+              background: "var(--amber)",
+              border: "none",
+              fontFamily: "var(--font-mono)",
+              fontSize: "16px",
+              color: "var(--bg)",
+              cursor: "pointer",
+              letterSpacing: "0.05em",
+              fontWeight: 400,
+            }}
+          >
+            [i understand]
+          </button>
+          <a
+            href="/privacy"
+            style={{
+              fontSize: "11px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--muted)",
+              textDecoration: "none",
+              letterSpacing: "0.04em",
+              opacity: 0.6,
+              textAlign: "center",
+            }}
+          >
+            [read our full privacy policy →]
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────
+// SCREEN 3 — THEME PICKER
 // ─────────────────────────────────────────────
 
 function ThemeScreen({
@@ -253,7 +364,7 @@ function ThemeScreen({
             <span style={{
               fontSize: "15px",
               fontFamily: "var(--font-mono)",
-              color: selectedTheme === theme.id ? theme.amber : "rgba(255,255,255,0.55)",
+              color: selectedTheme === theme.id ? theme.amber : theme.text,
               letterSpacing: "0.03em",
             }}>
               {theme.label}
@@ -586,7 +697,10 @@ export default function OnboardingPage() {
   return (
     <div style={{ background: "var(--bg)", minHeight: "100dvh" }}>
       {screen === "welcome" && (
-        <WelcomeScreen onNext={() => setScreen("theme")} />
+        <WelcomeScreen onNext={() => setScreen("cookies")} />
+      )}
+      {screen === "cookies" && (
+        <CookiesScreen onAccept={() => setScreen("theme")} />
       )}
       {screen === "theme" && (
         <ThemeScreen
