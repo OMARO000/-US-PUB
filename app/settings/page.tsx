@@ -584,6 +584,31 @@ export default function SettingsPage({ embedded }: { embedded?: boolean } = {}) 
           <VoiceSection currentVoiceId={currentVoiceId} onVoiceChange={handleVoiceChange} />
           <AccountSection />
           <NotificationsSection />
+          {process.env.NODE_ENV === "development" && (
+            <button
+              onClick={() => {
+                localStorage.removeItem("us_onboarded")
+                localStorage.removeItem("us_uid")
+                localStorage.removeItem("us_account_number")
+                window.location.href = "/"
+              }}
+              style={{
+                height: "40px",
+                width: "100%",
+                borderRadius: "9px",
+                background: "transparent",
+                border: "1px dashed var(--border)",
+                fontFamily: "var(--font-mono)",
+                fontSize: "10px",
+                color: "var(--dim)",
+                cursor: "pointer",
+                letterSpacing: "0.04em",
+                opacity: 0.4,
+              }}
+            >
+              [dev: reset onboarding]
+            </button>
+          )}
         </div>
       </main>
     </div>
