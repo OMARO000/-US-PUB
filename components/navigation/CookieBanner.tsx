@@ -22,7 +22,7 @@ export default function CookieBanner() {
     <div style={{
       position: "fixed",
       bottom: 0,
-      left: "var(--sidebar-width)",
+      left: 0,
       right: 0,
       zIndex: 30,
       background: "var(--bg)",
@@ -30,12 +30,13 @@ export default function CookieBanner() {
       padding: "12px 24px",
       display: "flex",
       alignItems: "center",
+      justifyContent: "center",
       gap: "12px",
       fontSize: "11px",
       fontFamily: "var(--font-mono)",
       color: "var(--muted)",
     }}>
-      <span style={{ flex: 1, lineHeight: 1.6 }}>
+      <span style={{ lineHeight: 1.6 }}>
         we use essential cookies to operate [us]. no tracking, no advertising cookies.
       </span>
       <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
