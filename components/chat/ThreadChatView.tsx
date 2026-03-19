@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { useThread } from "@/hooks/useThread"
 import AmbientOrb from "@/components/chat/AmbientOrb"
 import DMAnalysisBanner from "@/components/chat/DMAnalysisBanner"
@@ -62,11 +62,52 @@ export default function ThreadChatView({
   const config = THREAD_CONFIGS[threadType]
   const openingPrompt = config?.openingPrompt ?? ""
 
+  const [isRecording, setIsRecording] = useState(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const audioChunksRef = useRef<Blob[]>([])
+
   const { displayed: typedOpening, done: openingDone } = useTypedOpening(openingPrompt)
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [thread.messages])
+
+  const startRecording = useCallback(async () => {
+    if (isRecording) return
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const recorder = new MediaRecorder(stream, { mimeType: "audio/webm" })
+      audioChunksRef.current = []
+      recorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data) }
+      recorder.onstop = async () => {
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" })
+        stream.getTracks().forEach((t) => t.stop())
+        try {
+          const res = await fetch("/api/intake/transcribe", {
+            method: "POST",
+            headers: { "Content-Type": "audio/webm" },
+            body: blob,
+          })
+          if (!res.ok) return
+          const data = await res.json()
+          if (!data.empty && data.transcript && inputRef.current) {
+            inputRef.current.value = data.transcript
+            inputRef.current.style.height = "auto"
+            inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 110) + "px"
+          }
+        } catch { }
+      }
+      recorder.start()
+      mediaRecorderRef.current = recorder
+      setIsRecording(true)
+    } catch { }
+  }, [isRecording])
+
+  const stopRecording = useCallback(() => {
+    if (!isRecording || !mediaRecorderRef.current) return
+    mediaRecorderRef.current.stop()
+    setIsRecording(false)
+  }, [isRecording])
 
   const handleSend = () => {
     const text = inputRef.current?.value.trim()
@@ -164,10 +205,17 @@ export default function ThreadChatView({
   )
 
   return (
-    <div style={{
-      flex: 1, display: "flex", flexDirection: "column",
-      height: "100%", width: "100%", position: "relative",
-    }}>
+    <div
+      style={{
+        flex: 1, display: "flex", flexDirection: "column",
+        height: "100%", width: "100%", position: "relative",
+      }}
+      onMouseDown={startRecording}
+      onMouseUp={stopRecording}
+      onMouseLeave={stopRecording}
+      onTouchStart={(e) => { e.preventDefault(); startRecording() }}
+      onTouchEnd={stopRecording}
+    >
       <style>{`
         .us-textarea:focus-visible {
           outline: 2px solid var(--amber) !important;
@@ -193,12 +241,17 @@ export default function ThreadChatView({
             width: "100%", maxWidth: "1100px", padding: "0 24px",
           }}>
             {/* Orb */}
-            <div style={{
-              transform: "scale(2)", transformOrigin: "center center", marginBottom: "80px",
-            }}>
+            <div
+              style={{ transform: "scale(2)", transformOrigin: "center center", marginBottom: "80px" }}
+              onMouseDown={startRecording}
+              onMouseUp={stopRecording}
+              onMouseLeave={stopRecording}
+              onTouchStart={(e) => { e.preventDefault(); startRecording() }}
+              onTouchEnd={stopRecording}
+            >
               <AmbientOrb
-                isRecording={false}
-                orbState="idle"
+                isRecording={isRecording}
+                orbState={isRecording ? "recording" : "idle"}
                 isLocked={isLocked}
                 onToggleLock={onToggleLock}
               />

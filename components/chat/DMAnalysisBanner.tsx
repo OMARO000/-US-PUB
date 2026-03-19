@@ -1,12 +1,11 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 
 export default function DMAnalysisBanner() {
-  const [off, setOff] = useState(false)
-
-  useEffect(() => {
-    setOff(localStorage.getItem("us_dm_analysis_off") === "true")
-  }, [])
+  const [off, setOff] = useState(() => {
+    if (typeof window === "undefined") return false
+    return localStorage.getItem("us_dm_analysis_off") === "true"
+  })
 
   function turnOff() {
     localStorage.setItem("us_dm_analysis_off", "true")
@@ -58,8 +57,6 @@ export default function DMAnalysisBanner() {
       }}>
         [us] observes patterns in this conversation to improve your connection insights — not the content, just how you connect.
       </span>
-
-      {/* [turn off] — matches TOGGLE_BUTTON_STYLE exactly so it squares up with [lock voice] */}
       <button
         onClick={(e) => { e.stopPropagation(); turnOff() }}
         onMouseDown={(e) => e.stopPropagation()}
