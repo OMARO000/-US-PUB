@@ -413,6 +413,27 @@ export default function ConversationPage() {
                   </div>
 
                   <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: "6px",
+                    marginBottom: "32px",
+                  }}>
+                    <span style={{
+                      fontFamily: "var(--font-mono)", fontSize: "12px",
+                      color: "var(--muted)", letterSpacing: "0.06em",
+                    }}>
+                      hold anywhere to speak
+                    </span>
+                    <span style={{
+                      fontFamily: "var(--font-mono)", fontSize: "12px",
+                      color: "var(--muted)", letterSpacing: "0.06em",
+                    }}>
+                      or type below
+                    </span>
+                  </div>
+
+                  <div style={{
                     maxWidth: "560px",
                     width: "100%",
                     padding: "14px 18px",
@@ -438,40 +459,6 @@ export default function ConversationPage() {
                     )}
                   </div>
 
-                  <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "6px",
-                    marginBottom: "32px",
-                  }}>
-                    <span style={{
-                      fontFamily: "var(--font-mono)",
-                      fontSize: "11px",
-                      color: "var(--muted)",
-                      letterSpacing: "0.04em",
-                      opacity: 0.6,
-                      textAlign: "center",
-                      maxWidth: "320px",
-                      lineHeight: 1.7,
-                      marginBottom: "10px",
-                    }}>
-                      [u] is a presence, not a chatbot. it listens, reflects, and helps you understand yourself well enough to find real connection.
-                    </span>
-                    <span style={{
-                      fontFamily: "var(--font-mono)", fontSize: "12px",
-                      color: "var(--muted)", letterSpacing: "0.06em",
-                    }}>
-                      hold anywhere to speak
-                    </span>
-                    <span style={{
-                      fontFamily: "var(--font-mono)", fontSize: "12px",
-                      color: "var(--muted)", letterSpacing: "0.06em",
-                    }}>
-                      or type below
-                    </span>
-                  </div>
-
                   <div
                     style={{ width: "100%", flexShrink: 0 }}
                     onMouseDown={(e) => e.stopPropagation()}
@@ -490,7 +477,7 @@ export default function ConversationPage() {
                       onRephrase={intake.requestRephrase}
                       disabled={intake.status !== "active"}
                       showMessages={false}
-                      placeholder="[say something...]"
+                      placeholder="conversing with [u] is you doing the work. it starts with [u]. it proceeds with [us]."
                     />
                   </div>
                 </div>
@@ -516,7 +503,7 @@ export default function ConversationPage() {
                   onRephrase={intake.requestRephrase}
                   disabled={intake.status !== "active"}
                   showMessages={true}
-                  placeholder="[say something...]"
+                  placeholder="conversing with [u] is you doing the work. it starts with [u]. it proceeds with [us]."
                 />
               </div>
             )}

@@ -110,9 +110,19 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
           fontFamily: "var(--font-mono)",
           color: "var(--text)",
           fontWeight: 300,
-          lineHeight: 1.8,
+          lineHeight: 1.9,
         }}>
-          a place to understand yourself, find people who resonate, and navigate connection with more clarity.
+          you can only build community through self-awareness.
+        </div>
+        <div style={{
+          fontSize: "15px",
+          fontFamily: "var(--font-mono)",
+          color: "var(--muted)",
+          fontWeight: 300,
+          lineHeight: 1.9,
+        }}>
+          it starts with [u].<br />
+          proceeds with [us].
         </div>
         <div style={{
           fontSize: "12px",
@@ -120,8 +130,14 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
           color: "var(--muted)",
           fontWeight: 300,
           lineHeight: 1.7,
+          opacity: 0.6,
+          marginTop: "8px",
         }}>
-          no account required. no profile to fill out. just a conversation.
+          [u] is a presence — not a chatbot, not a therapist.<br />
+          it listens. it reflects. it helps you do the work<br />
+          of understanding yourself well enough<br />
+          to recognize real connection when it appears.<br /><br />
+          no profile. no account. just a conversation.
         </div>
       </div>
 

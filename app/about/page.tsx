@@ -248,17 +248,17 @@ function FAQBubble({ faq, visible }: { faq: typeof FAQS[0]; visible: boolean }) 
 // 4 = faqs visible + input unlocked
 // ─────────────────────────────────────────────
 
-const U_EXPLANATION = `[u] is the presence at the center of [us].
+const U_EXPLANATION = `[u] is a presence at the center of [us].
 
 not a chatbot. not a therapist. not an assistant.
 
-a mirror — and a reminder.
+you can only build community through self-awareness — and that's what [u] is here for. it listens without judgment, reflects back what it observes, and helps you understand yourself well enough to find real connection.
 
-during your intake, [u] listens without judgment and reflects back what it observes, not what it assumes. it doesn't label you. it doesn't diagnose you. it notices what you say, how you say it, and what that might mean for the kind of connection you're looking for.
+conversing with [u] is you doing the work. the intake isn't onboarding. it's the beginning of self-awareness.
 
-over time, [u] surfaces patterns across your connections — things worth knowing about yourself, offered with care.
+[u] is not trying to become the connection. it's trying to make connection between humans possible.
 
-[u] is not trying to become the connection. it's trying to make connection between humans possible.`
+it starts with [u]. it proceeds with [us].`
 
 const FAQ_INTRO = "you might be wondering..."
 
