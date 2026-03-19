@@ -144,10 +144,26 @@ function Toggle({ value, onChange, label }: { value: boolean; onChange: (v: bool
 // APPEARANCE SECTION
 // ─────────────────────────────────────────────
 
+function getThemeByTime(): "light" | "charcoal" {
+  const hour = new Date().getHours()
+  return hour >= 6 && hour < 20 ? "light" : "charcoal"
+}
+
 function AppearanceSection({ currentTheme, onThemeChange }: {
   currentTheme: string
   onThemeChange: (id: string) => void
 }) {
+  const [autoTheme, setAutoTheme] = useState(() => {
+    if (typeof window === "undefined") return false
+    return localStorage.getItem("us_auto_theme") === "true"
+  })
+
+  useEffect(() => {
+    if (!autoTheme) return
+    const theme = getThemeByTime()
+    onThemeChange(theme)
+  }, [autoTheme])
+
   return (
     <section>
       <SectionLabel>[appearance]</SectionLabel>
@@ -202,6 +218,44 @@ function AppearanceSection({ currentTheme, onThemeChange }: {
             )}
           </button>
         ))}
+        <div style={{
+          padding: "14px 16px",
+          borderTop: "1px solid var(--border)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "16px",
+        }}>
+          <div>
+            <div style={{
+              fontSize: "13px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--text)",
+              fontWeight: 300,
+              marginBottom: "4px",
+            }}>
+              auto theme
+            </div>
+            <div style={{
+              fontSize: "11px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--dim)",
+              fontWeight: 300,
+              lineHeight: 1.5,
+            }}>
+              light 6am–8pm · charcoal after dark
+            </div>
+          </div>
+          <Toggle
+            value={autoTheme}
+            onChange={(v) => {
+              setAutoTheme(v)
+              localStorage.setItem("us_auto_theme", String(v))
+              if (v) onThemeChange(getThemeByTime())
+            }}
+            label="toggle auto theme"
+          />
+        </div>
       </div>
     </section>
   )

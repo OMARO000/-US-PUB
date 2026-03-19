@@ -1,9 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function CookieBanner() {
   const [visible, setVisible] = useState(false);
+  const pathname = usePathname();
+
+  // pages with no sidebar — banner spans full width
+  const noSidebar = pathname === "/" || pathname === "/onboarding" || pathname === "/waiting" || pathname === "/intake/portrait";
 
   useEffect(() => {
     if (localStorage.getItem("us_cookies_accepted") !== "true") {
@@ -22,7 +27,7 @@ export default function CookieBanner() {
     <div style={{
       position: "fixed",
       bottom: 0,
-      left: 0,
+      left: noSidebar ? 0 : "var(--sidebar-width)",
       right: 0,
       zIndex: 30,
       background: "var(--bg)",

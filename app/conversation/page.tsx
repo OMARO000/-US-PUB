@@ -437,7 +437,7 @@ export default function ConversationPage() {
                     maxWidth: "560px",
                     width: "100%",
                     padding: "14px 18px",
-                    borderRadius: "15px 15px 15px 4px",
+                    borderRadius: "20px 20px 20px 6px",
                     background: "var(--bg2)",
                     border: "1px solid var(--border)",
                     fontSize: "15px",

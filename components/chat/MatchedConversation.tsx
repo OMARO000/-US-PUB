@@ -122,7 +122,7 @@ export default function MatchedConversation({ conversationId, userId, firstPromp
           }}>
             <div style={{
               padding: "14px 18px",
-              borderRadius: "15px 15px 15px 4px",
+              borderRadius: "20px 20px 20px 6px",
               background: "var(--bg2)",
               border: "1px solid var(--border)",
               fontFamily: "var(--font-mono)",
@@ -182,7 +182,7 @@ export default function MatchedConversation({ conversationId, userId, firstPromp
             }}>
               <div style={{
                 padding: "11px 15px",
-                borderRadius: msg.isMe ? "15px 15px 4px 15px" : "15px 15px 15px 4px",
+                borderRadius: msg.isMe ? "20px 20px 6px 20px" : "20px 20px 20px 6px",
                 fontSize: "13.5px",
                 fontWeight: 300,
                 lineHeight: 1.65,

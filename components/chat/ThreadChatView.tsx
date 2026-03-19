@@ -209,7 +209,7 @@ export default function ThreadChatView({
               <div style={{
                 maxWidth: "560px", width: "100%",
                 padding: "14px 18px",
-                borderRadius: "15px 15px 15px 4px",
+                borderRadius: "20px 20px 20px 6px",
                 background: "var(--bg2)",
                 border: "1px solid var(--border)",
                 fontSize: "15px",
@@ -273,7 +273,7 @@ export default function ThreadChatView({
               }}>
                 <div style={{
                   padding: "14px 18px",
-                  borderRadius: msg.role === "you" ? "15px 15px 15px 4px" : "15px 15px 4px 15px",
+                  borderRadius: msg.role === "you" ? "20px 20px 20px 6px" : "20px 20px 6px 20px",
                   fontSize: "15px",
                   fontWeight: 300,
                   lineHeight: 1.7,
