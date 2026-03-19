@@ -163,11 +163,11 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
               [us]
             </span>
             <span style={{
-              fontSize: "10px",
+              fontSize: "12px",
               fontFamily: "var(--font-mono)",
-              color: "var(--muted)",
+              color: "var(--text)",
               letterSpacing: "0.08em",
-              opacity: 0.6,
+              opacity: 0.85,
               fontWeight: 300,
             }}>
               authentic connections.
