@@ -185,7 +185,7 @@ function ThemeScreen({
       justifyContent: "center",
       minHeight: "100dvh",
       padding: "40px 32px",
-      gap: "40px",
+      gap: "52px",
     }}>
       <div style={{
         display: "flex",
@@ -195,7 +195,7 @@ function ThemeScreen({
         textAlign: "center",
       }}>
         <div style={{
-          fontSize: "13px",
+          fontSize: "18px",
           fontFamily: "var(--font-mono)",
           color: "var(--amber)",
           letterSpacing: "0.08em",
@@ -204,7 +204,7 @@ function ThemeScreen({
           [choose your environment]
         </div>
         <div style={{
-          fontSize: "12px",
+          fontSize: "15px",
           fontFamily: "var(--font-mono)",
           color: "var(--muted)",
           fontWeight: 300,
@@ -219,7 +219,7 @@ function ThemeScreen({
         flexDirection: "column",
         gap: "10px",
         width: "100%",
-        maxWidth: "360px",
+        maxWidth: "480px",
       }}>
         {THEMES.map((theme) => (
           <button
@@ -231,8 +231,8 @@ function ThemeScreen({
               display: "flex",
               alignItems: "center",
               gap: "16px",
-              padding: "14px 16px",
-              borderRadius: "12px",
+              padding: "18px 20px",
+              borderRadius: "16px",
               background: theme.bg2,
               border: `1.5px solid ${selectedTheme === theme.id ? theme.amber : "rgba(255,255,255,0.08)"}`,
               cursor: "pointer",
@@ -245,13 +245,13 @@ function ThemeScreen({
               gap: "4px",
               flexShrink: 0,
             }}>
-              <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: theme.bg }} />
-              <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: theme.amber }} />
-              <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: theme.rose }} />
+              <div style={{ width: "16px", height: "16px", borderRadius: "50%", background: theme.bg }} />
+              <div style={{ width: "16px", height: "16px", borderRadius: "50%", background: theme.amber }} />
+              <div style={{ width: "16px", height: "16px", borderRadius: "50%", background: theme.rose }} />
             </div>
 
             <span style={{
-              fontSize: "12px",
+              fontSize: "15px",
               fontFamily: "var(--font-mono)",
               color: selectedTheme === theme.id ? theme.amber : "rgba(255,255,255,0.55)",
               letterSpacing: "0.03em",
@@ -262,7 +262,7 @@ function ThemeScreen({
             {selectedTheme === theme.id && (
               <span style={{
                 marginLeft: "auto",
-                fontSize: "10px",
+                fontSize: "12px",
                 fontFamily: "var(--font-mono)",
                 color: theme.amber,
                 opacity: 0.8,
@@ -278,13 +278,13 @@ function ThemeScreen({
         onClick={onNext}
         aria-label="continue to voice selection"
         style={{
-          height: "52px",
-          padding: "0 40px",
-          borderRadius: "14px",
+          height: "64px",
+          padding: "0 52px",
+          borderRadius: "16px",
           background: "var(--amber)",
           border: "none",
           fontFamily: "var(--font-mono)",
-          fontSize: "13px",
+          fontSize: "16px",
           color: "var(--bg)",
           cursor: "pointer",
           letterSpacing: "0.05em",
@@ -354,7 +354,7 @@ function VoiceScreen({
       alignItems: "center",
       minHeight: "100dvh",
       padding: "40px 32px 32px",
-      gap: "24px",
+      gap: "32px",
     }}>
       <div style={{
         display: "flex",
@@ -364,7 +364,7 @@ function VoiceScreen({
         textAlign: "center",
       }}>
         <div style={{
-          fontSize: "13px",
+          fontSize: "18px",
           fontFamily: "var(--font-mono)",
           color: "var(--amber)",
           letterSpacing: "0.08em",
@@ -373,7 +373,7 @@ function VoiceScreen({
           [choose [u]'s voice]
         </div>
         <div style={{
-          fontSize: "12px",
+          fontSize: "15px",
           fontFamily: "var(--font-mono)",
           color: "var(--muted)",
           fontWeight: 300,
@@ -391,14 +391,14 @@ function VoiceScreen({
         aria-label="search voices"
         style={{
           width: "100%",
-          maxWidth: "360px",
-          padding: "10px 14px",
-          borderRadius: "10px",
+          maxWidth: "480px",
+          padding: "13px 18px",
+          borderRadius: "13px",
           background: "var(--bg2)",
           border: "1px solid var(--border)",
           outline: "none",
           fontFamily: "var(--font-mono)",
-          fontSize: "12px",
+          fontSize: "15px",
           color: "var(--text)",
           fontWeight: 300,
         }}
@@ -407,12 +407,12 @@ function VoiceScreen({
       {/* Voice list */}
       <div style={{
         width: "100%",
-        maxWidth: "360px",
+        maxWidth: "480px",
         flex: 1,
         overflowY: "auto",
         display: "flex",
         flexDirection: "column",
-        gap: "8px",
+        gap: "10px",
         maxHeight: "calc(100dvh - 320px)",
       }}>
         {loading && (
@@ -432,9 +432,9 @@ function VoiceScreen({
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
-              padding: "12px 14px",
-              borderRadius: "10px",
+              gap: "16px",
+              padding: "16px 18px",
+              borderRadius: "13px",
               background: "var(--bg2)",
               border: `1px solid ${selectedVoice === voice.voice_id ? "var(--amber)" : "var(--border)"}`,
               cursor: "pointer",
@@ -447,9 +447,9 @@ function VoiceScreen({
               onClick={(e) => { e.stopPropagation(); playPreview(voice) }}
               aria-label={`preview ${voice.name}`}
               style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "8px",
+                width: "40px",
+                height: "40px",
+                borderRadius: "10px",
                 background: playing === voice.voice_id ? "var(--amber)" : "var(--bg3)",
                 border: "none",
                 cursor: "pointer",
@@ -458,7 +458,7 @@ function VoiceScreen({
                 justifyContent: "center",
                 flexShrink: 0,
                 color: playing === voice.voice_id ? "var(--bg)" : "var(--muted)",
-                fontSize: "10px",
+                fontSize: "13px",
                 fontFamily: "var(--font-mono)",
               }}
             >
@@ -467,7 +467,7 @@ function VoiceScreen({
 
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
-                fontSize: "12px",
+                fontSize: "15px",
                 fontFamily: "var(--font-mono)",
                 color: selectedVoice === voice.voice_id ? "var(--amber)" : "var(--text)",
                 fontWeight: selectedVoice === voice.voice_id ? 400 : 300,
@@ -479,7 +479,7 @@ function VoiceScreen({
               </div>
               {voice.labels?.accent && (
                 <div style={{
-                  fontSize: "10px",
+                  fontSize: "12px",
                   fontFamily: "var(--font-mono)",
                   color: "var(--dim)",
                   marginTop: "2px",
@@ -491,7 +491,7 @@ function VoiceScreen({
 
             {selectedVoice === voice.voice_id && (
               <span style={{
-                fontSize: "9px",
+                fontSize: "11px",
                 fontFamily: "var(--font-mono)",
                 color: "var(--amber)",
                 opacity: 0.8,
@@ -509,13 +509,13 @@ function VoiceScreen({
         aria-label="complete onboarding"
         style={{
           width: "100%",
-          maxWidth: "360px",
-          height: "52px",
-          borderRadius: "14px",
+          maxWidth: "480px",
+          height: "64px",
+          borderRadius: "16px",
           background: "var(--amber)",
           border: "none",
           fontFamily: "var(--font-mono)",
-          fontSize: "13px",
+          fontSize: "16px",
           color: "var(--bg)",
           cursor: "pointer",
           letterSpacing: "0.05em",
