@@ -554,22 +554,16 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
                   onToggleLock={() => {}}
                 />
               </div>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: "12px",
-                  color: "var(--muted)", letterSpacing: "0.06em", opacity: 0.7,
-                }}>
-                  {isRecording ? "release to send" : isThinking ? "thinking..." : isSpeaking ? "speaking..." : "hold anywhere to speak"}
-                </span>
-                {!isRecording && !isThinking && !isSpeaking && (
+              {(isRecording || isThinking || isSpeaking) && (
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
                   <span style={{
                     fontFamily: "var(--font-mono)", fontSize: "12px",
                     color: "var(--muted)", letterSpacing: "0.06em", opacity: 0.7,
                   }}>
-                    or type below
+                    {isRecording ? "release to send" : isThinking ? "thinking..." : "speaking..."}
                   </span>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
         )}

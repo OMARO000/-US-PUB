@@ -32,6 +32,18 @@ export default function AmbientOrb({
   const uColor = ringRecording ? "var(--rose)" : "var(--amber)";
 
   return (
+    <>
+    <style>{`
+      @keyframes orbitText {
+        0%   { opacity: 0; transform: translateY(-18px) rotate(0deg); }
+        10%  { opacity: 0.6; }
+        25%  { opacity: 0.6; transform: translateY(-18px) rotate(90deg); }
+        50%  { opacity: 0.6; transform: translateY(-18px) rotate(180deg); }
+        75%  { opacity: 0.6; transform: translateY(-18px) rotate(270deg); }
+        90%  { opacity: 0.6; }
+        100% { opacity: 0; transform: translateY(-18px) rotate(360deg); }
+      }
+    `}</style>
     <div
       role={onHoldStart ? "button" : undefined}
       tabIndex={onHoldStart ? 0 : undefined}
@@ -70,19 +82,38 @@ export default function AmbientOrb({
           animation: `oring ${ringRecording ? "0.9s" : isSpeaking ? "1.4s" : "3s"} ease-in-out infinite`,
         }} />
         {/* [u] center — replaces dot */}
-        <span style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: "13px",
-          fontWeight: 400,
-          letterSpacing: "0.04em",
-          color: uColor,
-          opacity: isThinking ? 0.4 : 1,
-          animation: `${ringRecording ? "recpulse 0.9s" : isThinking ? "pulse 1.2s" : isSpeaking ? "obreathe 1.4s" : "obreathe 3s"} ease-in-out infinite`,
-          userSelect: "none",
-          pointerEvents: "none",
-        }}>
-          [u]
-        </span>
+        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "13px",
+            fontWeight: 400,
+            letterSpacing: "0.04em",
+            color: uColor,
+            opacity: isThinking ? 0.4 : 1,
+            animation: `${ringRecording ? "recpulse 0.9s" : isThinking ? "pulse 1.2s" : isSpeaking ? "obreathe 1.4s" : "obreathe 3s"} ease-in-out infinite`,
+            userSelect: "none",
+            pointerEvents: "none",
+          }}>
+            [u]
+          </span>
+          {orbState === "idle" && !isRecording && !isLocked && (
+            <span style={{
+              position: "absolute",
+              fontSize: "7px",
+              fontFamily: "var(--font-mono)",
+              color: uColor,
+              opacity: 0,
+              letterSpacing: "0.12em",
+              whiteSpace: "nowrap",
+              animation: "orbitText 4s linear infinite",
+              transformOrigin: "center",
+              pointerEvents: "none",
+              userSelect: "none",
+            }}>
+              hold · to · speak
+            </span>
+          )}
+        </div>
       </div>
 
       {stateLabel && (
@@ -97,5 +128,6 @@ export default function AmbientOrb({
         </span>
       )}
     </div>
+    </>
   );
 }

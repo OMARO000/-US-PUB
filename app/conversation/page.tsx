@@ -412,26 +412,6 @@ export default function ConversationPage() {
                     />
                   </div>
 
-                  <div style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "6px",
-                    marginBottom: "32px",
-                  }}>
-                    <span style={{
-                      fontFamily: "var(--font-mono)", fontSize: "12px",
-                      color: "var(--muted)", letterSpacing: "0.06em",
-                    }}>
-                      hold anywhere to speak
-                    </span>
-                    <span style={{
-                      fontFamily: "var(--font-mono)", fontSize: "12px",
-                      color: "var(--muted)", letterSpacing: "0.06em",
-                    }}>
-                      or type below
-                    </span>
-                  </div>
 
                   <div style={{
                     maxWidth: "560px",

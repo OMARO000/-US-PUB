@@ -230,10 +230,12 @@ export default function ThreadChatView({
           display: "flex", flexDirection: "column",
           alignItems: "center",
           paddingTop: isMessagesThread ? "calc(28vh - 44px)" : "28vh",
+          pointerEvents: "none",
         }}>
           <div style={{
             display: "flex", flexDirection: "column", alignItems: "center",
             width: "100%", maxWidth: "1100px", padding: "0 24px",
+            pointerEvents: "auto",
           }}>
             {/* Orb */}
             <div
@@ -280,24 +282,6 @@ export default function ThreadChatView({
               </div>
             )}
 
-            {/* Hold prompt */}
-            <div style={{
-              display: "flex", flexDirection: "column", alignItems: "center",
-              gap: "6px", marginBottom: "32px",
-            }}>
-              <span style={{
-                fontFamily: "var(--font-mono)", fontSize: "12px",
-                color: "var(--muted)", letterSpacing: "0.06em",
-              }}>
-                hold anywhere to speak
-              </span>
-              <span style={{
-                fontFamily: "var(--font-mono)", fontSize: "12px",
-                color: "var(--muted)", letterSpacing: "0.06em",
-              }}>
-                or type below
-              </span>
-            </div>
 
             <div style={{ width: "100%" }}>{InputBlock}</div>
           </div>
