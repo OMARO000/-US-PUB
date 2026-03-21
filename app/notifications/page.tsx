@@ -9,6 +9,16 @@
 
 import { useState, useEffect } from "react"
 
+function formatTimeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return "just now"
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 24) return `${hrs}h ago`
+  return `${Math.floor(hrs / 24)}d ago`
+}
+
 interface Notification {
   id: string
   category: "match" | "connection" | "message" | "insight" | "journal" | "policy" | "update"
@@ -118,26 +128,32 @@ export default function NotificationsPage({ embedded }: { embedded?: boolean } =
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // mark all as read after viewing
-    const timer = setTimeout(() => {
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-    }, 1500)
+    const userId = typeof window !== "undefined"
+      ? localStorage.getItem("us_uid") ?? null
+      : null
+    if (!userId) { setLoading(false); return }
 
-    // mock notifications for now — will be replaced with API
-    const mockNotifs: Notification[] = [
-      {
-        id: "1",
-        category: "update",
-        content: "welcome to [us]. your portrait is the foundation of everything here. [u] is listening.",
-        timestamp: "just now",
-        read: false,
-      },
-    ]
-
-    setNotifications(mockNotifs)
-    setLoading(false)
-
-    return () => clearTimeout(timer)
+    fetch(`/api/notifications?userId=${encodeURIComponent(userId)}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => {
+        if (data?.notifications) {
+          setNotifications(data.notifications.map((n: Notification & { createdAt: string | number }) => ({
+            ...n,
+            timestamp: formatTimeAgo(new Date(n.createdAt).toISOString()),
+          })))
+          // mark all as read after 1.5s
+          setTimeout(() => {
+            fetch("/api/notifications", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId }),
+            })
+            setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+          }, 1500)
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false))
   }, [])
 
   return (

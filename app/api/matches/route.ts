@@ -10,6 +10,7 @@ import { eq, and, ne, desc } from "drizzle-orm"
 import { rankMatches } from "@/lib/match/matchEngine"
 import { v4 as uuid } from "uuid"
 import type { ConnectionType } from "@/lib/match/matchEngine"
+import { createNotification } from "@/lib/notifications/create"
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
@@ -79,7 +80,14 @@ export async function GET(req: NextRequest) {
       updatedAt: now,
     }))
 
-    if (rows.length > 0) await db.insert(matchScores).values(rows)
+    if (rows.length > 0) {
+      await db.insert(matchScores).values(rows)
+      await createNotification(
+        userId,
+        "match",
+        `[u] found ${rows.length} new resonance signal${rows.length !== 1 ? "s" : ""}. check your [connections].`
+      )
+    }
 
     return NextResponse.json({
       matches: rows.map((r) => ({

@@ -8,6 +8,7 @@ import { matchScores, conversations } from "@/lib/db/schema"
 import { eq, and } from "drizzle-orm"
 import { v4 as uuid } from "uuid"
 import { generateFirstPrompt } from "@/lib/match/firstPrompt"
+import { createNotification } from "@/lib/notifications/create"
 
 export async function POST(req: NextRequest) {
   let body: { matchId: string; userId: string }
@@ -42,6 +43,9 @@ export async function POST(req: NextRequest) {
       .limit(1)
 
     if (!mirrorMatch) return NextResponse.json({ mutual: false })
+
+    await createNotification(userId, "connection", "a mutual connection opened. check your [connections].")
+    await createNotification(targetUserId, "connection", "a mutual connection opened. check your [connections].")
 
     // check if conversation already exists
     const [existingConvo] = await db

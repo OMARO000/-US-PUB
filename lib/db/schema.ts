@@ -269,3 +269,19 @@ export const threadMessages = sqliteTable("thread_messages", {
   metadata: text("metadata"),  // JSON — for MATCH_CARD, SETTING_UPDATE etc
   createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
 })
+
+// ─────────────────────────────────────────────
+// NOTIFICATIONS
+// Surfaced by [u] — matches, connections, updates, etc.
+// ─────────────────────────────────────────────
+export const notifications = sqliteTable("notifications", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  category: text("category", {
+    enum: ["match", "connection", "message", "insight", "journal", "policy", "update"],
+  }).notNull(),
+  content: text("content").notNull(),
+  read: integer("read", { mode: "boolean" }).notNull().default(false),
+  relatedId: text("related_id"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+})
