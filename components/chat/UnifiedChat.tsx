@@ -163,8 +163,10 @@ export default function UnifiedChat({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        padding: "16px 0",
+        padding: "60px 0",
         flexShrink: 0,
+        transform: "scale(2.0)",
+        transformOrigin: "center center",
       }}>
         <AmbientOrb
           isRecording={isRecording}
