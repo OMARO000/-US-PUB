@@ -30,20 +30,9 @@ export default function AmbientOrb({
 
   const ringRecording = isLocked || isRecording;
   const uColor = ringRecording ? "var(--rose)" : "var(--amber)";
+  const showOrbitText = orbState === "idle" && !isRecording && !isLocked;
 
   return (
-    <>
-    <style>{`
-      @keyframes orbitText {
-        0%   { opacity: 0; transform: translateY(-18px) rotate(0deg); }
-        10%  { opacity: 0.6; }
-        25%  { opacity: 0.6; transform: translateY(-18px) rotate(90deg); }
-        50%  { opacity: 0.6; transform: translateY(-18px) rotate(180deg); }
-        75%  { opacity: 0.6; transform: translateY(-18px) rotate(270deg); }
-        90%  { opacity: 0.6; }
-        100% { opacity: 0; transform: translateY(-18px) rotate(360deg); }
-      }
-    `}</style>
     <div
       role={onHoldStart ? "button" : undefined}
       tabIndex={onHoldStart ? 0 : undefined}
@@ -65,6 +54,17 @@ export default function AmbientOrb({
         userSelect: "none", WebkitUserSelect: "none",
       }}
     >
+      <style>{`
+        @keyframes orbitText {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+        @keyframes orbitTextReverse {
+          from { transform: rotate(0deg) translateX(28px) rotate(0deg); }
+          to   { transform: rotate(360deg) translateX(28px) rotate(-360deg); }
+        }
+      `}</style>
+
       <div style={{
         width: "80px", height: "80px", position: "relative",
         display: "flex", alignItems: "center", justifyContent: "center",
@@ -81,39 +81,56 @@ export default function AmbientOrb({
           border: `1px solid ${ringRecording ? "rgba(196,132,138,0.35)" : isSpeaking ? "rgba(196,151,74,0.45)" : "rgba(196,151,74,0.22)"}`,
           animation: `oring ${ringRecording ? "0.9s" : isSpeaking ? "1.4s" : "3s"} ease-in-out infinite`,
         }} />
-        {/* [u] center — replaces dot */}
-        <div style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "13px",
-            fontWeight: 400,
-            letterSpacing: "0.04em",
-            color: uColor,
-            opacity: isThinking ? 0.4 : 1,
-            animation: `${ringRecording ? "recpulse 0.9s" : isThinking ? "pulse 1.2s" : isSpeaking ? "obreathe 1.4s" : "obreathe 3s"} ease-in-out infinite`,
-            userSelect: "none",
-            pointerEvents: "none",
-          }}>
-            [u]
-          </span>
-          {orbState === "idle" && !isRecording && !isLocked && (
-            <span style={{
+
+        {/* circular "hold to speak" text — SVG text on path */}
+        {showOrbitText && (
+          <svg
+            style={{
               position: "absolute",
-              fontSize: "7px",
-              fontFamily: "var(--font-mono)",
-              color: uColor,
-              opacity: 0,
-              letterSpacing: "0.12em",
-              whiteSpace: "nowrap",
-              animation: "orbitText 4s linear infinite",
-              transformOrigin: "center",
+              inset: 0,
+              width: "80px",
+              height: "80px",
+              animation: "orbitText 8s linear infinite",
+              opacity: 0.55,
               pointerEvents: "none",
-              userSelect: "none",
-            }}>
-              hold · to · speak
-            </span>
-          )}
-        </div>
+            }}
+            viewBox="0 0 80 80"
+          >
+            <defs>
+              <path
+                id="orbitCircle"
+                d="M 40,40 m -26,0 a 26,26 0 1,1 52,0 a 26,26 0 1,1 -52,0"
+              />
+            </defs>
+            <text
+              fontFamily="var(--font-mono)"
+              fontSize="7"
+              fill={uColor}
+              letterSpacing="2.5"
+            >
+              <textPath href="#orbitCircle">
+                hold to speak · hold to speak ·
+              </textPath>
+            </text>
+          </svg>
+        )}
+
+        {/* [u] center */}
+        <span style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "13px",
+          fontWeight: 400,
+          letterSpacing: "0.04em",
+          color: uColor,
+          opacity: isThinking ? 0.4 : 1,
+          animation: `${ringRecording ? "recpulse 0.9s" : isThinking ? "pulse 1.2s" : isSpeaking ? "obreathe 1.4s" : "obreathe 3s"} ease-in-out infinite`,
+          userSelect: "none",
+          pointerEvents: "none",
+          position: "relative",
+          zIndex: 1,
+        }}>
+          [u]
+        </span>
       </div>
 
       {stateLabel && (
@@ -128,6 +145,5 @@ export default function AmbientOrb({
         </span>
       )}
     </div>
-    </>
   );
 }
