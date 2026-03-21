@@ -5,6 +5,8 @@
  * [open] · [shared] · [sovereign]
  */
 
+import { useState } from "react"
+
 const MODES = [
   {
     id: "open",
@@ -25,7 +27,7 @@ const MODES = [
   {
     id: "shared",
     label: "[shared]",
-    price: "$5 / month",
+    price: "$10 / month",
     description: "you contribute anonymized data to the [us] research commons. in return, you get deeper connection intelligence and help build something that benefits everyone.",
     features: [
       "everything in [open]",
@@ -43,7 +45,7 @@ const MODES = [
   {
     id: "sovereign",
     label: "[sovereign]",
-    price: "$10 / month",
+    price: "$20 / month",
     description: "all the depth of [shared], with complete data sovereignty. nothing leaves your account. ever.",
     features: [
       "everything in [shared]",
@@ -58,6 +60,8 @@ const MODES = [
 ]
 
 export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
+  const [selected, setSelected] = useState<string | null>(null)
+
   return (
     <div style={{
       flex: 1,
@@ -68,6 +72,8 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
       display: "flex",
       flexDirection: "column",
       gap: "16px",
+      overflowY: "auto",
+      height: "100%",
     }}>
       {/* header */}
       <div style={{ marginBottom: "8px" }}>
@@ -94,15 +100,21 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
 
       {/* mode cards */}
       {MODES.map((mode) => (
-        <div key={mode.id} style={{
-          border: `1px solid ${mode.amber ? "var(--amber)" : "var(--border)"}`,
-          borderRadius: "13px",
-          background: "var(--bg2)",
-          padding: "20px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "14px",
-        }}>
+        <div
+          key={mode.id}
+          onClick={() => setSelected(mode.id)}
+          style={{
+            border: `1px solid ${selected === mode.id ? "var(--amber)" : mode.amber ? "var(--amber)" : "var(--border)"}`,
+            borderRadius: "13px",
+            background: selected === mode.id ? "rgba(196,151,74,0.06)" : "var(--bg2)",
+            padding: "20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: "14px",
+            cursor: "pointer",
+            transition: "border-color 0.15s, background 0.15s",
+          }}
+        >
           {/* mode header */}
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
             <span style={{
@@ -176,18 +188,22 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
 
           {/* CTA */}
           {mode.id !== "open" && (
-            <button style={{
-              height: "44px",
-              borderRadius: "10px",
-              background: mode.amber ? "var(--amber)" : "transparent",
-              border: mode.amber ? "none" : "1px solid var(--border)",
-              fontFamily: "var(--font-mono)",
-              fontSize: "12px",
-              color: mode.amber ? "var(--bg)" : "var(--muted)",
-              cursor: "pointer",
-              letterSpacing: "0.04em",
-            }}>
-              [coming soon]
+            <button
+              onClick={(e) => { e.stopPropagation(); setSelected(mode.id) }}
+              style={{
+                height: "44px",
+                borderRadius: "10px",
+                background: selected === mode.id ? "var(--amber)" : mode.amber ? "var(--amber)" : "transparent",
+                border: selected === mode.id ? "none" : mode.amber ? "none" : "1px solid var(--border)",
+                fontFamily: "var(--font-mono)",
+                fontSize: "12px",
+                color: selected === mode.id || mode.amber ? "var(--bg)" : "var(--muted)",
+                cursor: "pointer",
+                letterSpacing: "0.04em",
+                transition: "background 0.15s",
+              }}
+            >
+              {selected === mode.id ? "[selected — coming soon]" : "[coming soon]"}
             </button>
           )}
         </div>
