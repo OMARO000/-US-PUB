@@ -14,8 +14,10 @@ export function useIntentSignal(userId: string | null, connectionsActive: boolea
   const [hasIntent, setHasIntent] = useState(false)
   const clearedRef = useRef(false)
 
+  const noPortraitRef = useRef(false)
+
   const check = useCallback(async () => {
-    if (!userId) return
+    if (!userId || noPortraitRef.current) return
     try {
       const res = await fetch(
         `/api/matches?userId=${encodeURIComponent(userId)}&connectionType=open`,
@@ -23,6 +25,10 @@ export function useIntentSignal(userId: string | null, connectionsActive: boolea
       )
       if (!res.ok) return
       const data = await res.json()
+      if (data.noPortrait) {
+        noPortraitRef.current = true
+        return
+      }
       const intent = (data.matches ?? []).some(
         (m: { intentSignal: boolean; status: string }) =>
           m.intentSignal && m.status === "pending"
