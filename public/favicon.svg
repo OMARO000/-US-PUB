@@ -1,13 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="8" fill="#1C1C1E"/>
-  <text
-    x="16"
-    y="22"
-    text-anchor="middle"
-    font-family="monospace"
-    font-size="14"
-    font-weight="300"
-    fill="#C4974A"
-    letter-spacing="-0.5"
-  >[u]</text>
+  <rect width="32" height="32" rx="6" fill="#1C1C1E"/>
+  <!-- left bracket [ -->
+  <rect x="7" y="9" width="2.5" height="14" rx="0.5" fill="#C4974A"/>
+  <rect x="7" y="9" width="6" height="2.5" rx="0.5" fill="#C4974A"/>
+  <rect x="7" y="20.5" width="6" height="2.5" rx="0.5" fill="#C4974A"/>
+  <!-- u shape -->
+  <rect x="14" y="9" width="2.5" height="10" rx="0.5" fill="#C4974A"/>
+  <rect x="14" y="17" width="5" height="2.5" rx="0.5" fill="#C4974A"/>
+  <rect x="17" y="9" width="2.5" height="10" rx="0.5" fill="#C4974A"/>
+  <!-- right bracket ] -->
+  <rect x="22.5" y="9" width="2.5" height="14" rx="0.5" fill="#C4974A"/>
+  <rect x="19" y="9" width="6" height="2.5" rx="0.5" fill="#C4974A"/>
+  <rect x="19" y="20.5" width="6" height="2.5" rx="0.5" fill="#C4974A"/>
 </svg>
