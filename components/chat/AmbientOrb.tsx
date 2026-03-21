@@ -91,7 +91,7 @@ export default function AmbientOrb({
               width: "80px",
               height: "80px",
               animation: "orbitText 8s linear infinite",
-              opacity: 0.55,
+              opacity: 0.75,
               pointerEvents: "none",
             }}
             viewBox="0 0 80 80"
