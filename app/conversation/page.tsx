@@ -444,7 +444,7 @@ export default function ConversationPage() {
                     color: "var(--text)",
                     fontFamily: "var(--font-mono)",
                     textAlign: "center",
-                    marginBottom: "32px",
+                    marginBottom: "10px",
                     minHeight: "52px",
                   }}>
                     {typedBubble}
