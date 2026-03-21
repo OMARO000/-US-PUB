@@ -1,8 +1,9 @@
 "use client"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export default function GrainOverlay() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [blendMode, setBlendMode] = useState<string>("overlay")
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -27,6 +28,17 @@ export default function GrainOverlay() {
     ctx.putImageData(imageData, 0, 0)
   }, [])
 
+  useEffect(() => {
+    const updateBlend = () => {
+      const theme = document.documentElement.getAttribute("data-theme")
+      setBlendMode(theme === "light" ? "multiply" : "overlay")
+    }
+    updateBlend()
+    const observer = new MutationObserver(updateBlend)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] })
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <canvas
       ref={canvasRef}
@@ -37,8 +49,8 @@ export default function GrainOverlay() {
         height: "100%",
         pointerEvents: "none",
         zIndex: 9999,
-        opacity: 0.04,
-        mixBlendMode: "overlay",
+        opacity: 0.08,
+        mixBlendMode: blendMode as any,
       }}
     />
   )
