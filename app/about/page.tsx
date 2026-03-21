@@ -449,6 +449,33 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
       onTouchEnd={handleOrbRelease}
     >
 
+      {/* Skip button — absolute top-right, only during delivery */}
+      {stage < 4 && (
+        <button
+          onClick={() => setStage(4)}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          style={{
+            position: "absolute",
+            top: "16px",
+            right: "20px",
+            zIndex: 20,
+            background: "transparent",
+            border: "1px solid var(--border)",
+            borderRadius: "6px",
+            cursor: "pointer",
+            fontSize: "12px",
+            fontFamily: "var(--font-mono)",
+            letterSpacing: "0.06em",
+            padding: "6px 10px",
+            minHeight: "44px",
+            color: "var(--muted)",
+          }}
+        >
+          [skip →]
+        </button>
+      )}
+
       {/* message stream */}
       <div style={{
         flex: 1,
@@ -459,27 +486,6 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
         gap: "14px",
         scrollbarWidth: "none",
       }}>
-
-        {stage < 4 && (
-          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "4px" }}>
-            <button
-              onClick={() => setStage(4)}
-              style={{
-                background: "transparent",
-                border: "none",
-                fontFamily: "var(--font-mono)",
-                fontSize: "10px",
-                color: "var(--muted)",
-                opacity: 0.4,
-                cursor: "pointer",
-                letterSpacing: "0.06em",
-                padding: "4px 8px",
-              }}
-            >
-              [skip →]
-            </button>
-          </div>
-        )}
 
         {/* philosophy */}
         <ThemBubble
