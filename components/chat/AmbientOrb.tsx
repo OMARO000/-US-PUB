@@ -99,14 +99,14 @@ export default function AmbientOrb({
             <defs>
               <path
                 id="orbitCircle"
-                d="M 40,40 m -26,0 a 26,26 0 1,1 52,0 a 26,26 0 1,1 -52,0"
+                d="M 40,40 m -34,0 a 34,34 0 1,1 68,0 a 34,34 0 1,1 -68,0"
               />
             </defs>
             <text
               fontFamily="var(--font-mono)"
-              fontSize="7"
+              fontSize="6.5"
               fill={uColor}
-              letterSpacing="2.5"
+              letterSpacing="2"
             >
               <textPath href="#orbitCircle">
                 hold to speak · hold to speak ·
