@@ -31,6 +31,8 @@ const SettingsPageView    = dynamic(() => import("@/app/settings/PageView"),    
 const TermsPageView       = dynamic(() => import("@/app/terms/PageView"),       { ssr: false })
 const PrivacyPageView     = dynamic(() => import("@/app/privacy/PageView"),     { ssr: false })
 const AboutPage           = dynamic(() => import("@/app/about/page"),           { ssr: false })
+const NotificationsPageView = dynamic(() => import("@/app/notifications/PageView"), { ssr: false })
+const UsPlusPageView        = dynamic(() => import("@/app/us-plus/PageView"),        { ssr: false })
 
 import { useSearchParams } from "next/navigation"
 import { useIntentSignal } from "@/hooks/useIntentSignal"
@@ -88,8 +90,10 @@ function PageViewRenderer({ threadType }: { threadType: ThreadType }) {
     case "journal":     return <JournalPageView />
     case "about":       return <AboutPageView />
     case "profile":     return <ProfilePageView />
-    case "settings":    return <SettingsPageView />
-    case "terms":       return <TermsPageView />
+    case "settings":       return <SettingsPageView />
+    case "notifications":  return <NotificationsPageView />
+    case "us-plus":        return <UsPlusPageView />
+    case "terms":          return <TermsPageView />
     case "privacy":     return <PrivacyPageView />
     default:            return null
   }

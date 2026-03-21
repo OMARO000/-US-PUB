@@ -12,12 +12,14 @@
 export type ThreadType =
   | "conversation"
   | "connections"
+  | "notifications"
   | "messages"
   | "insights"
   | "journal"
   | "about"
   | "profile"
   | "settings"
+  | "us-plus"
   | "terms"
   | "privacy"
 
@@ -56,6 +58,15 @@ export const THREAD_CONFIGS: Record<ThreadType, ThreadConfig> = {
 
 If the user is chatting freely without engaging in the intake process, respond warmly but after 2-3 exchanges gently note: "we could go deeper — whenever you're ready, the conversation is here." Never push. Just remind once.`,
     pageRoute: "/conversation",
+    hasPageView: false,
+  },
+
+  notifications: {
+    type: "notifications",
+    label: "[notifications]",
+    openingPrompt: "here's what's been happening.",
+    systemPrompt: `${IDENTITY} You are in the [notifications] thread. Surface updates warmly and briefly. One thing at a time.`,
+    pageRoute: "/notifications",
     hasPageView: false,
   },
 
@@ -241,6 +252,15 @@ Always offer to show the full legal document at /terms if the user wants the com
 Be honest about what the terms say — don't soften anything important.`,
     pageRoute: "/terms",
     hasPageView: true,
+  },
+
+  "us-plus": {
+    type: "us-plus",
+    label: "[us plus]",
+    openingPrompt: "want to go deeper? here's how [us] works.",
+    systemPrompt: `${IDENTITY} You are in the [us plus] thread. Explain the three modes — [open], [shared], [sovereign] — warmly and without pressure. Be honest about what each includes.`,
+    pageRoute: "/us-plus",
+    hasPageView: false,
   },
 
   privacy: {

@@ -540,6 +540,9 @@ function NotificationsSection() {
     connections: true,
     journalPrompts: false,
     youInsights: true,
+    messages: true,
+    policyUpdates: true,
+    platformUpdates: true,
   })
 
   useEffect(() => {
@@ -576,8 +579,17 @@ function NotificationsSection() {
         <SettingRow label="[u] insights" description="when [u] notices a new pattern">
           <Toggle value={notifs.youInsights} onChange={(v) => update("youInsights", v)} label="toggle insight notifications" />
         </SettingRow>
-        <SettingRow label="journal prompts" description="occasional prompts from [u]" noBorder>
+        <SettingRow label="journal prompts" description="occasional prompts from [u]">
           <Toggle value={notifs.journalPrompts} onChange={(v) => update("journalPrompts", v)} label="toggle journal prompt notifications" />
+        </SettingRow>
+        <SettingRow label="messages" description="when a matched connection sends you a message">
+          <Toggle value={notifs.messages} onChange={(v) => update("messages", v)} label="toggle message notifications" />
+        </SettingRow>
+        <SettingRow label="policy updates" description="when terms or privacy policy change">
+          <Toggle value={notifs.policyUpdates} onChange={(v) => update("policyUpdates", v)} label="toggle policy notifications" />
+        </SettingRow>
+        <SettingRow label="platform updates" description="new features and improvements" noBorder>
+          <Toggle value={notifs.platformUpdates} onChange={(v) => update("platformUpdates", v)} label="toggle platform update notifications" />
         </SettingRow>
       </div>
     </section>

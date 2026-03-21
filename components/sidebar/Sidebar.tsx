@@ -50,6 +50,18 @@ const navItems = [
     badge: true,
   },
   {
+    href: "/notifications",
+    threadType: "notifications" as ThreadType,
+    label: "[notifications]",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+      </svg>
+    ),
+    badge: false,
+  },
+  {
     href: "/conversation?thread=messages",
     threadType: "messages" as ThreadType,
     label: "[messages]",
@@ -316,6 +328,36 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
       </button>
 
       <div style={{ flex: 1 }} />
+
+      {/* [us plus] */}
+      <button
+        onClick={() => onThreadSelect?.("us-plus" as ThreadType)}
+        style={{
+          width: "100%",
+          height: "44px",
+          borderRadius: "10px",
+          background: "transparent",
+          border: "1px solid var(--amber)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: collapsed ? "center" : "flex-start",
+          gap: collapsed ? 0 : "10px",
+          padding: collapsed ? "0" : "0 12px",
+          cursor: "pointer",
+          marginBottom: "8px",
+          transition: "background 0.15s",
+        }}
+      >
+        <span style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: collapsed ? "10px" : "13px",
+          color: "var(--amber)",
+          letterSpacing: "0.06em",
+          whiteSpace: "nowrap",
+        }}>
+          {collapsed ? "[+]" : "[us plus]"}
+        </span>
+      </button>
 
       {/* Collapse toggle — desktop only */}
       {!isMobile && (

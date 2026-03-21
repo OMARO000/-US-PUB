@@ -28,6 +28,7 @@ export type PortraitRevealStage =
   | "metaphor_landing"
   | "confirming"
   | "confirmed"
+  | "account_reveal"
   | "wallet_input"
   | "minting"
   | "minted"
@@ -142,7 +143,7 @@ export default function PortraitReveal({
   }, [metaphorStreaming.done])
 
   const handleConfirm = () => {
-    setStage("confirmed")
+    setStage("account_reveal")
     onConfirm(confirmInput.trim() || undefined)
   }
 
@@ -374,6 +375,103 @@ export default function PortraitReveal({
                 [save]
               </button>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Account reveal — shown after confirmation */}
+      {stage === "account_reveal" && (
+        <div style={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          animation: "fadeIn 0.6s ease forwards",
+        }}>
+          <div style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "13px",
+            color: "var(--text)",
+            fontWeight: 300,
+            lineHeight: 1.75,
+          }}>
+            your portrait is saved.
+          </div>
+          <div style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "12px",
+            color: "var(--muted)",
+            fontWeight: 300,
+            lineHeight: 1.75,
+          }}>
+            [us] created an anonymous account to hold it. no email, no name — just a number that's yours.
+          </div>
+          <div style={{
+            padding: "14px 16px",
+            borderRadius: "10px",
+            background: "var(--bg)",
+            border: "1px solid var(--amber)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "14px",
+            color: "var(--amber)",
+            letterSpacing: "0.12em",
+            textAlign: "center",
+          }}>
+            {typeof window !== "undefined"
+              ? localStorage.getItem("us_account_number") ?? "—"
+              : "—"}
+          </div>
+          <div style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "11px",
+            color: "var(--muted)",
+            opacity: 0.6,
+            lineHeight: 1.6,
+          }}>
+            save this number to return to your portrait and matches. you can find it anytime in [settings].
+          </div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              onClick={() => setStage("confirmed")}
+              style={{
+                flex: 1,
+                height: "44px",
+                borderRadius: "10px",
+                background: "var(--amber)",
+                border: "none",
+                fontFamily: "var(--font-mono)",
+                fontSize: "12px",
+                color: "var(--bg)",
+                cursor: "pointer",
+                letterSpacing: "0.03em",
+              }}
+            >
+              [i've saved it]
+            </button>
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  localStorage.removeItem("us_account_number")
+                  localStorage.removeItem("us_uid")
+                }
+                setStage("confirmed")
+              }}
+              style={{
+                height: "44px",
+                padding: "0 16px",
+                borderRadius: "10px",
+                background: "transparent",
+                border: "1px solid var(--border)",
+                fontFamily: "var(--font-mono)",
+                fontSize: "12px",
+                color: "var(--muted)",
+                cursor: "pointer",
+                letterSpacing: "0.03em",
+                whiteSpace: "nowrap",
+              }}
+            >
+              [continue without saving]
+            </button>
           </div>
         </div>
       )}
