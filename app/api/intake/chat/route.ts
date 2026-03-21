@@ -204,6 +204,16 @@ export async function POST(req: NextRequest) {
                 archetype: portrait.archetype,
                 sessionId,
               }
+              // persist portrait to DB immediately
+              await SessionManager.savePortrait(sessionId, {
+                portraitText: portrait.portraitText,
+                valuesSignals: [],
+                narrativeSignals: [],
+                relationalSignals: [],
+                communicationSignals: [],
+                frictionSignals: [],
+                connectionType: "open",
+              })
             } catch (err) {
               console.error("[us] portrait generation error:", err)
             }

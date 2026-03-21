@@ -1,8 +1,8 @@
 "use client"
 
 /**
- * useIntentSignal — polls /api/matches every 60s
- * Returns true if any pending match has intentSignal = true
+ * useIntentSignal — polls /api/matches and /api/notifications every 60s
+ * Returns true if any pending match has intentSignal = true OR there are unread notifications
  * Clears when user visits connections
  */
 
@@ -17,22 +17,35 @@ export function useIntentSignal(userId: string | null, connectionsActive: boolea
   const noPortraitRef = useRef(false)
 
   const check = useCallback(async () => {
-    if (!userId || noPortraitRef.current) return
+    if (!userId) return
     try {
-      const res = await fetch(
-        `/api/matches?userId=${encodeURIComponent(userId)}&connectionType=open`,
-        { cache: "no-store" }
-      )
-      if (!res.ok) return
-      const data = await res.json()
-      if (data.noPortrait) {
-        noPortraitRef.current = true
-        return
+      const [matchesRes, notifsRes] = await Promise.all([
+        noPortraitRef.current
+          ? Promise.resolve(null)
+          : fetch(`/api/matches?userId=${encodeURIComponent(userId)}&connectionType=open`, { cache: "no-store" }),
+        fetch(`/api/notifications?userId=${encodeURIComponent(userId)}`, { cache: "no-store" }),
+      ])
+
+      let intent = false
+
+      if (matchesRes?.ok) {
+        const data = await matchesRes.json()
+        if (data.noPortrait) {
+          noPortraitRef.current = true
+        } else {
+          intent = (data.matches ?? []).some(
+            (m: { intentSignal: boolean; status: string }) =>
+              m.intentSignal && m.status === "pending"
+          )
+        }
       }
-      const intent = (data.matches ?? []).some(
-        (m: { intentSignal: boolean; status: string }) =>
-          m.intentSignal && m.status === "pending"
-      )
+
+      if (!intent && notifsRes?.ok) {
+        const data = await notifsRes.json()
+        const unread = (data.notifications ?? []).some((n: { read: boolean }) => !n.read)
+        if (unread) intent = true
+      }
+
       setHasIntent(intent)
     } catch {
       // silent

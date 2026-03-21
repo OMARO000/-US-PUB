@@ -460,6 +460,27 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
         scrollbarWidth: "none",
       }}>
 
+        {stage < 4 && (
+          <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "4px" }}>
+            <button
+              onClick={() => setStage(4)}
+              style={{
+                background: "transparent",
+                border: "none",
+                fontFamily: "var(--font-mono)",
+                fontSize: "10px",
+                color: "var(--muted)",
+                opacity: 0.4,
+                cursor: "pointer",
+                letterSpacing: "0.06em",
+                padding: "4px 8px",
+              }}
+            >
+              [skip →]
+            </button>
+          </div>
+        )}
+
         {/* philosophy */}
         <ThemBubble
           text={PHILOSOPHY}
@@ -564,6 +585,28 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
                   }}>
                     {isRecording ? "release to send" : isThinking ? "thinking..." : "speaking..."}
                   </span>
+                  {isSpeaking && (
+                    <button
+                      onClick={() => {
+                        audioRef.current?.pause()
+                        setIsSpeaking(false)
+                      }}
+                      style={{
+                        marginTop: "8px",
+                        background: "transparent",
+                        border: "1px solid var(--border)",
+                        borderRadius: "6px",
+                        fontFamily: "var(--font-mono)",
+                        fontSize: "10px",
+                        color: "var(--muted)",
+                        cursor: "pointer",
+                        padding: "4px 10px",
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      [stop]
+                    </button>
+                  )}
                 </div>
               )}
             </div>

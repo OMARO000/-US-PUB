@@ -308,21 +308,23 @@ export function useIntake(): UseIntakeReturn {
           setOrbState("idle")
           return
         }
-        await sendMessage(data.transcript, "voice", data.durationMs ?? undefined)
+        const isBlock4 = currentBlock === 4
+        await sendMessage(data.transcript, "voice", data.durationMs ?? undefined, isBlock4 || undefined)
       } catch {
         setOrbState("idle")
       }
     },
-    [sendMessage]
+    [sendMessage, currentBlock]
   )
 
   // ── send text message ──
   const sendText = useCallback(
     (text: string) => {
       if (!text.trim()) return
-      sendMessage(text.trim(), "text")
+      const isBlock4 = currentBlock === 4
+      sendMessage(text.trim(), "text", undefined, isBlock4 || undefined)
     },
-    [sendMessage]
+    [sendMessage, currentBlock]
   )
 
   // ── request rephrase ──

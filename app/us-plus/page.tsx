@@ -186,6 +186,26 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
             {mode.note}
           </div>
 
+          {/* current mode indicator for open */}
+          {mode.id === "open" && (
+            <div style={{
+              height: "44px",
+              borderRadius: "10px",
+              background: "rgba(196,151,74,0.06)",
+              border: "1px solid var(--border)",
+              fontFamily: "var(--font-mono)",
+              fontSize: "12px",
+              color: "var(--muted)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              letterSpacing: "0.04em",
+              opacity: 0.6,
+            }}>
+              [your current mode]
+            </div>
+          )}
+
           {/* CTA */}
           {mode.id !== "open" && (
             <button

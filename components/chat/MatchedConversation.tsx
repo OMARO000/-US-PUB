@@ -32,6 +32,7 @@ export default function MatchedConversation({ conversationId, userId, firstPromp
   const [sending, setSending] = useState(false)
   const [ended, setEnded] = useState(false)
   const [loaded, setLoaded] = useState(false)
+  const [outcomeRecorded, setOutcomeRecorded] = useState(false)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const latestMessageIdRef = useRef<string | null>(null)
@@ -56,9 +57,11 @@ export default function MatchedConversation({ conversationId, userId, firstPromp
   // initial fetch
   useEffect(() => { fetchMessages() }, [fetchMessages])
 
-  // poll every 5s
+  // poll every 5s (skip when tab hidden)
   useEffect(() => {
-    const interval = setInterval(fetchMessages, POLL_INTERVAL_MS)
+    const interval = setInterval(() => {
+      if (!document.hidden) fetchMessages()
+    }, POLL_INTERVAL_MS)
     return () => clearInterval(interval)
   }, [fetchMessages])
 
@@ -88,6 +91,17 @@ export default function MatchedConversation({ conversationId, userId, firstPromp
       setSending(false)
     }
   }
+
+  const recordOutcome = useCallback(async (outcome: "met" | "didnt_meet" | "ongoing") => {
+    try {
+      await fetch("/api/matches/outcome", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId, userId, outcome }),
+      })
+      setOutcomeRecorded(true)
+    } catch { }
+  }, [conversationId, userId])
 
   const hasMessages = messages.length > 0
 
@@ -203,14 +217,55 @@ export default function MatchedConversation({ conversationId, userId, firstPromp
       {ended && (
         <div style={{
           padding: "12px 24px",
-          textAlign: "center",
-          fontFamily: "var(--font-mono)",
-          fontSize: "11px",
-          color: "var(--muted)",
-          opacity: 0.5,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: "10px",
           flexShrink: 0,
         }}>
-          [this conversation has ended]
+          <span style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "11px",
+            color: "var(--muted)",
+            opacity: 0.5,
+          }}>
+            [this conversation has ended]
+          </span>
+          {!outcomeRecorded && (
+            <div style={{ display: "flex", gap: "8px" }}>
+              {(["met", "didnt_meet", "ongoing"] as const).map((outcome) => (
+                <button
+                  key={outcome}
+                  onClick={() => recordOutcome(outcome)}
+                  style={{
+                    height: "36px",
+                    padding: "0 12px",
+                    borderRadius: "8px",
+                    background: "transparent",
+                    border: "1px solid var(--border)",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "10px",
+                    color: "var(--muted)",
+                    cursor: "pointer",
+                    letterSpacing: "0.04em",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {outcome === "met" ? "[we met]" : outcome === "didnt_meet" ? "[didn't meet]" : "[still talking]"}
+                </button>
+              ))}
+            </div>
+          )}
+          {outcomeRecorded && (
+            <span style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: "10px",
+              color: "var(--muted)",
+              opacity: 0.4,
+            }}>
+              [outcome recorded]
+            </span>
+          )}
         </div>
       )}
 

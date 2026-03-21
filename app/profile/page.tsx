@@ -197,9 +197,16 @@ function buildDeclaredProfile(portrait: Portrait): DeclaredField[] {
 function DeclaredProfileSection({ portrait }: { portrait: Portrait }) {
   const fields = buildDeclaredProfile(portrait)
   const [editing, setEditing] = useState<string | null>(null)
-  const [values, setValues] = useState<Record<string, string>>(
-    Object.fromEntries(fields.map((f) => [f.key, f.value]))
-  )
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    const base = Object.fromEntries(fields.map((f) => [f.key, f.value]))
+    if (typeof window === "undefined") return base
+    return Object.fromEntries(
+      fields.map((f) => {
+        const saved = localStorage.getItem(`us_declared_${f.key}`)
+        return [f.key, saved ?? f.value]
+      })
+    )
+  })
 
   return (
     <Section>
@@ -236,7 +243,10 @@ function DeclaredProfileSection({ portrait }: { portrait: Portrait }) {
                   }}
                 />
                 <button
-                  onClick={() => setEditing(null)}
+                  onClick={() => {
+                    localStorage.setItem(`us_declared_${field.key}`, values[field.key])
+                    setEditing(null)
+                  }}
                   style={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--amber)", background: "transparent", border: "none", cursor: "pointer", padding: "0 6px" }}
                 >
                   [save]
@@ -343,19 +353,33 @@ function DataControlsSection({ userId }: { userId: string }) {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleted, setDeleted] = useState(false)
 
-  const handleExport = () => {
-    const data = {
-      userId,
-      exportedAt: new Date().toISOString(),
-      note: "this is your declared profile data from [us]",
+  const handleExport = async () => {
+    try {
+      const res = await fetch(`/api/profile?userId=${encodeURIComponent(userId)}`)
+      const profileData = res.ok ? await res.json() : null
+      const declared: Record<string, string> = {}
+      const fields = ["values", "direction", "connection", "communication", "looking_for"]
+      fields.forEach((key) => {
+        const saved = localStorage.getItem(`us_declared_${key}`)
+        if (saved) declared[key] = saved
+      })
+      const data = {
+        userId,
+        exportedAt: new Date().toISOString(),
+        portrait: profileData?.portrait ?? null,
+        declaredProfile: declared,
+        note: "your data from [us] by OMARO PBC",
+      }
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = "us-profile.json"
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch {
+      // silent — download best effort
     }
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = "us-profile.json"
-    a.click()
-    URL.revokeObjectURL(url)
   }
 
   const handleDelete = async () => {

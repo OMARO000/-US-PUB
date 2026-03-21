@@ -160,9 +160,12 @@ function AppearanceSection({ currentTheme, onThemeChange }: {
 
   useEffect(() => {
     if (!autoTheme) return
-    const theme = getThemeByTime()
-    onThemeChange(theme)
-  }, [autoTheme])
+    onThemeChange(getThemeByTime())
+    const interval = setInterval(() => {
+      onThemeChange(getThemeByTime())
+    }, 5 * 60 * 1000) // check every 5 minutes
+    return () => clearInterval(interval)
+  }, [autoTheme, onThemeChange])
 
   return (
     <section>
