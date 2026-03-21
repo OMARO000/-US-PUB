@@ -74,7 +74,7 @@ export default function UnifiedChat({
         }
       `}</style>
 
-      {/* CHAT BODY — only rendered when showMessages is true */}
+      {/* CHAT BODY */}
       {showMessages && (
         <div
           onMouseDown={handleBodyMouseDown}
@@ -104,23 +104,7 @@ export default function UnifiedChat({
             position: "relative",
           }}
         >
-          {/* Orb overlay — while recording/thinking/speaking over messages */}
-          {(isRecording || isThinking || isSpeaking) && (
-            <div style={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              pointerEvents: "none",
-            }}>
-              <AmbientOrb isRecording={isRecording} orbState={orbState} isLocked={isLocked} />
-            </div>
-          )}
-
-          {/* Messages — aria-live so screen readers announce incoming [them] responses */}
+          {/* Messages */}
           <div
             aria-live="polite"
             aria-atomic="false"
@@ -173,6 +157,24 @@ export default function UnifiedChat({
           </div>
         </div>
       )}
+
+      {/* ORB — always visible between bubble and input, hold to speak */}
+      <div className="no-record" style={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: "16px 0",
+        flexShrink: 0,
+      }}>
+        <AmbientOrb
+          isRecording={isRecording}
+          orbState={orbState}
+          isLocked={isLocked}
+          onHoldStart={onHoldStart}
+          onHoldEnd={onHoldEnd}
+          onToggleLock={onToggleLock}
+        />
+      </div>
 
       {/* BOTTOM INPUT */}
       <div className="no-record" style={{
