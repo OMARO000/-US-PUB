@@ -108,7 +108,12 @@ export default function AmbientOrb({
               fill={uColor}
               letterSpacing="2"
             >
-              <textPath href="#orbitCircle">
+              <textPath
+                href="#orbitCircle"
+                startOffset="0%"
+                textLength="100%"
+                lengthAdjust="spacing"
+              >
                 hold to speak · hold to speak ·
               </textPath>
             </text>
