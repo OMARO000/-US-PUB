@@ -536,6 +536,10 @@ export default function ConversationPage() {
               </div>
             ) : activeThread === "about" ? (
               <AboutPage embedded />
+            ) : activeThread === "notifications" ? (
+              <NotificationsPageView />
+            ) : activeThread === "us-plus" ? (
+              <UsPlusPageView />
             ) : viewMode === "chat" ? (
               <ThreadChatView
                 key={activeThread}

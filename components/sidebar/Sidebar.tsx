@@ -329,33 +329,30 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
 
       <div style={{ flex: 1 }} />
 
-      {/* [us plus] */}
+      {/* [us+] */}
       <button
         onClick={() => onThreadSelect?.("us-plus" as ThreadType)}
         style={{
           width: "100%",
-          height: "44px",
+          height: "36px",
           borderRadius: "10px",
           background: "transparent",
           border: "1px solid var(--amber)",
           display: "flex",
           alignItems: "center",
-          justifyContent: collapsed ? "center" : "flex-start",
-          gap: collapsed ? 0 : "10px",
-          padding: collapsed ? "0" : "0 12px",
+          justifyContent: "center",
           cursor: "pointer",
-          marginBottom: "8px",
-          transition: "background 0.15s",
+          marginBottom: "4px",
         }}
       >
         <span style={{
           fontFamily: "var(--font-mono)",
-          fontSize: collapsed ? "10px" : "13px",
+          fontSize: "13px",
           color: "var(--amber)",
           letterSpacing: "0.06em",
           whiteSpace: "nowrap",
         }}>
-          {collapsed ? "[+]" : "[us plus]"}
+          {collapsed ? "[+]" : "[us+]"}
         </span>
       </button>
 
