@@ -265,8 +265,8 @@ export default function ConversationPage() {
           }} />
         )}
 
-        {/* ── Top-right toggles — non-conversation threads (not settings) ── */}
-        {!isConversationThread && activeThread !== "settings" && (
+        {/* ── Top-right toggles — non-conversation threads (not settings/us-plus/notifications) ── */}
+        {!isConversationThread && activeThread !== "settings" && activeThread !== "us-plus" && activeThread !== "notifications" && (
           <>
             {config.hasPageView && activeThread !== "about" && (
               <button
