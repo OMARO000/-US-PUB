@@ -30,7 +30,6 @@ export default function AmbientOrb({
 
   const ringRecording = isLocked || isRecording;
   const uColor = ringRecording ? "var(--rose)" : "var(--amber)";
-  const showOrbitText = orbState === "idle" && !isRecording && !isLocked;
 
   return (
     <div
@@ -54,16 +53,6 @@ export default function AmbientOrb({
         userSelect: "none", WebkitUserSelect: "none",
       }}
     >
-      <style>{`
-        @keyframes orbitText {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        @keyframes orbitTextReverse {
-          from { transform: rotate(0deg) translateX(28px) rotate(0deg); }
-          to   { transform: rotate(360deg) translateX(28px) rotate(-360deg); }
-        }
-      `}</style>
 
       <div style={{
         width: "80px", height: "80px", position: "relative",
@@ -81,49 +70,6 @@ export default function AmbientOrb({
           border: `1px solid ${ringRecording ? "rgba(196,132,138,0.35)" : isSpeaking ? "rgba(196,151,74,0.45)" : "rgba(196,151,74,0.22)"}`,
           animation: `oring ${ringRecording ? "0.9s" : isSpeaking ? "1.4s" : "3s"} ease-in-out infinite`,
         }} />
-
-        {/* circular "hold to speak" text — SVG text on path */}
-        {showOrbitText && (
-          <svg
-            style={{
-              position: "absolute",
-              inset: 0,
-              width: "80px",
-              height: "80px",
-              animation: "orbitText 8s linear infinite",
-              opacity: 0.75,
-              pointerEvents: "none",
-            }}
-            viewBox="0 0 80 80"
-          >
-            <defs>
-              <path
-                id="orbitCircle"
-                d="M 40,40 m -34,0 a 34,34 0 1,1 68,0 a 34,34 0 1,1 -68,0"
-              />
-            </defs>
-            <text
-              fontFamily="var(--font-mono)"
-              fontSize="6.5"
-              fill={uColor}
-              letterSpacing="2"
-            >
-              <textPath href="#orbitCircle" startOffset="0%">
-                hold to speak ·
-              </textPath>
-            </text>
-            <text
-              fontFamily="var(--font-mono)"
-              fontSize="6.5"
-              fill={uColor}
-              letterSpacing="2"
-            >
-              <textPath href="#orbitCircle" startOffset="50%">
-                hold to speak ·
-              </textPath>
-            </text>
-          </svg>
-        )}
 
         {/* [u] center */}
         <span style={{
