@@ -458,7 +458,7 @@ export default function ConversationPage() {
                   </div>
 
                   <div
-                    style={{ width: "100%", flexShrink: 0 }}
+                    style={{ width: "100%", maxWidth: "560px", margin: "0 auto", flexShrink: 0 }}
                     onMouseDown={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                   >

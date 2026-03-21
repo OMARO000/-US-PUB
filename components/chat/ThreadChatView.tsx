@@ -123,13 +123,13 @@ export default function ThreadChatView({
 
   const InputBlock = (
     <div className="no-record" style={{
-      padding: "20px 24px 24px",
+      padding: "10px 0 24px",
       flexShrink: 0,
       display: "flex",
       flexDirection: "column",
       gap: "10px",
     }}>
-      <div style={{ borderTop: "1px solid var(--border)", margin: "0 -18px" }} />
+      <div style={{ borderTop: "1px solid var(--border)" }} />
       <div style={{
         display: "flex",
         alignItems: "center",
@@ -283,7 +283,7 @@ export default function ThreadChatView({
             )}
 
 
-            <div style={{ width: "100%" }}>{InputBlock}</div>
+            <div style={{ width: "100%", maxWidth: "560px", margin: "0 auto" }}>{InputBlock}</div>
           </div>
         </div>
       )}
