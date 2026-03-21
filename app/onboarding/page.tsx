@@ -144,7 +144,9 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
           opacity: 0.6,
           marginTop: "8px",
         }}>
-          no profile. no algorithm. just a conversation.
+          no profile to fill out.<br />
+          no performance required.<br />
+          just a conversation.
         </div>
       </div>
 
