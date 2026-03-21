@@ -110,19 +110,21 @@ function ThemBubble({
   active,
   onDone,
   speed = 12,
+  skipped = false,
 }: {
   text: string
   active: boolean
   onDone: () => void
   speed?: number
+  skipped?: boolean
 }) {
-  const { displayed, done } = useTypingText(text, active, speed)
+  const { displayed, done } = useTypingText(text, active && !skipped, speed)
 
   useEffect(() => {
     if (done) onDone()
   }, [done, onDone])
 
-  if (!active && !displayed) return null
+  if (!skipped && !active && !displayed) return null
 
   return (
     <div style={{
@@ -139,8 +141,8 @@ function ThemBubble({
       fontFamily: "var(--font-mono)",
       whiteSpace: "pre-wrap",
     }}>
-      {displayed}
-      {!done && active && (
+      {skipped ? text : displayed}
+      {!skipped && !done && active && (
         <span style={{
           display: "inline-block",
           width: "7px",
@@ -264,6 +266,7 @@ const FAQ_INTRO = "you might be wondering..."
 
 export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
   const [stage, setStage] = useState(0)
+  const [skipped, setSkipped] = useState(false)
   const [inputValue, setInputValue] = useState("")
   const [messages, setMessages] = useState<{ role: "them" | "user"; content: string }[]>([])
   const [isThinking, setIsThinking] = useState(false)
@@ -452,7 +455,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
       {/* Skip button — absolute top-right, only during delivery */}
       {stage < 4 && (
         <button
-          onClick={() => setStage(4)}
+          onClick={() => { setSkipped(true); setStage(4) }}
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
           style={{
@@ -493,35 +496,39 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
           active={stage === 0}
           onDone={onPhilosophyDone}
           speed={10}
+          skipped={skipped}
         />
 
         {/* mission */}
-        {stage >= 1 && (
+        {(stage >= 1 || skipped) && (
           <ThemBubble
             text={MISSION}
             active={stage === 1}
             onDone={onMissionDone}
             speed={10}
+            skipped={skipped}
           />
         )}
 
         {/* [u] explanation */}
-        {stage >= 2 && (
+        {(stage >= 2 || skipped) && (
           <ThemBubble
             text={U_EXPLANATION}
             active={stage === 2}
             onDone={onUExplanationDone}
             speed={10}
+            skipped={skipped}
           />
         )}
 
         {/* faq intro */}
-        {stage >= 3 && (
+        {(stage >= 3 || skipped) && (
           <ThemBubble
             text={FAQ_INTRO}
             active={stage === 3}
             onDone={onFaqIntroDone}
             speed={18}
+            skipped={skipped}
           />
         )}
 
