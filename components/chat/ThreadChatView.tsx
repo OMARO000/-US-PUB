@@ -210,11 +210,6 @@ export default function ThreadChatView({
         flex: 1, display: "flex", flexDirection: "column",
         height: "100%", width: "100%", position: "relative",
       }}
-      onMouseDown={startRecording}
-      onMouseUp={stopRecording}
-      onMouseLeave={stopRecording}
-      onTouchStart={(e) => { e.preventDefault(); startRecording() }}
-      onTouchEnd={stopRecording}
     >
       <style>{`
         .us-textarea:focus-visible {
