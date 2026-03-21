@@ -417,18 +417,6 @@ export default function ConversationPage() {
                   maxWidth: "1100px",
                   padding: "0 24px",
                 }}>
-                  <div style={{
-                    transform: "scale(2)",
-                    transformOrigin: "center center",
-                    marginBottom: "80px",
-                  }}>
-                    <AmbientOrb
-                      isRecording={intake.isRecording}
-                      orbState={orbState}
-                      isLocked={isLocked}
-                      onToggleLock={(e) => { e?.stopPropagation(); handleToggleLock() }}
-                    />
-                  </div>
 
 
                   <div style={{
