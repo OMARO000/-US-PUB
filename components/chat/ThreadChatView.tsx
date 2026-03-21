@@ -196,7 +196,7 @@ export default function ThreadChatView({
         textAlign: "center", marginTop: "8px", fontSize: "12px",
         fontFamily: "var(--font-mono)", color: "var(--muted)", opacity: 0.6, lineHeight: 1.5,
       }}>
-        by talking to [them], an AI, you agree to our{" "}
+        by talking to [u], an AI, you agree to our{" "}
         <a href="/terms" style={{ color: "inherit", textDecoration: "underline" }}>[terms]</a>
         {" "}and{" "}
         <a href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>[privacy policy]</a>

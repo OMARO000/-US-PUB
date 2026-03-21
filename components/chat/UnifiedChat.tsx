@@ -23,13 +23,14 @@ interface UnifiedChatProps {
   disabled?: boolean;
   showMessages?: boolean;
   placeholder?: string;
+  inputRows?: number;
 }
 
 export default function UnifiedChat({
   messages, isRecording, isThinking, isSpeaking,
   isLocked, onHoldStart, onHoldEnd, onToggleLock,
   onSendText, onRephrase, disabled = false,
-  showMessages = true, placeholder,
+  showMessages = true, placeholder, inputRows = 1,
 }: UnifiedChatProps) {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasMessages = messages.length > 0 && showMessages;
@@ -199,7 +200,7 @@ export default function UnifiedChat({
         }}>
           <textarea
             ref={inputRef}
-            rows={1}
+            rows={inputRows}
             placeholder={placeholder ?? "[say something…]"}
             aria-label="say something"
             className="no-record us-textarea"

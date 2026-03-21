@@ -446,7 +446,7 @@ export default function ConversationPage() {
                   </div>
 
                   <div
-                    style={{ width: "100%", maxWidth: "560px", margin: "0 auto", flexShrink: 0 }}
+                    style={{ width: "100%", maxWidth: "760px", margin: "0 auto", flexShrink: 0 }}
                     onMouseDown={(e) => e.stopPropagation()}
                     onTouchStart={(e) => e.stopPropagation()}
                   >
@@ -464,6 +464,7 @@ export default function ConversationPage() {
                       disabled={intake.status !== "active"}
                       showMessages={false}
                       placeholder="conversing with [u] is you doing the work. it starts with [u]. it proceeds with [us]."
+                      inputRows={2}
                     />
                   </div>
                 </div>
@@ -490,6 +491,7 @@ export default function ConversationPage() {
                   disabled={intake.status !== "active"}
                   showMessages={true}
                   placeholder="conversing with [u] is you doing the work. it starts with [u]. it proceeds with [us]."
+                      inputRows={2}
                 />
               </div>
             )}
