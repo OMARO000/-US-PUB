@@ -176,13 +176,13 @@ export default function UnifiedChat({
 
       {/* BOTTOM INPUT */}
       <div className="no-record" style={{
-        padding: "20px 24px 24px",
+        padding: "10px 0 24px",
         flexShrink: 0,
         display: "flex",
         flexDirection: "column",
         gap: "10px",
       }}>
-        <div style={{ borderTop: "1px solid var(--border)", margin: "0 -18px" }} />
+        <div style={{ borderTop: "1px solid var(--border)" }} />
         <div style={{
           display: "flex",
           alignItems: "center",
