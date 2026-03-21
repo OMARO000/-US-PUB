@@ -309,26 +309,40 @@ export default function ConversationPage() {
           </>
         )}
 
-        {/* Portrait toggle — conversation only */}
+        {/* Portrait + lock voice toggles — conversation only */}
         {isConversationThread && (
-          <button
-            aria-label={portraitAsBackground ? "hide portrait" : "show portrait"}
-            onClick={(e) => {
-              e.stopPropagation()
-              const next = !portraitAsBackground
-              setPortraitAsBackground(next)
-              localStorage.setItem("us_portrait_bg", String(next))
-            }}
-            style={{
-              ...TOGGLE_BUTTON_STYLE,
-              top: "16px",
-              border: "1px solid var(--amber)",
-              color: "var(--amber)",
-              opacity: portraitAsBackground ? 0.9 : 0.45,
-            }}
-          >
-            {portraitAsBackground ? "[portrait on]" : "[portrait]"}
-          </button>
+          <>
+            <button
+              aria-label={portraitAsBackground ? "hide portrait" : "show portrait"}
+              onClick={(e) => {
+                e.stopPropagation()
+                const next = !portraitAsBackground
+                setPortraitAsBackground(next)
+                localStorage.setItem("us_portrait_bg", String(next))
+              }}
+              style={{
+                ...TOGGLE_BUTTON_STYLE,
+                top: "16px",
+                border: "1px solid var(--amber)",
+                color: "var(--amber)",
+                opacity: portraitAsBackground ? 0.9 : 0.45,
+              }}
+            >
+              {portraitAsBackground ? "[portrait on]" : "[portrait]"}
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleToggleLock() }}
+              aria-label={isLocked ? "unlock voice" : "lock voice"}
+              style={{
+                ...TOGGLE_BUTTON_STYLE,
+                top: "72px",
+                border: `1px solid ${isLocked ? "var(--amber)" : "var(--border)"}`,
+                color: isLocked ? "var(--amber)" : "var(--muted)",
+              }}
+            >
+              {isLocked ? "[voice locked]" : "[lock voice]"}
+            </button>
+          </>
         )}
 
         {/* ── CONVERSATION THREAD ── */}

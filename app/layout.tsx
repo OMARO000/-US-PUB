@@ -17,7 +17,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "[us] — authentic connections",
+  title: "[us] — authentic connections.",
   description: "authentic connections. no ads, no algorithms, no performance.",
   applicationName: "[us]",
   manifest: "/manifest.json",
@@ -25,6 +25,11 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "[us]",
+  },
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
   },
 };
 

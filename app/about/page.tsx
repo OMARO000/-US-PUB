@@ -43,8 +43,8 @@ const FAQS: { question: string; answer: string }[] = [
     answer: "no. [us] supports romantic connection, but also platonic and professional. and eventually, community. it doesn't privilege one type of connection over another. it just creates the conditions for real connection to happen — and then gets out of the way.",
   },
   {
-    question: "what does [them] actually do?",
-    answer: "[them] is the presence at the center of [us]. not a chatbot, not a therapist, not an assistant. a mirror. and a reminder.\n\nduring intake, [them] listens without judgment and reflects back what it observes — not what it assumes. over time, [them] notices patterns across your connections and surfaces them with care.\n\n[them] is not trying to become the connection. it's trying to make connection between humans possible.",
+    question: "what does [u] actually do?",
+    answer: "[u] is the presence at the center of [us]. not a chatbot, not a therapist. not an assistant. a mirror. and a reminder.\n\nduring intake, [u] listens without judgment and reflects back what it observes — not what it assumes. over time, [u] notices patterns across your connections and surfaces them with care.\n\n[u] is not trying to become the connection. it's trying to make connection between humans possible.",
   },
   {
     question: "how does matching work?",
@@ -552,6 +552,8 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
                   orbState={orbState}
                   isLocked={false}
                   onToggleLock={() => {}}
+                  onHoldStart={handleOrbTap}
+                  onHoldEnd={handleOrbRelease}
                 />
               </div>
               {(isRecording || isThinking || isSpeaking) && (
