@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/themes/ThemeProvider";
-import CookieBanner from "@/components/navigation/CookieBanner";
+import CookieBanner from "@/components/navigation/CookieBanner"
+import GrainOverlay from "@/components/ui/GrainOverlay";
 import "./globals.css";
 
 const ibmPlexSans = IBM_Plex_Sans({
@@ -52,6 +53,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <CookieBanner />
+          <GrainOverlay />
         </ThemeProvider>
       </body>
     </html>
