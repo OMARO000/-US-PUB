@@ -237,22 +237,6 @@ export default function ThreadChatView({
             width: "100%", maxWidth: "1100px", padding: "0 24px",
             pointerEvents: "auto",
           }}>
-            {/* Orb */}
-            <div
-              style={{ transform: "scale(2)", transformOrigin: "center center", marginBottom: "80px" }}
-              onMouseDown={startRecording}
-              onMouseUp={stopRecording}
-              onMouseLeave={stopRecording}
-              onTouchStart={(e) => { e.preventDefault(); startRecording() }}
-              onTouchEnd={stopRecording}
-            >
-              <AmbientOrb
-                isRecording={isRecording}
-                orbState={isRecording ? "recording" : "idle"}
-                isLocked={isLocked}
-                onToggleLock={onToggleLock}
-              />
-            </div>
 
             {/* Typed opening bubble */}
             {openingPrompt && (
@@ -282,6 +266,26 @@ export default function ThreadChatView({
               </div>
             )}
 
+            {/* Orb */}
+            <div
+              style={{
+                display: "flex", justifyContent: "center", alignItems: "center",
+                padding: "60px 0",
+                transform: "scale(2.0)", transformOrigin: "center center",
+              }}
+              onMouseDown={startRecording}
+              onMouseUp={stopRecording}
+              onMouseLeave={stopRecording}
+              onTouchStart={(e) => { e.preventDefault(); startRecording() }}
+              onTouchEnd={stopRecording}
+            >
+              <AmbientOrb
+                isRecording={isRecording}
+                orbState={isRecording ? "recording" : "idle"}
+                isLocked={isLocked}
+                onToggleLock={onToggleLock}
+              />
+            </div>
 
             <div style={{ width: "100%", maxWidth: "560px", margin: "0 auto" }}>{InputBlock}</div>
           </div>
