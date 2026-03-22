@@ -67,7 +67,7 @@ const THEMES: Theme[] = [
 // SCREEN 1 — WELCOME
 // ─────────────────────────────────────────────
 
-function WelcomeScreen({ onNext }: { onNext: () => void }) {
+function WelcomeScreen({ onNext, onLogin }: { onNext: () => void; onLogin: () => void }) {
   const [visible, setVisible] = useState(false)
 
   useEffect(() => {
@@ -150,25 +150,53 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
         </div>
       </div>
 
-      <button
-        onClick={onNext}
-        aria-label="begin"
-        style={{
-          height: "64px",
-          padding: "0 52px",
-          borderRadius: "16px",
-          background: "var(--amber)",
-          border: "none",
-          fontFamily: "var(--font-mono)",
-          fontSize: "16px",
-          color: "var(--bg)",
-          cursor: "pointer",
-          letterSpacing: "0.05em",
-          fontWeight: 400,
-        }}
-      >
-        [begin]
-      </button>
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "12px",
+        width: "100%",
+        maxWidth: "280px",
+      }}>
+        <button
+          onClick={onNext}
+          aria-label="begin"
+          style={{
+            width: "100%",
+            height: "64px",
+            borderRadius: "16px",
+            background: "var(--amber)",
+            border: "none",
+            fontFamily: "var(--font-mono)",
+            fontSize: "16px",
+            color: "var(--bg)",
+            cursor: "pointer",
+            letterSpacing: "0.05em",
+            fontWeight: 400,
+          }}
+        >
+          [begin]
+        </button>
+        <button
+          onClick={onLogin}
+          aria-label="log in"
+          style={{
+            width: "100%",
+            height: "64px",
+            borderRadius: "16px",
+            background: "transparent",
+            border: "1px solid var(--border)",
+            fontFamily: "var(--font-mono)",
+            fontSize: "16px",
+            color: "var(--muted)",
+            cursor: "pointer",
+            letterSpacing: "0.05em",
+            fontWeight: 400,
+          }}
+        >
+          [log in]
+        </button>
+      </div>
     </div>
   )
 }
@@ -410,7 +438,7 @@ function ThemeScreen({
 }
 
 // ─────────────────────────────────────────────
-// SCREEN 3 — VOICE PICKER
+// SCREEN 4 — VOICE PICKER
 // ─────────────────────────────────────────────
 
 function VoiceScreen({
@@ -666,7 +694,6 @@ export default function OnboardingPage() {
 
   const handleThemeSelect = (id: string) => {
     setSelectedTheme(id)
-    // apply theme live via ThemeProvider's localStorage key
     if (typeof window !== "undefined") {
       localStorage.setItem("us-theme", id)
       document.documentElement.setAttribute("data-theme", id)
@@ -679,7 +706,6 @@ export default function OnboardingPage() {
     localStorage.setItem("us-theme", selectedTheme)
     localStorage.setItem("us_voice_id", selectedVoice)
 
-    // ensure user row exists in DB with chosen preferences
     const userId = localStorage.getItem("us_uid")
     if (userId) {
       try {
@@ -696,10 +722,19 @@ export default function OnboardingPage() {
     router.push("/conversation")
   }
 
+  const handleLogin = () => {
+    // mark as onboarded and go straight to conversation
+    // full auth flow to be wired here post-MVP
+    if (typeof window !== "undefined") {
+      localStorage.setItem("us_onboarded", "true")
+    }
+    router.push("/conversation")
+  }
+
   return (
     <div style={{ background: "var(--bg)", minHeight: "100dvh" }}>
       {screen === "welcome" && (
-        <WelcomeScreen onNext={() => setScreen("cookies")} />
+        <WelcomeScreen onNext={() => setScreen("cookies")} onLogin={handleLogin} />
       )}
       {screen === "cookies" && (
         <CookiesScreen onAccept={() => setScreen("theme")} />
