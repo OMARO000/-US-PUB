@@ -2,7 +2,7 @@
 
 /**
  * /us-plus — [modes] pricing
- * [open] · [shared] · [sovereign]
+ * [open] · [shared] · [sovereign] · [us] for two · [us] for family
  */
 
 import { useState } from "react"
@@ -20,41 +20,80 @@ const MODES = [
       "connections + matched conversations",
       "journal + insights",
       "[u] across all threads",
+      "limited sessions per month",
     ],
     note: "always free. no expiration.",
     amber: false,
+    isFree: true,
   },
   {
     id: "shared",
     label: "[shared]",
     price: "$10 / month",
-    description: "you contribute anonymized data to the [us] research commons. in return, you get deeper connection intelligence and help build something that benefits everyone.",
+    description: "full personal access to everything [us] offers. your portrait grows deeper over time. your data stays yours — always.",
     features: [
       "everything in [open]",
+      "unlimited sessions",
       "4 additional match engine layers",
       "[go deeper] matching mode",
       "pattern recognition across connections",
       "pre-meet preparation with [u]",
       "post-connect debriefs",
       "framework visibility — see how [u] sees you",
-      "data co-op contributor status",
     ],
-    note: "your data is anonymized, consented, and never sold. it funds research into human connection.",
+    note: "your data is never sold. it is used only to build better products for you and the public.",
     amber: true,
   },
   {
     id: "sovereign",
     label: "[sovereign]",
     price: "$20 / month",
-    description: "all the depth of [shared], with complete data sovereignty. nothing leaves your account. ever.",
+    description: "the deepest relationship with [u]. your portrait evolves month over month. complete data sovereignty — nothing leaves your account, ever.",
     features: [
       "everything in [shared]",
-      "zero data contribution — your data stays yours",
+      "deep portrait — tracks how you change over time",
+      "memory exports — download your full history",
+      "priority voice quality",
+      "custom [u] name",
+      "early access to new features — 30-60 days first",
+      "direct product input channel",
       "NFT portrait mint included",
-      "priority matching",
-      "early access to new features",
     ],
     note: "for those who want depth without compromise.",
+    amber: false,
+  },
+  {
+    id: "two",
+    label: "[us] for two",
+    price: "$18 / month",
+    priceUpgrade: "+ $7 for [sovereign] access → $25 / month",
+    description: "a private shared space for two people — partners, best friends, anyone who wants to grow together. each person keeps their private portrait. together you build a shared one.",
+    features: [
+      "two full [shared] accounts",
+      "private shared space between both people",
+      "shared portrait — reflects the relationship",
+      "private threads between members",
+      "matched conversation history",
+      "upgrade either account to [sovereign] for +$7",
+    ],
+    note: "people-first. no workplace tools. no data sales. built for relationships.",
+    amber: false,
+  },
+  {
+    id: "family",
+    label: "[us] for family",
+    price: "$28 / month",
+    priceUpgrade: "+ $7 for [sovereign] access → $35 / month",
+    description: "a private shared space for up to 5 people. every member has their own portrait and private threads. together you build something that reflects all of you.",
+    features: [
+      "up to 5 full [shared] accounts",
+      "private shared family space",
+      "family portrait — evolves with everyone",
+      "private threads between any two members",
+      "shared insights across the group",
+      "upgrade any account to [sovereign] for +$7",
+    ],
+    note: "private by design. your family's data belongs to your family.",
     amber: false,
   },
 ]
@@ -66,7 +105,7 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
     <div style={{
       flex: 1,
       width: "100%",
-      maxWidth: "640px",
+      maxWidth: "720px",
       margin: "0 auto",
       padding: embedded ? "24px 20px 60px" : "40px 20px 60px",
       display: "flex",
@@ -94,7 +133,7 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
           lineHeight: 1.7,
           opacity: 0.7,
         }}>
-          choose how you want to be part of [us]. all modes include the full platform — the difference is depth and data.
+          choose how you want to be part of [us]. all modes include the full platform — the difference is depth, data sovereignty, and who you bring with you.
         </div>
       </div>
 
@@ -116,7 +155,7 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
           }}
         >
           {/* mode header */}
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: "6px" }}>
             <span style={{
               fontFamily: "var(--font-mono)",
               fontSize: "15px",
@@ -125,14 +164,27 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
             }}>
               {mode.label}
             </span>
-            <span style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: "13px",
-              color: mode.amber ? "var(--amber)" : "var(--muted)",
-              letterSpacing: "0.04em",
-            }}>
-              {mode.price}
-            </span>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "3px" }}>
+              <span style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: "13px",
+                color: mode.amber ? "var(--amber)" : "var(--muted)",
+                letterSpacing: "0.04em",
+              }}>
+                {mode.price}
+              </span>
+              {"priceUpgrade" in mode && mode.priceUpgrade && (
+                <span style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: "10px",
+                  color: "var(--muted)",
+                  letterSpacing: "0.04em",
+                  opacity: 0.6,
+                }}>
+                  {mode.priceUpgrade}
+                </span>
+              )}
+            </div>
           </div>
 
           {/* description */}
@@ -238,7 +290,7 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
         textAlign: "center",
         marginTop: "8px",
       }}>
-        payments via Stripe · sovereign by design · OMARO PBC
+        payments via Stripe · sovereign by design · your data is never sold · OMARO PBC
       </div>
     </div>
   )
