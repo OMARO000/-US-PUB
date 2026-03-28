@@ -193,6 +193,30 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
         )}
       </button>
 
+      {(!collapsed || isMobile) && (
+        <div style={{
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: "6px",
+        }}>
+          <div style={{
+            padding: "4px 8px",
+            background: "rgba(196,151,74,0.12)",
+            border: "1px solid rgba(196,151,74,0.25)",
+            borderRadius: "4px",
+            fontFamily: "var(--font-mono)",
+            fontSize: "9px",
+            letterSpacing: "0.1em",
+            color: "#C4974A",
+            lineHeight: 1.5,
+            textAlign: "center",
+            textTransform: "uppercase",
+          }}>
+            AN OMARO PBC<br/>COMPANY
+          </div>
+        </div>
+      )}
+
       <div style={{ width: "100%", height: "1px", background: "var(--border)", margin: "4px auto" }} />
 
       {/* Nav items */}
