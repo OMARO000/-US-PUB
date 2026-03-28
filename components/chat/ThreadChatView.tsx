@@ -293,14 +293,14 @@ export default function ThreadChatView({
                   boxSizing: "border-box" as const,
                   background: "rgba(255,255,255,0.06)",
                   border: "0.5px solid rgba(255,255,255,0.12)",
-                  borderRadius: "10px",
-                  padding: "14px 18px",
+                  borderRadius: "14px",
+                  padding: "24px 32px",
                   fontFamily: "IBM Plex Mono, monospace",
-                  fontSize: "12px",
+                  fontSize: "14px",
                   color: "rgba(255,255,255,0.45)",
                   letterSpacing: "0.04em",
                   lineHeight: 1.65,
-                  minHeight: "48px",
+                  minHeight: "64px",
                 }}>
                   {typedOpening}
                   {!openingDone && <span className="tcv-cursor">|</span>}
@@ -313,11 +313,11 @@ export default function ThreadChatView({
                 boxSizing: "border-box" as const,
                 display: "flex",
                 alignItems: "center",
-                gap: "10px",
+                gap: "12px",
                 background: "rgba(255,255,255,0.04)",
                 border: "0.5px solid rgba(196,151,74,0.22)",
-                borderRadius: "10px",
-                padding: "9px 13px",
+                borderRadius: "14px",
+                padding: "24px 32px",
                 opacity: thread.isStreaming ? 0.4 : 1,
               }}>
                 <textarea
@@ -349,13 +349,13 @@ export default function ThreadChatView({
                   onClick={handleSend}
                   disabled={thread.isStreaming}
                   style={{
-                    width: "36px", height: "36px", borderRadius: "8px", border: "none",
+                    width: "38px", height: "38px", borderRadius: "8px", border: "none",
                     background: "rgba(196,151,74,0.14)",
                     cursor: thread.isStreaming ? "default" : "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
                   }}
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                     stroke="var(--amber)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                     <line x1="22" y1="2" x2="11" y2="13"/>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"/>
