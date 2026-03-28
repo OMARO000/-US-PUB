@@ -4,13 +4,14 @@ export type UFigureState = "idle" | "listening" | "speaking";
 
 interface UFigureProps {
   state?: UFigureState;
+  scale?: number;
 }
 
-export default function UFigure({ state = "idle" }: UFigureProps) {
+export default function UFigure({ state = "idle", scale = 1 }: UFigureProps) {
   if (state === "listening") {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <svg width="100" height="90" viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
+        <svg width={100 * scale} height={90 * scale} viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
           <text x="50" y="34" textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="28" fontWeight="400" fill="#E05C5C">]u[</text>
           {/* body */}
           <line x1="50" y1="42" x2="50" y2="64" stroke="#E05C5C" strokeWidth="5.4" strokeLinecap="round"/>
@@ -30,11 +31,11 @@ export default function UFigure({ state = "idle" }: UFigureProps) {
         <div style={{
           fontFamily: "IBM Plex Mono, monospace",
           fontWeight: 700,
-          fontSize: "11px",
+          fontSize: `${11 * scale}px`,
           color: "#E05C5C",
           letterSpacing: "0.08em",
           textAlign: "center",
-          marginTop: "4px",
+          marginTop: `${4 * scale}px`,
         }}>
           [listening...]
         </div>
@@ -44,7 +45,7 @@ export default function UFigure({ state = "idle" }: UFigureProps) {
 
   if (state === "speaking") {
     return (
-      <svg width="90" height="130" viewBox="0 0 90 130" xmlns="http://www.w3.org/2000/svg">
+      <svg width={90 * scale} height={130 * scale} viewBox="0 0 90 130" xmlns="http://www.w3.org/2000/svg">
         <text x="45" y="32" textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="28" fontWeight="400" fill="#C4974A">[u]</text>
         {/* body */}
         <line x1="45" y1="40" x2="45" y2="64" stroke="#C4974A" strokeWidth="5.4" strokeLinecap="round"/>
@@ -64,7 +65,7 @@ export default function UFigure({ state = "idle" }: UFigureProps) {
 
   // idle
   return (
-    <svg width="90" height="130" viewBox="0 0 90 130" xmlns="http://www.w3.org/2000/svg">
+    <svg width={90 * scale} height={130 * scale} viewBox="0 0 90 130" xmlns="http://www.w3.org/2000/svg">
       <text x="45" y="32" textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="28" fontWeight="400" fill="#C4974A">[u]</text>
       {/* body */}
       <line x1="45" y1="40" x2="45" y2="64" stroke="#C4974A" strokeWidth="5.4" strokeLinecap="round"/>
