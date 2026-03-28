@@ -10,7 +10,7 @@ export default function UFigure({ state = "idle" }: UFigureProps) {
   if (state === "listening") {
     return (
       <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-        <svg width="100" height="140" viewBox="0 0 100 140" xmlns="http://www.w3.org/2000/svg">
+        <svg width="100" height="90" viewBox="0 0 100 90" xmlns="http://www.w3.org/2000/svg">
           <text x="50" y="34" textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="28" fontWeight="400" fill="#E05C5C">]u[</text>
           {/* body */}
           <line x1="50" y1="42" x2="50" y2="64" stroke="#E05C5C" strokeWidth="5.4" strokeLinecap="round"/>
@@ -34,7 +34,7 @@ export default function UFigure({ state = "idle" }: UFigureProps) {
           color: "#E05C5C",
           letterSpacing: "0.08em",
           textAlign: "center",
-          marginTop: "6px",
+          marginTop: "4px",
         }}>
           [listening...]
         </div>
