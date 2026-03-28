@@ -44,6 +44,7 @@ function ConsentToggle({ value, onChange }: { value: boolean; onChange: (v: bool
       onClick={() => onChange(!value)}
       aria-label={value ? "disable [u] access to journal" : "enable [u] access to journal"}
       aria-pressed={value}
+      title="[share journal]"
       style={{
         display: "flex",
         alignItems: "center",
@@ -82,7 +83,7 @@ function ConsentToggle({ value, onChange }: { value: boolean; onChange: (v: bool
         color: "var(--muted)",
         fontWeight: 300,
       }}>
-        {value ? "[u] can reference your journal in coaching" : "[u] cannot see your journal"}
+        [witness]
       </span>
     </button>
   )
@@ -267,6 +268,17 @@ export default function JournalPage({ embedded }: { embedded?: boolean } = {}) {
 
           {/* Consent toggle */}
           <section>
+            <div style={{
+              fontSize: "10px",
+              fontFamily: "var(--font-mono)",
+              color: "var(--amber)",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              marginBottom: "4px",
+              opacity: 0.7,
+            }}>
+              WITNESS MODE
+            </div>
             <ConsentToggle value={youConsent} onChange={setYouConsent} />
             <div style={{
               fontSize: "11px",

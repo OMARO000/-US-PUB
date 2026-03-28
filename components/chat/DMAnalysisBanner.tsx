@@ -87,7 +87,7 @@ export default function DMAnalysisBanner() {
         lineHeight: 1.5,
         letterSpacing: "0.02em",
       }}>
-        [us] observes patterns in this conversation to improve your connection insights — not the content, just how you connect.
+        WITNESS MODE: [us] observes patterns in this conversation to improve your connection insights — not the content, just how you connect.
       </span>
       <button
         onClick={(e) => { e.stopPropagation(); turnOff() }}
