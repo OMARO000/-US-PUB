@@ -166,7 +166,7 @@ export default function UnifiedChat({
     `}</style>
   );
 
-  // ── EMPTY STATE — 3-zone horizontal layout (3× scale) ────────────────────
+  // ── EMPTY STATE — 3-zone horizontal layout (2× scale) ────────────────────
   if (!hasMessages) {
     return (
       <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
@@ -180,10 +180,10 @@ export default function UnifiedChat({
           padding: "40px 32px",
           overflow: "auto",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "72px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "48px" }}>
 
             {/* ── Left zone: figure + hold box ── */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "24px" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
               <div
                 role="button"
                 aria-label="hold to speak"
@@ -197,16 +197,16 @@ export default function UnifiedChat({
                 onKeyUp={(e) => { if (e.code === "Space") { e.preventDefault(); onHoldEnd(); } }}
                 style={{ cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" }}
               >
-                <UFigure state={figureState} scale={3} />
+                <UFigure state={figureState} scale={2} />
               </div>
               <div style={{
-                width: "270px",
+                width: "180px",
                 background: "rgba(196,151,74,0.12)",
                 border: "0.5px solid rgba(196,151,74,0.35)",
-                borderRadius: "10px",
-                padding: "18px 24px",
+                borderRadius: "7px",
+                padding: "12px 16px",
                 fontFamily: "IBM Plex Mono, monospace",
-                fontSize: "18px",
+                fontSize: "12px",
                 color: "#C4974A",
                 letterSpacing: "0.09em",
                 lineHeight: 1.9,
@@ -217,17 +217,17 @@ export default function UnifiedChat({
               </div>
             </div>
 
-            {/* ── Dots — head of idle figure at (32/130)*390 ≈ 96px from top ── */}
+            {/* ── Dots — head of idle figure at (32/130)*260 ≈ 64px from top ── */}
             <div style={{
               display: "flex",
               flexDirection: "column",
               alignSelf: "flex-start",
-              paddingTop: "96px",
+              paddingTop: "64px",
             }}>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <div className="us-dot-1" style={{ width: 15, height: 15, borderRadius: "50%", background: "#C4974A", margin: "0 12px", flexShrink: 0 }} />
-                <div className="us-dot-2" style={{ width: 15, height: 15, borderRadius: "50%", background: "#C4974A", margin: "0 12px", flexShrink: 0 }} />
-                <div className="us-dot-3" style={{ width: 15, height: 15, borderRadius: "50%", background: "#C4974A", margin: "0 12px", flexShrink: 0 }} />
+                <div className="us-dot-1" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
+                <div className="us-dot-2" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
+                <div className="us-dot-3" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
               </div>
             </div>
 
@@ -235,23 +235,23 @@ export default function UnifiedChat({
             <div style={{
               display: "flex",
               flexDirection: "column",
-              gap: "30px",
-              minWidth: "480px",
-              maxWidth: "680px",
+              gap: "20px",
+              minWidth: "320px",
+              maxWidth: "454px",
               flex: 1,
             }}>
               {/* Cycling typewriter bubble */}
               <div style={{
                 background: "rgba(255,255,255,0.06)",
                 border: "0.5px solid rgba(255,255,255,0.12)",
-                borderRadius: "20px",
-                padding: "36px 48px",
+                borderRadius: "14px",
+                padding: "24px 32px",
                 fontFamily: "IBM Plex Mono, monospace",
-                fontSize: "20px",
+                fontSize: "14px",
                 color: "rgba(255,255,255,0.45)",
                 letterSpacing: "0.04em",
                 lineHeight: 1.65,
-                minHeight: "96px",
+                minHeight: "64px",
               }}>
                 {typedText}<span className="us-cursor">|</span>
               </div>
@@ -260,11 +260,11 @@ export default function UnifiedChat({
               <div className="no-record" style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "16px",
+                gap: "12px",
                 background: "rgba(255,255,255,0.04)",
                 border: "0.5px solid rgba(196,151,74,0.22)",
-                borderRadius: "20px",
-                padding: "36px 48px",
+                borderRadius: "14px",
+                padding: "24px 32px",
                 opacity: disabled ? 0.4 : 1,
               }}>
                 <textarea
@@ -292,7 +292,7 @@ export default function UnifiedChat({
                     background: "transparent",
                     border: "none",
                     outline: "none",
-                    fontSize: "20px",
+                    fontSize: "14px",
                     fontWeight: 300,
                     color: "var(--text)",
                     fontFamily: "var(--font-mono)",
@@ -307,9 +307,9 @@ export default function UnifiedChat({
                   onClick={handleSend}
                   disabled={!!disabled}
                   style={{
-                    width: "56px",
-                    height: "56px",
-                    borderRadius: "12px",
+                    width: "38px",
+                    height: "38px",
+                    borderRadius: "8px",
                     border: "none",
                     background: "rgba(196,151,74,0.14)",
                     cursor: disabled ? "default" : "pointer",
@@ -319,7 +319,7 @@ export default function UnifiedChat({
                     flexShrink: 0,
                   }}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <line x1="22" y1="2" x2="11" y2="13"/>
                     <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                   </svg>
@@ -328,7 +328,7 @@ export default function UnifiedChat({
 
               {/* Disclaimer */}
               <div style={{
-                fontSize: "14px",
+                fontSize: "10px",
                 fontFamily: "IBM Plex Mono, monospace",
                 color: "var(--muted)",
                 opacity: 0.6,
