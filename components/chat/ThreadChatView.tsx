@@ -240,7 +240,7 @@ export default function ThreadChatView({
           width: "100%",
           flex: 1,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "48px", width: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "48px", width: "100%", maxWidth: "900px" }}>
 
             {/* Left zone: figure + hold box */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
@@ -285,7 +285,7 @@ export default function ThreadChatView({
             </div>
 
             {/* Right zone: bubble + input + disclaimer */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "20px", minWidth: "448px", flex: 1 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px", minWidth: "448px", maxWidth: "520px", width: "100%", flex: 1 }}>
               {/* Typewriter bubble */}
               {openingPrompt && (
                 <div className="us-bubble" style={{
