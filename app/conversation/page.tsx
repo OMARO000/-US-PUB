@@ -406,23 +406,13 @@ export default function ConversationPage() {
                 display: "flex",
                 flexDirection: "column",
                 alignItems: "center",
-                paddingTop: "28vh",
+                justifyContent: "center",
               }}>
-                <div style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  width: "100%",
-                  maxWidth: "1100px",
-                  padding: "0 24px",
-                }}>
-
-
-                  <div
-                    style={{ width: "100%", maxWidth: "760px", margin: "0 auto", flexShrink: 0 }}
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onTouchStart={(e) => e.stopPropagation()}
-                  >
+                <div
+                  style={{ width: "100%", flex: 1, display: "flex" }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                >
                     <UnifiedChat
                       messages={intake.messages}
                       isThinking={intake.isThinking}
@@ -439,7 +429,6 @@ export default function ConversationPage() {
                       placeholder="conversing with [u] is you doing the work. it starts with [u]. it proceeds with [us]."
                       inputRows={2}
                     />
-                  </div>
                 </div>
               </div>
             )}
