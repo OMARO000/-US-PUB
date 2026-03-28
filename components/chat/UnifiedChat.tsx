@@ -169,16 +169,17 @@ export default function UnifiedChat({
   // ── EMPTY STATE — 3-zone horizontal layout (2× scale) ────────────────────
   if (!hasMessages) {
     return (
-      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
         {sharedStyles}
 
         <div style={{
-          flex: 1,
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: "calc(100vh - 80px)",
-          padding: "40px 32px",
+          height: "100%",
+          width: "100%",
+          flex: 1,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "48px", width: "100%" }}>
 

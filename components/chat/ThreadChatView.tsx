@@ -232,15 +232,15 @@ export default function ThreadChatView({
       {/* Empty state — 3-zone horizontal layout */}
       {!hasConversation && (
         <div style={{
-          flex: 1,
           display: "flex",
+          flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           height: "100%",
-          minHeight: "calc(100vh - 80px)",
-          padding: "40px 32px",
+          width: "100%",
+          flex: 1,
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "24px", width: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "48px", width: "100%" }}>
 
             {/* Left zone: figure + hold box */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
@@ -252,18 +252,18 @@ export default function ThreadChatView({
                 onTouchEnd={stopRecording}
                 style={{ cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" as const }}
               >
-                <UFigure state={isRecording ? "listening" : "idle"} />
+                <UFigure state={isRecording ? "listening" : "idle"} scale={2} />
               </div>
               {!isRecording && (
                 <div className="us-hold-box" style={{
-                  marginTop: "-38px",
-                  width: "90px",
+                  marginTop: "-76px",
+                  width: "180px",
                   background: "rgba(196,151,74,0.12)",
                   border: "0.5px solid rgba(196,151,74,0.5)",
-                  borderRadius: "5px",
-                  padding: "6px 10px",
+                  borderRadius: "7px",
+                  padding: "12px 16px",
                   fontFamily: "IBM Plex Mono, monospace",
-                  fontSize: "9px",
+                  fontSize: "12px",
                   color: "#C4974A",
                   letterSpacing: "0.09em",
                   lineHeight: 1.9,
@@ -275,17 +275,17 @@ export default function ThreadChatView({
               )}
             </div>
 
-            {/* Dots — aligned with figure head (~32px from top) */}
-            <div style={{ display: "flex", flexDirection: "column", alignSelf: "flex-start", paddingTop: "32px" }}>
+            {/* Dots — aligned with figure head at 2× scale: (32/130)*260 ≈ 64px from top */}
+            <div style={{ display: "flex", flexDirection: "column", alignSelf: "flex-start", paddingTop: "64px" }}>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <div className="tcv-dot-1 us-dot" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
-                <div className="tcv-dot-2 us-dot" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
-                <div className="tcv-dot-3 us-dot" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
+                <div className="tcv-dot-1 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
+                <div className="tcv-dot-2 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
+                <div className="tcv-dot-3 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
               </div>
             </div>
 
             {/* Right zone: bubble + input + disclaimer */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", minWidth: "260px", flex: 1 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "20px", minWidth: "448px", flex: 1 }}>
               {/* Typewriter bubble */}
               {openingPrompt && (
                 <div className="us-bubble" style={{
