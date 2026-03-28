@@ -40,6 +40,9 @@ function getUserId(): string | null {
 
 function ConsentToggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
   const [hovered, setHovered] = useState(false)
+
+  const label = value ? "[journal shared]" : hovered ? "[share journal]" : "[witness mode]"
+
   return (
     <button
       onClick={() => onChange(!value)}
@@ -82,11 +85,11 @@ function ConsentToggle({ value, onChange }: { value: boolean; onChange: (v: bool
       <span style={{
         fontSize: "12px",
         fontFamily: "var(--font-mono)",
-        color: "var(--muted)",
+        color: value ? "var(--amber)" : "var(--muted)",
         fontWeight: 300,
-        transition: "opacity 0.15s",
+        transition: "color 0.15s",
       }}>
-        {hovered ? "[share journal]" : "[witness mode]"}
+        {label}
       </span>
     </button>
   )
