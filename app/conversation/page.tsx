@@ -114,6 +114,7 @@ export default function ConversationPage() {
   const [portraitAsBackground, setPortraitAsBackground] = useState(false)
   const [archetype, setArchetype]                       = useState<string | null>(null)
   const [journalShared, setJournalShared]               = useState(false)
+  const [journalHovered, setJournalHovered]             = useState(false)
   const [openingBubble, setOpeningBubble] = useState(
     () => CONVERSATION_PROMPTS[Math.floor(Math.random() * CONVERSATION_PROMPTS.length)]
   )
@@ -299,6 +300,8 @@ export default function ConversationPage() {
             {activeThread === "journal" && (
               <button
                 onClick={(e) => { e.stopPropagation(); setJournalShared((p) => !p) }}
+                onMouseEnter={() => setJournalHovered(true)}
+                onMouseLeave={() => setJournalHovered(false)}
                 aria-label={journalShared ? "stop sharing journal" : "share journal with [u]"}
                 style={{
                   ...TOGGLE_BUTTON_STYLE,
@@ -307,7 +310,7 @@ export default function ConversationPage() {
                   color: journalShared ? "var(--amber)" : "var(--muted)",
                 }}
               >
-                {journalShared ? "[journal: shared]" : "[share journal]"}
+                {journalShared ? "[journal: shared]" : journalHovered ? "[share journal]" : "[witness mode]"}
               </button>
             )}
           </>
