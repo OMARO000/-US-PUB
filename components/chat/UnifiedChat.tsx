@@ -177,6 +177,7 @@ export default function UnifiedChat({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          minHeight: "calc(100vh - 80px)",
           padding: "40px 32px",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "48px", width: "100%" }}>

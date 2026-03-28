@@ -584,25 +584,25 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
                 >
                   <UFigure state={isRecording ? "listening" : isSpeaking ? "speaking" : "idle"} />
                 </div>
-                {!isRecording && !isSpeaking && !isThinking && (
-                  <div className="us-hold-box" style={{
-                    marginTop: "-15px",
-                    width: "90px",
-                    background: "rgba(196,151,74,0.12)",
-                    border: "0.5px solid rgba(196,151,74,0.5)",
-                    borderRadius: "5px",
-                    padding: "6px 10px",
-                    fontFamily: "IBM Plex Mono, monospace",
-                    fontSize: "9px",
-                    color: "#C4974A",
-                    letterSpacing: "0.09em",
-                    lineHeight: 1.9,
-                    textAlign: "center",
-                    boxSizing: "border-box",
-                  }}>
-                    [hold me]<br/>[to speak]
-                  </div>
-                )}
+                <div className="us-hold-box" style={{
+                  fontFamily: "IBM Plex Mono, monospace",
+                  fontSize: "9px",
+                  letterSpacing: "0.09em",
+                  color: "#C4974A",
+                  background: "rgba(196,151,74,0.15)",
+                  border: "0.5px solid rgba(196,151,74,0.5)",
+                  borderRadius: "5px",
+                  padding: "6px 10px",
+                  textAlign: "center",
+                  lineHeight: 1.9,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  marginTop: "0px",
+                }}>
+                  <span>[hold me]</span>
+                  <span>[to speak]</span>
+                </div>
               </div>
               {(isRecording || isThinking || isSpeaking) && (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>

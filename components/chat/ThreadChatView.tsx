@@ -237,6 +237,7 @@ export default function ThreadChatView({
           alignItems: "center",
           justifyContent: "center",
           height: "100%",
+          minHeight: "calc(100vh - 80px)",
           padding: "40px 32px",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "24px", width: "100%" }}>
