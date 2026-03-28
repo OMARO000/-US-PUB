@@ -218,71 +218,154 @@ export default function ThreadChatView({
           border-radius: 4px;
         }
         @keyframes blink { 0%, 100% { opacity: 0.7; } 50% { opacity: 0; } }
+        @keyframes tcv-pulse { 0%,100%{opacity:0.12} 50%{opacity:0.8} }
+        @keyframes tcv-blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
+        .tcv-dot-1 { animation: tcv-pulse 1.6s ease-in-out infinite 0s; }
+        .tcv-dot-2 { animation: tcv-pulse 1.6s ease-in-out infinite 0.22s; }
+        .tcv-dot-3 { animation: tcv-pulse 1.6s ease-in-out infinite 0.44s; }
+        .tcv-cursor { animation: tcv-blink 1s step-end infinite; color: #C4974A; }
       `}</style>
 
       {/* DM analysis banner — messages thread only */}
       {isMessagesThread && <DMAnalysisBanner />}
 
-      {/* Empty state */}
+      {/* Empty state — 3-zone horizontal layout */}
       {!hasConversation && (
         <div style={{
-          position: "absolute", inset: 0,
-          display: "flex", flexDirection: "column",
+          flex: 1,
+          display: "flex",
           alignItems: "center",
-          paddingTop: isMessagesThread ? "calc(28vh - 44px)" : "28vh",
-          pointerEvents: "none",
+          justifyContent: "center",
+          padding: "40px 32px",
         }}>
-          <div style={{
-            display: "flex", flexDirection: "column", alignItems: "center",
-            width: "100%", maxWidth: "1100px", padding: "0 24px",
-            pointerEvents: "auto",
-          }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
 
-            {/* Typed opening bubble */}
-            {openingPrompt && (
-              <div style={{
-                maxWidth: "560px", width: "100%",
-                padding: "14px 18px",
-                borderRadius: "20px 20px 20px 6px",
-                background: "var(--bg2)",
-                border: "1px solid var(--border)",
-                fontSize: "15px",
-                fontWeight: 300,
-                lineHeight: 1.7,
-                color: "var(--text)",
-                fontFamily: "var(--font-mono)",
-                textAlign: "center",
-                marginBottom: "10px",
-                minHeight: "52px",
-              }}>
-                {typedOpening}
-                {!openingDone && (
-                  <span style={{
-                    display: "inline-block", width: "7px", height: "15px",
-                    background: "var(--amber)", marginLeft: "2px", opacity: 0.7,
-                    animation: "blink 0.8s step-end infinite", verticalAlign: "text-bottom",
-                  }} />
-                )}
+            {/* Left zone: figure + hold box */}
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+              <div
+                onMouseDown={startRecording}
+                onMouseUp={stopRecording}
+                onMouseLeave={stopRecording}
+                onTouchStart={(e) => { e.preventDefault(); startRecording() }}
+                onTouchEnd={stopRecording}
+                style={{ cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" as const }}
+              >
+                <UFigure state={isRecording ? "listening" : "idle"} />
               </div>
-            )}
-
-            {/* Orb */}
-            <div
-              style={{
-                display: "flex", justifyContent: "center", alignItems: "center",
-                padding: "60px 0",
-                transform: "scale(2.0)", transformOrigin: "center center",
-              }}
-              onMouseDown={startRecording}
-              onMouseUp={stopRecording}
-              onMouseLeave={stopRecording}
-              onTouchStart={(e) => { e.preventDefault(); startRecording() }}
-              onTouchEnd={stopRecording}
-            >
-              <UFigure state={isRecording ? "listening" : "idle"} />
+              <div style={{
+                width: "90px",
+                background: "rgba(196,151,74,0.12)",
+                border: "0.5px solid rgba(196,151,74,0.35)",
+                borderRadius: "5px",
+                padding: "6px 10px",
+                fontFamily: "IBM Plex Mono, monospace",
+                fontSize: "9px",
+                color: "#C4974A",
+                letterSpacing: "0.09em",
+                lineHeight: 1.9,
+                textAlign: "center" as const,
+                boxSizing: "border-box" as const,
+              }}>
+                [hold me]<br/>[to speak]
+              </div>
             </div>
 
-            <div style={{ width: "100%", maxWidth: "560px", margin: "0 auto" }}>{InputBlock}</div>
+            {/* Dots — aligned with figure head (~32px from top) */}
+            <div style={{ display: "flex", flexDirection: "column", alignSelf: "flex-start", paddingTop: "32px" }}>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div className="tcv-dot-1" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
+                <div className="tcv-dot-2" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
+                <div className="tcv-dot-3" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
+              </div>
+            </div>
+
+            {/* Right zone: bubble + input + disclaimer */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", minWidth: "260px", maxWidth: "360px", flex: 1 }}>
+              {/* Typewriter bubble */}
+              {openingPrompt && (
+                <div style={{
+                  background: "rgba(255,255,255,0.06)",
+                  border: "0.5px solid rgba(255,255,255,0.12)",
+                  borderRadius: "10px",
+                  padding: "14px 18px",
+                  fontFamily: "IBM Plex Mono, monospace",
+                  fontSize: "12px",
+                  color: "rgba(255,255,255,0.45)",
+                  letterSpacing: "0.04em",
+                  lineHeight: 1.65,
+                  minHeight: "48px",
+                }}>
+                  {typedOpening}
+                  {!openingDone && <span className="tcv-cursor">|</span>}
+                </div>
+              )}
+
+              {/* Input + send */}
+              <div className="no-record" style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                background: "rgba(255,255,255,0.04)",
+                border: "0.5px solid rgba(196,151,74,0.22)",
+                borderRadius: "10px",
+                padding: "9px 13px",
+                opacity: thread.isStreaming ? 0.4 : 1,
+              }}>
+                <textarea
+                  ref={inputRef}
+                  rows={1}
+                  placeholder={contextPrompt ?? "conversing with [u] starts with you..."}
+                  aria-label="message [them]"
+                  className="no-record us-textarea"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onTouchStart={(e) => e.stopPropagation()}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend() }
+                  }}
+                  onInput={(e) => {
+                    const t = e.currentTarget
+                    t.style.height = "auto"
+                    t.style.height = Math.min(t.scrollHeight, 110) + "px"
+                  }}
+                  style={{
+                    flex: 1, background: "transparent", border: "none", outline: "none",
+                    fontSize: "14px", fontWeight: 300, color: "var(--text)",
+                    fontFamily: "var(--font-mono)", resize: "none", lineHeight: 1.5,
+                  }}
+                />
+                <button
+                  className="no-record"
+                  aria-label="send message"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={handleSend}
+                  disabled={thread.isStreaming}
+                  style={{
+                    width: "36px", height: "36px", borderRadius: "8px", border: "none",
+                    background: "rgba(196,151,74,0.14)",
+                    cursor: thread.isStreaming ? "default" : "pointer",
+                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+                  }}
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                    stroke="var(--amber)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"/>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Disclaimer */}
+              <div style={{
+                fontSize: "9px", fontFamily: "IBM Plex Mono, monospace",
+                color: "var(--muted)", opacity: 0.6, lineHeight: 1.6, letterSpacing: "0.03em",
+              }}>
+                by talking to [u], an AI, you agree to our{" "}
+                <a href="/terms" style={{ color: "#C4974A", textDecoration: "none" }}>[terms]</a>
+                {" "}and{" "}
+                <a href="/privacy" style={{ color: "#C4974A", textDecoration: "none" }}>[privacy policy]</a>
+              </div>
+            </div>
+
           </div>
         </div>
       )}
