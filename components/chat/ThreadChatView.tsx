@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react"
 import { useThread } from "@/hooks/useThread"
-import AmbientOrb from "@/components/chat/AmbientOrb"
+import UFigure from "@/components/UFigure"
 import DMAnalysisBanner from "@/components/chat/DMAnalysisBanner"
 import type { ThreadType } from "@/lib/threads/threadPrompts"
 import { THREAD_CONFIGS } from "@/lib/threads/threadPrompts"
@@ -279,12 +279,7 @@ export default function ThreadChatView({
               onTouchStart={(e) => { e.preventDefault(); startRecording() }}
               onTouchEnd={stopRecording}
             >
-              <AmbientOrb
-                isRecording={isRecording}
-                orbState={isRecording ? "recording" : "idle"}
-                isLocked={isLocked}
-                onToggleLock={onToggleLock}
-              />
+              <UFigure state={isRecording ? "listening" : "idle"} />
             </div>
 
             <div style={{ width: "100%", maxWidth: "560px", margin: "0 auto" }}>{InputBlock}</div>

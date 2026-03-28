@@ -1,6 +1,6 @@
 "use client";
 import { useRef } from "react";
-import AmbientOrb from "./AmbientOrb";
+import UFigure from "@/components/UFigure";
 
 interface Message {
   id: string;
@@ -160,23 +160,31 @@ export default function UnifiedChat({
       )}
 
       {/* ORB — always visible between bubble and input, hold to speak */}
-      <div className="no-record" style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        padding: "60px 0",
-        flexShrink: 0,
-        transform: "scale(2.0)",
-        transformOrigin: "center center",
-      }}>
-        <AmbientOrb
-          isRecording={isRecording}
-          orbState={orbState}
-          isLocked={isLocked}
-          onHoldStart={onHoldStart}
-          onHoldEnd={onHoldEnd}
-          onToggleLock={onToggleLock}
-        />
+      <div
+        className="no-record"
+        role="button"
+        aria-label="hold to speak"
+        tabIndex={0}
+        onMouseDown={handleBodyMouseDown}
+        onMouseUp={handleBodyMouseUp}
+        onMouseLeave={handleBodyMouseUp}
+        onTouchStart={(e) => { e.preventDefault(); handleBodyMouseDown(); }}
+        onTouchEnd={handleBodyMouseUp}
+        onKeyDown={(e) => { if (e.code === "Space") { e.preventDefault(); onHoldStart(); } }}
+        onKeyUp={(e) => { if (e.code === "Space") { e.preventDefault(); onHoldEnd(); } }}
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          padding: "60px 0",
+          flexShrink: 0,
+          transform: "scale(2.0)",
+          transformOrigin: "center center",
+          cursor: "pointer",
+          userSelect: "none",
+        }}
+      >
+        <UFigure state={(isRecording || isLocked) ? "listening" : isSpeaking ? "speaking" : "idle"} />
       </div>
 
       {/* BOTTOM INPUT */}
