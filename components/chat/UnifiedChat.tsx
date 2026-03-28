@@ -1,7 +1,8 @@
 "use client";
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import UFigure from "@/components/UFigure";
 
+const BUBBLE_PROMPT = "what would you say if you knew it would land?";
 
 interface Message {
   id: string;
@@ -36,6 +37,27 @@ export default function UnifiedChat({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasMessages = messages.length > 0 && showMessages;
 
+  const [typedText, setTypedText] = useState("");
+  const [typingDone, setTypingDone] = useState(false);
+
+  useEffect(() => {
+    if (hasMessages) return;
+    let cancelled = false;
+    let i = 0;
+    setTypedText("");
+    setTypingDone(false);
+
+    const type = () => {
+      if (cancelled) return;
+      if (i >= BUBBLE_PROMPT.length) { setTypingDone(true); return; }
+      setTypedText(BUBBLE_PROMPT.slice(0, i + 1));
+      i++;
+      setTimeout(type, 42 + Math.random() * 30);
+    };
+
+    const timer = setTimeout(type, 400);
+    return () => { cancelled = true; clearTimeout(timer); };
+  }, [hasMessages]);
 
   const figureState = (isRecording || isLocked) ? "listening" as const
     : isSpeaking ? "speaking" as const
@@ -155,6 +177,23 @@ export default function UnifiedChat({
               maxWidth: "360px",
               flex: 1,
             }}>
+              {/* Typewriter bubble */}
+              <div style={{
+                background: "rgba(255,255,255,0.06)",
+                border: "0.5px solid rgba(255,255,255,0.12)",
+                borderRadius: "10px",
+                padding: "14px 18px",
+                fontFamily: "IBM Plex Mono, monospace",
+                fontSize: "12px",
+                color: "rgba(255,255,255,0.45)",
+                letterSpacing: "0.04em",
+                lineHeight: 1.65,
+                minHeight: "48px",
+              }}>
+                {typedText}
+                {!typingDone && <span className="us-cursor">|</span>}
+              </div>
+
               {/* Input + send */}
               <div className="no-record" style={{
                 display: "flex",
