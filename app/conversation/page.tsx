@@ -419,32 +419,6 @@ export default function ConversationPage() {
                 }}>
 
 
-                  <div style={{
-                    maxWidth: "560px",
-                    width: "100%",
-                    padding: "14px 18px",
-                    borderRadius: "20px 20px 20px 6px",
-                    background: "var(--bg2)",
-                    border: "1px solid var(--border)",
-                    fontSize: "15px",
-                    fontWeight: 300,
-                    lineHeight: 1.7,
-                    color: "var(--text)",
-                    fontFamily: "var(--font-mono)",
-                    textAlign: "center",
-                    marginBottom: "10px",
-                    minHeight: "52px",
-                  }}>
-                    {typedBubble}
-                    {!bubbleDone && (
-                      <span style={{
-                        display: "inline-block", width: "7px", height: "15px",
-                        background: "var(--amber)", marginLeft: "2px", opacity: 0.7,
-                        animation: "blink 0.8s step-end infinite", verticalAlign: "text-bottom",
-                      }} />
-                    )}
-                  </div>
-
                   <div
                     style={{ width: "100%", maxWidth: "760px", margin: "0 auto", flexShrink: 0 }}
                     onMouseDown={(e) => e.stopPropagation()}
