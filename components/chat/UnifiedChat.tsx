@@ -341,6 +341,7 @@ export default function UnifiedChat({
                 opacity: 0.6,
                 lineHeight: 1.6,
                 letterSpacing: "0.03em",
+                textAlign: "center",
               }}>
                 by talking to [u], an AI, you agree to our{" "}
                 <a href="/terms" style={{ color: "#C4974A", textDecoration: "none" }}>[terms]</a>
