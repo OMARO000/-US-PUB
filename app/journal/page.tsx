@@ -39,12 +39,14 @@ function getUserId(): string | null {
 // ─────────────────────────────────────────────
 
 function ConsentToggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  const [hovered, setHovered] = useState(false)
   return (
     <button
       onClick={() => onChange(!value)}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       aria-label={value ? "disable [u] access to journal" : "enable [u] access to journal"}
       aria-pressed={value}
-      title="[share journal]"
       style={{
         display: "flex",
         alignItems: "center",
@@ -82,8 +84,9 @@ function ConsentToggle({ value, onChange }: { value: boolean; onChange: (v: bool
         fontFamily: "var(--font-mono)",
         color: "var(--muted)",
         fontWeight: 300,
+        transition: "opacity 0.15s",
       }}>
-        [witness]
+        {hovered ? "[share journal]" : "[witness mode]"}
       </span>
     </button>
   )
