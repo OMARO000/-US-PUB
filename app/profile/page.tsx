@@ -472,7 +472,7 @@ function DataControlsSection({ userId }: { userId: string }) {
       </div>
 
       <div style={{ fontFamily: "var(--font-mono)", fontSize: "10px", color: "var(--muted)", opacity: 0.4, lineHeight: 1.6 }}>
-        [us] by OMARO PBC · sovereign by design · no ads, no brokers
+        [us] | ONE PLUS LLC | Governed by OMARO Public Benefit Corporation.
       </div>
     </Section>
   )

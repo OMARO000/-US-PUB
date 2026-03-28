@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import AmbientOrb from "@/components/chat/AmbientOrb"
+import UFigure from "@/components/UFigure"
 
 // ─────────────────────────────────────────────
 // CONTENT
@@ -256,7 +256,7 @@ not a chatbot. not a therapist. not an assistant.
 
 you can only build community through self-awareness — and that's what [u] is here for. it listens without judgment, reflects back what it observes, and helps you understand yourself well enough to find real connection.
 
-conversing with [u] is you doing the work. the intake isn't onboarding. it's the beginning of self-awareness.
+Conversing with [u] starts with you. It proceeds with [us].
 
 [u] is not trying to become the connection. it's trying to make connection between humans possible.
 
@@ -561,7 +561,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
                   opacity: 0.5,
                   marginTop: "8px",
                 }}>
-                  [us] by One Plus LLC · OMARO PBC · sovereign by design.
+                  [us] | ONE PLUS LLC | Governed by OMARO Public Benefit Corporation.
                 </div>
               )}
             </div>
@@ -581,14 +581,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
                 onTouchStart={(e) => { e.preventDefault(); handleOrbTap() }}
                 onTouchEnd={handleOrbRelease}
               >
-                <AmbientOrb
-                  isRecording={isRecording}
-                  orbState={orbState}
-                  isLocked={false}
-                  onToggleLock={() => {}}
-                  onHoldStart={handleOrbTap}
-                  onHoldEnd={handleOrbRelease}
-                />
+                <UFigure state={isRecording ? "listening" : isSpeaking ? "speaking" : "idle"} />
               </div>
               {(isRecording || isThinking || isSpeaking) && (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>

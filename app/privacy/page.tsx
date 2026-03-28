@@ -281,7 +281,7 @@ export default function PrivacyPage({ embedded }: { embedded?: boolean } = {}) {
             color: "var(--dim)",
             lineHeight: 1.7,
           }}>
-            [us] is a product of One Plus LLC, a subsidiary of OMARO PBC. sovereign by design.
+            [us] | ONE PLUS LLC | Governed by OMARO Public Benefit Corporation.
           </div>
 
         </div>
