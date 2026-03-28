@@ -169,7 +169,7 @@ export default function UnifiedChat({
   // ── EMPTY STATE — 3-zone horizontal layout (2× scale) ────────────────────
   if (!hasMessages) {
     return (
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
         {sharedStyles}
 
         <div style={{
@@ -178,12 +178,11 @@ export default function UnifiedChat({
           alignItems: "center",
           justifyContent: "center",
           padding: "40px 32px",
-          overflow: "auto",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "48px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "48px", width: "100%" }}>
 
             {/* ── Left zone: figure + hold box ── */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
               <div
                 role="button"
                 aria-label="hold to speak"
@@ -199,10 +198,11 @@ export default function UnifiedChat({
               >
                 <UFigure state={figureState} scale={2} />
               </div>
-              <div style={{
+              {figureState !== "listening" && <div className="us-hold-box" style={{
                 width: "180px",
+                marginTop: "-76px",
                 background: "rgba(196,151,74,0.12)",
-                border: "0.5px solid rgba(196,151,74,0.35)",
+                border: "0.5px solid rgba(196,151,74,0.5)",
                 borderRadius: "7px",
                 padding: "12px 16px",
                 fontFamily: "IBM Plex Mono, monospace",
@@ -214,7 +214,7 @@ export default function UnifiedChat({
                 boxSizing: "border-box",
               }}>
                 [hold me]<br/>[to speak]
-              </div>
+              </div>}
             </div>
 
             {/* ── Dots — head of idle figure at (32/130)*260 ≈ 64px from top ── */}
@@ -225,9 +225,9 @@ export default function UnifiedChat({
               paddingTop: "64px",
             }}>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <div className="us-dot-1" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
-                <div className="us-dot-2" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
-                <div className="us-dot-3" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
+                <div className="us-dot-1 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
+                <div className="us-dot-2 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
+                <div className="us-dot-3 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
               </div>
             </div>
 
@@ -236,12 +236,13 @@ export default function UnifiedChat({
               display: "flex",
               flexDirection: "column",
               gap: "20px",
-              minWidth: "320px",
-              maxWidth: "454px",
+              minWidth: "448px",
               flex: 1,
             }}>
               {/* Cycling typewriter bubble */}
-              <div style={{
+              <div className="us-bubble" style={{
+                width: "100%",
+                boxSizing: "border-box",
                 background: "rgba(255,255,255,0.06)",
                 border: "0.5px solid rgba(255,255,255,0.12)",
                 borderRadius: "14px",
@@ -257,7 +258,9 @@ export default function UnifiedChat({
               </div>
 
               {/* Input + send */}
-              <div className="no-record" style={{
+              <div className="no-record us-chatbox" style={{
+                width: "100%",
+                boxSizing: "border-box",
                 display: "flex",
                 alignItems: "center",
                 gap: "12px",

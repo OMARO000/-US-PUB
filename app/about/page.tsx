@@ -573,15 +573,36 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
               gap: "24px", position: "sticky", top: "0",
               minHeight: "400px",
             }}>
-              <div
-                style={{ transform: "scale(2)", transformOrigin: "center center", marginBottom: "40px" }}
-                onMouseDown={handleOrbTap}
-                onMouseUp={handleOrbRelease}
-                onMouseLeave={handleOrbRelease}
-                onTouchStart={(e) => { e.preventDefault(); handleOrbTap() }}
-                onTouchEnd={handleOrbRelease}
-              >
-                <UFigure state={isRecording ? "listening" : isSpeaking ? "speaking" : "idle"} />
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <div
+                  style={{ transform: "scale(2)", transformOrigin: "center center" }}
+                  onMouseDown={handleOrbTap}
+                  onMouseUp={handleOrbRelease}
+                  onMouseLeave={handleOrbRelease}
+                  onTouchStart={(e) => { e.preventDefault(); handleOrbTap() }}
+                  onTouchEnd={handleOrbRelease}
+                >
+                  <UFigure state={isRecording ? "listening" : isSpeaking ? "speaking" : "idle"} />
+                </div>
+                {!isRecording && !isSpeaking && !isThinking && (
+                  <div className="us-hold-box" style={{
+                    marginTop: "-15px",
+                    width: "90px",
+                    background: "rgba(196,151,74,0.12)",
+                    border: "0.5px solid rgba(196,151,74,0.5)",
+                    borderRadius: "5px",
+                    padding: "6px 10px",
+                    fontFamily: "IBM Plex Mono, monospace",
+                    fontSize: "9px",
+                    color: "#C4974A",
+                    letterSpacing: "0.09em",
+                    lineHeight: 1.9,
+                    textAlign: "center",
+                    boxSizing: "border-box",
+                  }}>
+                    [hold me]<br/>[to speak]
+                  </div>
+                )}
               </div>
               {(isRecording || isThinking || isSpeaking) && (
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>

@@ -236,12 +236,13 @@ export default function ThreadChatView({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
+          height: "100%",
           padding: "40px 32px",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "24px", width: "100%" }}>
 
             {/* Left zone: figure + hold box */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
               <div
                 onMouseDown={startRecording}
                 onMouseUp={stopRecording}
@@ -252,38 +253,43 @@ export default function ThreadChatView({
               >
                 <UFigure state={isRecording ? "listening" : "idle"} />
               </div>
-              <div style={{
-                width: "90px",
-                background: "rgba(196,151,74,0.12)",
-                border: "0.5px solid rgba(196,151,74,0.35)",
-                borderRadius: "5px",
-                padding: "6px 10px",
-                fontFamily: "IBM Plex Mono, monospace",
-                fontSize: "9px",
-                color: "#C4974A",
-                letterSpacing: "0.09em",
-                lineHeight: 1.9,
-                textAlign: "center" as const,
-                boxSizing: "border-box" as const,
-              }}>
-                [hold me]<br/>[to speak]
-              </div>
+              {!isRecording && (
+                <div className="us-hold-box" style={{
+                  marginTop: "-38px",
+                  width: "90px",
+                  background: "rgba(196,151,74,0.12)",
+                  border: "0.5px solid rgba(196,151,74,0.5)",
+                  borderRadius: "5px",
+                  padding: "6px 10px",
+                  fontFamily: "IBM Plex Mono, monospace",
+                  fontSize: "9px",
+                  color: "#C4974A",
+                  letterSpacing: "0.09em",
+                  lineHeight: 1.9,
+                  textAlign: "center" as const,
+                  boxSizing: "border-box" as const,
+                }}>
+                  [hold me]<br/>[to speak]
+                </div>
+              )}
             </div>
 
             {/* Dots — aligned with figure head (~32px from top) */}
             <div style={{ display: "flex", flexDirection: "column", alignSelf: "flex-start", paddingTop: "32px" }}>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <div className="tcv-dot-1" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
-                <div className="tcv-dot-2" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
-                <div className="tcv-dot-3" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
+                <div className="tcv-dot-1 us-dot" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
+                <div className="tcv-dot-2 us-dot" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
+                <div className="tcv-dot-3 us-dot" style={{ width: 5, height: 5, borderRadius: "50%", background: "#C4974A", margin: "0 4px", flexShrink: 0 }} />
               </div>
             </div>
 
             {/* Right zone: bubble + input + disclaimer */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", minWidth: "260px", maxWidth: "360px", flex: 1 }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "10px", minWidth: "260px", flex: 1 }}>
               {/* Typewriter bubble */}
               {openingPrompt && (
-                <div style={{
+                <div className="us-bubble" style={{
+                  width: "100%",
+                  boxSizing: "border-box" as const,
                   background: "rgba(255,255,255,0.06)",
                   border: "0.5px solid rgba(255,255,255,0.12)",
                   borderRadius: "10px",
@@ -301,7 +307,9 @@ export default function ThreadChatView({
               )}
 
               {/* Input + send */}
-              <div className="no-record" style={{
+              <div className="no-record us-chatbox" style={{
+                width: "100%",
+                boxSizing: "border-box" as const,
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",

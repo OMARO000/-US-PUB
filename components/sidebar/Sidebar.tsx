@@ -199,7 +199,7 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
           justifyContent: "center",
           marginBottom: "6px",
         }}>
-          <div style={{
+          <div className="us-omaro-box" style={{
             padding: "4px 8px",
             background: "rgba(196,151,74,0.12)",
             border: "1px solid rgba(196,151,74,0.25)",

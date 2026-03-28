@@ -94,6 +94,30 @@ a:hover .nav-tooltip { opacity: 1 !important; }
   50% { opacity: 1; transform: scale(1.2); }
 }
 
+/* ── Light mode overrides for chat UI components ── */
+[data-theme="light"] .us-bubble {
+  background: rgba(0,0,0,0.06) !important;
+  border-color: rgba(0,0,0,0.15) !important;
+  color: rgba(0,0,0,0.7) !important;
+}
+[data-theme="light"] .us-chatbox {
+  background: rgba(0,0,0,0.04) !important;
+  border-color: rgba(196,151,74,0.4) !important;
+}
+[data-theme="light"] .us-hold-box {
+  background: rgba(139,96,35,0.18) !important;
+  border-color: rgba(139,96,35,0.5) !important;
+  color: #7a5520 !important;
+}
+[data-theme="light"] .us-omaro-box {
+  background: rgba(139,96,35,0.15) !important;
+  border-color: rgba(139,96,35,0.45) !important;
+  color: #7a5520 !important;
+}
+[data-theme="light"] .us-dot {
+  background: #a07030 !important;
+}
+
 @media (max-width: 768px) {
   :root {
     --sidebar-width: 0px;
