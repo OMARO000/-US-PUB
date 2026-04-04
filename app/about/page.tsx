@@ -573,7 +573,16 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
               gap: "24px", position: "sticky", top: "0",
               minHeight: "400px",
             }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <div style={{ display: "flex", alignItems: "flex-start" }}>
+                {/* Dots — aligned to figure head level */}
+                <div style={{ display: "flex", flexDirection: "column", alignSelf: "flex-start", paddingTop: "64px" }}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
+                    <div className="abt-dot-1 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
+                    <div className="abt-dot-2 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
+                    <div className="abt-dot-3 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
+                  </div>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                 <div
                   style={{ transform: "scale(2)", transformOrigin: "center center" }}
                   onMouseDown={handleOrbTap}
@@ -602,6 +611,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
                 }}>
                   <span>[hold me]</span>
                   <span>[to speak]</span>
+                </div>
                 </div>
               </div>
               {(isRecording || isThinking || isSpeaking) && (
@@ -757,6 +767,10 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
           from { opacity: 0; transform: translateY(6px); }
           to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes abtpulse { 0%,100%{opacity:0.12} 50%{opacity:0.8} }
+        .abt-dot-1 { animation: abtpulse 1.6s ease-in-out infinite 0s; }
+        .abt-dot-2 { animation: abtpulse 1.6s ease-in-out infinite 0.22s; }
+        .abt-dot-3 { animation: abtpulse 1.6s ease-in-out infinite 0.44s; }
       `}</style>
     </div>
   )
