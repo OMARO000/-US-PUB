@@ -18,10 +18,10 @@ import { eq, and } from "drizzle-orm"
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const userId = req.nextUrl.searchParams.get("userId")
-  const { id } = params
+  const { id } = await params
 
   if (!userId) {
     return NextResponse.json({ error: "userId required" }, { status: 400 })
@@ -50,9 +50,9 @@ export async function DELETE(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { id } = params
+  const { id } = await params
   let body: { userId: string; allowYouAccess: boolean }
 
   try {

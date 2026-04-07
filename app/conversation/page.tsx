@@ -103,7 +103,7 @@ function PageViewRenderer({ threadType }: { threadType: ThreadType }) {
 // MAIN PAGE
 // ─────────────────────────────────────────────
 
-export default function ConversationPage() {
+function ConversationPage() {
   // Tab state is pure local state — no URL params, no router.
   // Eliminates the Next.js App Router searchParams re-render race entirely.
   const [activeThread, setActiveThread] = useState<ThreadType>("conversation")
@@ -267,9 +267,9 @@ export default function ConversationPage() {
         )}
 
         {/* ── Top-right toggles — non-conversation threads (not settings/us-plus/notifications) ── */}
-        {!isConversationThread && activeThread !== "settings" && activeThread !== "us-plus" && activeThread !== "notifications" && activeThread !== "about" && (
+        {!isConversationThread && activeThread !== "settings" && activeThread !== "us-plus" && activeThread !== "notifications" && (activeThread as string) !== "about" && (
           <>
-            {config.hasPageView && activeThread !== "about" && (
+            {config.hasPageView && (activeThread as string) !== "about" && (
               <button
                 onClick={toggleViewMode}
                 aria-label={viewMode === "chat" ? "switch to page view" : "switch to chat view"}
@@ -522,5 +522,13 @@ export default function ConversationPage() {
         )}
       </main>
     </div>
+  )
+}
+
+export default function ConversationPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <ConversationPage />
+    </Suspense>
   )
 }

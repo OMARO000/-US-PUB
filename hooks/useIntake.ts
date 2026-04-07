@@ -101,7 +101,7 @@ export function useIntake(): UseIntakeReturn {
       setCurrentBlock(data.currentBlock)
       setStatus("active")
       // add arrival statement as visible bubble + speak it
-      addMessage({ role: "them", content: data.arrivalStatement, inputMode: null })
+      addMessage({ role: "them", content: data.arrivalStatement, inputMode: undefined })
       await speakText(data.arrivalStatement)
     } catch (err) {
       console.error("[us] init error:", err)
@@ -223,7 +223,7 @@ export function useIntake(): UseIntakeReturn {
                     try {
                       const uid = localStorage.getItem("us_uid") ?? "user"
                       await navigator.credentials?.store?.(
-                        new PasswordCredential({
+                        new (window as any).PasswordCredential({
                           id: uid,
                           password: json.accountNumber,
                           name: "[us] account number",
@@ -247,7 +247,7 @@ export function useIntake(): UseIntakeReturn {
 
         setIsThinking(false)
         // speak the full response
-        if (fullResponse && status !== "completed") {
+        if (fullResponse && (status as string) !== "completed") {
           await speakText(fullResponse)
         } else {
           setOrbState("idle")

@@ -3,26 +3,28 @@ import { useState } from "react";
 import ChatHeader from "./ChatHeader";
 import UnifiedChat from "./UnifiedChat";
 
-interface Message {
+interface ChatMessage {
+  id: string;
   role: "them" | "user";
-  text: string;
+  content: string;
   time: string;
 }
 
-const SEED_MESSAGES: Message[] = [
-  { role: "them", text: "Something brought you here. What was it?", time: "just now" },
+const SEED_MESSAGES: ChatMessage[] = [
+  { id: "seed-1", role: "them", content: "Something brought you here. What was it?", time: "just now" },
 ];
 
 export default function ChatInterface() {
   const [isRecording, setIsRecording] = useState(false);
   const [isLocked, setIsLocked] = useState(false);
-  const [messages, setMessages] = useState<Message[]>(SEED_MESSAGES);
+  const [messages, setMessages] = useState<ChatMessage[]>(SEED_MESSAGES);
 
-  const handleStartRecording = () => setIsRecording(true);
-  const handleStopRecording = () => { setIsRecording(false); setIsLocked(false); };
-  const handleLock = () => setIsLocked(true);
-  const handleSend = (text: string) => {
-    setMessages(prev => [...prev, { role: "user", text, time: "just now" }]);
+  const handleHoldStart = () => setIsRecording(true);
+  const handleHoldEnd = () => { setIsRecording(false); };
+  const handleToggleLock = () => setIsLocked(l => !l);
+  const handleRephrase = () => {};
+  const handleSendText = (text: string) => {
+    setMessages(prev => [...prev, { id: crypto.randomUUID(), role: "user", content: text, time: "just now" }]);
   };
 
   return (
@@ -38,11 +40,14 @@ export default function ChatInterface() {
       <UnifiedChat
         messages={messages}
         isRecording={isRecording}
+        isThinking={false}
+        isSpeaking={false}
         isLocked={isLocked}
-        onStartRecording={handleStartRecording}
-        onStopRecording={handleStopRecording}
-        onLock={handleLock}
-        onSend={handleSend}
+        onHoldStart={handleHoldStart}
+        onHoldEnd={handleHoldEnd}
+        onToggleLock={handleToggleLock}
+        onSendText={handleSendText}
+        onRephrase={handleRephrase}
       />
     </div>
   );

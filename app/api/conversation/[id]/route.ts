@@ -14,9 +14,9 @@ import { v4 as uuid } from "uuid"
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const conversationId = params.id
+  const conversationId = (await params).id
   const userId = req.nextUrl.searchParams.get("userId")
 
   if (!userId) return NextResponse.json({ error: "userId required" }, { status: 400 })
@@ -48,7 +48,7 @@ export async function GET(
         role: m.role,           // "a" or "b"
         content: m.content,
         createdAt: m.createdAt,
-        isMe: m.role === (convo.userIdA === userId ? "a" : "b"),
+        isMe: (m.role as string) === (convo.userIdA === userId ? "a" : "b"),
       })),
     })
   } catch (err) {
@@ -59,9 +59,9 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const conversationId = params.id
+  const conversationId = (await params).id
   let body: { userId: string; content: string }
   try { body = await req.json() } catch {
     return NextResponse.json({ error: "invalid request" }, { status: 400 })
@@ -87,7 +87,7 @@ export async function POST(
       return NextResponse.json({ error: "conversation ended" }, { status: 409 })
     }
 
-    const role = convo.userIdA === userId ? "a" : "b"
+    const role = convo.userIdA === userId ? "user" : "you"
     const now = new Date()
 
     const msgId = uuid()

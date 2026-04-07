@@ -445,7 +445,6 @@ export default function AmbientYou() {
               animation: isRecording ? "ambientPillPulse 1s ease-in-out infinite" : "none",
             }}
             onMouseEnter={(e) => { if (!isRecording) e.currentTarget.style.opacity = "1" }}
-            onMouseLeave={(e) => { if (!isRecording) e.currentTarget.style.opacity = "0.7" }}
           >
             {pillLabel}
           </button>

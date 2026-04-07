@@ -10,7 +10,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid request" }, { status: 400 })
   }
 
-  const { threadId, role, content, metadata } = body
+  const { threadId, role: roleRaw, content, metadata } = body
+  const role = roleRaw as "user" | "you"
   if (!threadId || !role || !content) {
     return NextResponse.json({ error: "threadId, role, content required" }, { status: 400 })
   }
