@@ -64,8 +64,10 @@ export default function UnifiedChat({
   // ── Hold gesture (2s minimum) ─────────────────────────────────────────────
   const holdTimer = useRef<NodeJS.Timeout | null>(null);
   const [isHolding, setIsHolding] = useState(false);
+  const [holdingDown, setHoldingDown] = useState(false);
 
   const handleHoldStart = () => {
+    setHoldingDown(true);
     holdTimer.current = setTimeout(() => {
       setIsHolding(true);
       onHoldStart();
@@ -73,6 +75,7 @@ export default function UnifiedChat({
   };
 
   const handleHoldEnd = () => {
+    setHoldingDown(false);
     if (holdTimer.current) clearTimeout(holdTimer.current);
     if (isHolding) {
       setIsHolding(false);
@@ -170,30 +173,20 @@ export default function UnifiedChat({
                 background: "rgba(196,151,74,0.2)",
                 marginBottom: "14px",
               }}/>
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "10px",
-              }}>
-                <span style={{
-                  fontFamily: "var(--font-ibm-plex-mono), monospace",
-                  fontSize: "11px",
-                  color: "#C4974A",
-                  letterSpacing: "0.1em",
-                }}>hold me to speak</span>
-                <span style={{
-                  width: "1px",
-                  height: "12px",
-                  background: "rgba(196,151,74,0.35)",
-                  display: "inline-block",
-                }}/>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
                 <span style={{
                   fontFamily: "var(--font-ibm-plex-mono), monospace",
                   fontSize: "11px",
                   color: "rgba(196,151,74,0.45)",
                   letterSpacing: "0.1em",
                 }}>tap to type</span>
+                <span style={{ width: "1px", height: "12px", background: "rgba(196,151,74,0.35)", display: "inline-block" }}/>
+                <span style={{
+                  fontFamily: "var(--font-ibm-plex-mono), monospace",
+                  fontSize: "11px",
+                  color: "#C4974A",
+                  letterSpacing: "0.1em",
+                }}>hold [u] to speak</span>
               </div>
             </div>
 
@@ -227,7 +220,14 @@ export default function UnifiedChat({
               onTouchEnd={handleHoldEnd}
               onKeyDown={(e) => { if (e.code === "Space") { e.preventDefault(); handleHoldStart(); } }}
               onKeyUp={(e) => { if (e.code === "Space") { e.preventDefault(); handleHoldEnd(); } }}
-              style={{ cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" }}
+              style={{
+                cursor: "pointer",
+                userSelect: "none",
+                WebkitUserSelect: "none",
+                transition: "transform 0.2s ease, filter 0.2s ease",
+                transform: holdingDown ? "scale(1.04)" : "scale(1)",
+                filter: holdingDown ? "drop-shadow(0 0 12px rgba(196,151,74,0.4))" : "none",
+              }}
             >
               <UFigure state={figureState} scale={5} />
             </div>
