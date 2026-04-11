@@ -273,7 +273,7 @@ export default function UnifiedChat({
               color: "rgba(255,255,255,0.25)",
               textAlign: "center",
               marginTop: "0",
-              marginBottom: "16px",
+              marginBottom: "4px",
               letterSpacing: "0.04em",
               lineHeight: 1.6,
             }}>
@@ -300,7 +300,7 @@ export default function UnifiedChat({
                 cursor: "pointer",
                 userSelect: "none",
                 WebkitUserSelect: "none",
-                marginTop: "8px",
+                marginTop: "0px",
                 transition: "transform 0.2s ease, filter 0.2s ease",
                 transform: holdingDown ? "scale(1.04)" : "scale(1)",
                 filter: holdingDown ? "drop-shadow(0 0 12px rgba(196,151,74,0.4))" : "none",
