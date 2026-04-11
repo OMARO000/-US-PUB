@@ -65,11 +65,13 @@ export default function UnifiedChat({
   const holdTimer = useRef<NodeJS.Timeout | null>(null);
   const [isHolding, setIsHolding] = useState(false);
   const [holdingDown, setHoldingDown] = useState(false);
+  const [localListening, setLocalListening] = useState(false);
 
   const handleHoldStart = () => {
     setHoldingDown(true);
     holdTimer.current = setTimeout(() => {
       setIsHolding(true);
+      setLocalListening(true);
       onHoldStart();
     }, 2000);
   };
@@ -77,13 +79,14 @@ export default function UnifiedChat({
   const handleHoldEnd = () => {
     setHoldingDown(false);
     if (holdTimer.current) clearTimeout(holdTimer.current);
+    setLocalListening(false);
     if (isHolding) {
       setIsHolding(false);
       onHoldEnd();
     }
   };
 
-  const figureState = (isRecording || isLocked) ? "listening" as const
+  const figureState = (isRecording || isLocked || localListening) ? "listening" as const
     : isSpeaking ? "speaking" as const
     : "idle" as const;
 
