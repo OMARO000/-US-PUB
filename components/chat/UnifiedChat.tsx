@@ -151,18 +151,17 @@ export default function UnifiedChat({
   // ── EMPTY STATE — centered figure with speech bubble (2.5× scale) ─────────
   if (!hasMessages) {
     return (
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
+      <div style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100%",
+        flex: 1,
+      }}>
         {sharedStyles}
 
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100%",
-          width: "100%",
-          flex: 1,
-        }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
 
             {/* Speech bubble — question + controls / typing */}
