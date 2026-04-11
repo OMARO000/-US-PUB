@@ -176,8 +176,8 @@ export default function UnifiedChat({
                 background: "rgba(196,151,74,0.08)",
                 border: "1px solid rgba(196,151,74,0.3)",
                 borderRadius: "12px",
-                padding: "22px 28px",
-                maxWidth: "420px",
+                padding: "28px 36px",
+                maxWidth: "538px",
                 width: "100%",
                 textAlign: "center",
                 marginBottom: "8px",
@@ -188,7 +188,7 @@ export default function UnifiedChat({
             >
               <p style={{
                 fontFamily: "var(--font-ibm-plex-mono), monospace",
-                fontSize: "13px",
+                fontSize: "15px",
                 color: "rgba(255,255,255,0.85)",
                 lineHeight: 1.65,
                 letterSpacing: "0.02em",
