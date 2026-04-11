@@ -141,13 +141,14 @@ export default function UnifiedChat({
         }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
 
-            {/* Speech bubble */}
+            {/* Speech bubble — question + controls */}
             <div style={{
               background: "rgba(196,151,74,0.08)",
               border: "1px solid rgba(196,151,74,0.3)",
               borderRadius: "12px",
-              padding: "18px 24px",
-              maxWidth: "360px",
+              padding: "22px 28px",
+              maxWidth: "420px",
+              width: "100%",
               textAlign: "center",
               marginBottom: "32px",
               opacity: visible ? 1 : 0,
@@ -159,11 +160,60 @@ export default function UnifiedChat({
                 color: "rgba(255,255,255,0.85)",
                 lineHeight: 1.65,
                 letterSpacing: "0.02em",
-                margin: 0,
+                margin: "0 0 16px 0",
               }}>
                 {questions[currentQ]}
               </p>
+              <div style={{
+                width: "100%",
+                height: "1px",
+                background: "rgba(196,151,74,0.2)",
+                marginBottom: "14px",
+              }}/>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "10px",
+              }}>
+                <span style={{
+                  fontFamily: "var(--font-ibm-plex-mono), monospace",
+                  fontSize: "11px",
+                  color: "#C4974A",
+                  letterSpacing: "0.1em",
+                }}>hold me to speak</span>
+                <span style={{
+                  width: "1px",
+                  height: "12px",
+                  background: "rgba(196,151,74,0.35)",
+                  display: "inline-block",
+                }}/>
+                <span style={{
+                  fontFamily: "var(--font-ibm-plex-mono), monospace",
+                  fontSize: "11px",
+                  color: "rgba(196,151,74,0.45)",
+                  letterSpacing: "0.1em",
+                }}>tap to type</span>
+              </div>
             </div>
+
+            {/* Legal — directly under bubble */}
+            <p style={{
+              fontFamily: "var(--font-ibm-plex-mono), monospace",
+              fontSize: "10px",
+              color: "rgba(255,255,255,0.25)",
+              textAlign: "center",
+              marginTop: "-20px",
+              marginBottom: "24px",
+              letterSpacing: "0.04em",
+              lineHeight: 1.6,
+            }}>
+              by talking to [u], an AI, you agree to our{" "}
+              <a href="/terms" style={{ color: "rgba(196,151,74,0.5)", textDecoration: "none" }}>[terms]</a>
+              {" "}and{" "}
+              <a href="/privacy" style={{ color: "rgba(196,151,74,0.5)", textDecoration: "none" }}>[privacy policy]</a>
+              .
+            </p>
 
             {/* UFigure */}
             <div
@@ -181,50 +231,6 @@ export default function UnifiedChat({
             >
               <UFigure state={figureState} scale={5} />
             </div>
-
-            {/* Hold / tap controls */}
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginTop: "20px",
-            }}>
-              <span style={{
-                fontFamily: "var(--font-ibm-plex-mono), monospace",
-                fontSize: "11px",
-                color: "#C4974A",
-                letterSpacing: "0.1em",
-              }}>hold me to speak</span>
-              <span style={{
-                width: "1px",
-                height: "12px",
-                background: "rgba(196,151,74,0.35)",
-                display: "inline-block",
-              }}/>
-              <span style={{
-                fontFamily: "var(--font-ibm-plex-mono), monospace",
-                fontSize: "11px",
-                color: "rgba(196,151,74,0.45)",
-                letterSpacing: "0.1em",
-              }}>tap to type</span>
-            </div>
-
-            {/* Legal */}
-            <p style={{
-              fontFamily: "var(--font-ibm-plex-mono), monospace",
-              fontSize: "10px",
-              color: "rgba(255,255,255,0.25)",
-              textAlign: "center",
-              marginTop: "16px",
-              letterSpacing: "0.04em",
-              lineHeight: 1.6,
-            }}>
-              by talking to [u], an AI, you agree to our{" "}
-              <a href="/terms" style={{ color: "rgba(196,151,74,0.5)", textDecoration: "none" }}>[terms]</a>
-              {" "}and{" "}
-              <a href="/privacy" style={{ color: "rgba(196,151,74,0.5)", textDecoration: "none" }}>[privacy policy]</a>
-              .
-            </p>
 
           </div>
         </div>
