@@ -57,9 +57,27 @@ export default function UnifiedChat({
         setCurrentQ(prev => (prev + 1) % questions.length);
         setVisible(true);
       }, 400);
-    }, 5000);
+    }, 9000);
     return () => clearInterval(interval);
   }, []);
+
+  // ── Inline typing mode ────────────────────────────────────────────────────
+  const [typing, setTyping] = useState(false);
+  const [userInput, setUserInput] = useState("");
+  const bubbleInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleBubbleSend = () => {
+    const text = userInput.trim();
+    if (!text) return;
+    onSendText(text);
+    setUserInput("");
+    setTyping(false);
+  };
+
+  const handleBubbleCancel = () => {
+    setUserInput("");
+    setTyping(false);
+  };
 
   // ── Hold gesture (2s minimum) ─────────────────────────────────────────────
   const holdTimer = useRef<NodeJS.Timeout | null>(null);
@@ -147,19 +165,23 @@ export default function UnifiedChat({
         }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
 
-            {/* Speech bubble — question + controls */}
-            <div style={{
-              background: "rgba(196,151,74,0.08)",
-              border: "1px solid rgba(196,151,74,0.3)",
-              borderRadius: "12px",
-              padding: "22px 28px",
-              maxWidth: "420px",
-              width: "100%",
-              textAlign: "center",
-              marginBottom: "32px",
-              opacity: visible ? 1 : 0,
-              transition: "opacity 0.4s ease",
-            }}>
+            {/* Speech bubble — question + controls / typing */}
+            <div
+              onClick={() => { if (!typing) { setTyping(true); setTimeout(() => bubbleInputRef.current?.focus(), 0); } }}
+              style={{
+                background: "rgba(196,151,74,0.08)",
+                border: "1px solid rgba(196,151,74,0.3)",
+                borderRadius: "12px",
+                padding: "22px 28px",
+                maxWidth: "420px",
+                width: "100%",
+                textAlign: "center",
+                marginBottom: "32px",
+                cursor: typing ? "default" : "text",
+                opacity: visible ? 1 : 0,
+                transition: "opacity 0.4s ease",
+              }}
+            >
               <p style={{
                 fontFamily: "var(--font-ibm-plex-mono), monospace",
                 fontSize: "13px",
@@ -176,21 +198,71 @@ export default function UnifiedChat({
                 background: "rgba(196,151,74,0.2)",
                 marginBottom: "14px",
               }}/>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
-                <span style={{
-                  fontFamily: "var(--font-ibm-plex-mono), monospace",
-                  fontSize: "11px",
-                  color: "rgba(196,151,74,0.45)",
-                  letterSpacing: "0.1em",
-                }}>tap to type</span>
-                <span style={{ width: "1px", height: "12px", background: "rgba(196,151,74,0.35)", display: "inline-block" }}/>
-                <span style={{
-                  fontFamily: "var(--font-ibm-plex-mono), monospace",
-                  fontSize: "11px",
-                  color: "#C4974A",
-                  letterSpacing: "0.1em",
-                }}>hold [u] to speak</span>
-              </div>
+              {typing ? (
+                <div style={{ position: "relative", textAlign: "left" }}>
+                  {userInput === "" && (
+                    <span style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      fontFamily: "var(--font-ibm-plex-mono), monospace",
+                      fontSize: "13px",
+                      color: "rgba(196,151,74,0.45)",
+                      letterSpacing: "0.04em",
+                      pointerEvents: "none",
+                    }}>
+                      [say something<span className="us-cursor">_</span>]
+                    </span>
+                  )}
+                  <textarea
+                    ref={bubbleInputRef}
+                    value={userInput}
+                    autoFocus
+                    rows={1}
+                    onChange={(e) => {
+                      setUserInput(e.target.value);
+                      e.target.style.height = "auto";
+                      e.target.style.height = Math.min(e.target.scrollHeight, 110) + "px";
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleBubbleSend(); }
+                      if (e.key === "Escape") { e.preventDefault(); handleBubbleCancel(); }
+                    }}
+                    onBlur={handleBubbleCancel}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onTouchStart={(e) => e.stopPropagation()}
+                    style={{
+                      width: "100%",
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      fontFamily: "var(--font-ibm-plex-mono), monospace",
+                      fontSize: "13px",
+                      color: "rgba(255,255,255,0.9)",
+                      letterSpacing: "0.04em",
+                      lineHeight: 1.65,
+                      resize: "none",
+                      caretColor: "#C4974A",
+                    }}
+                  />
+                </div>
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+                  <span style={{
+                    fontFamily: "var(--font-ibm-plex-mono), monospace",
+                    fontSize: "11px",
+                    color: "rgba(196,151,74,0.45)",
+                    letterSpacing: "0.1em",
+                  }}>tap to type</span>
+                  <span style={{ width: "1px", height: "12px", background: "rgba(196,151,74,0.35)", display: "inline-block" }}/>
+                  <span style={{
+                    fontFamily: "var(--font-ibm-plex-mono), monospace",
+                    fontSize: "11px",
+                    color: "#C4974A",
+                    letterSpacing: "0.1em",
+                  }}>hold [u] to speak</span>
+                </div>
+              )}
             </div>
 
             {/* Legal — directly under bubble */}
