@@ -161,8 +161,15 @@ export default function UnifiedChat({
       }}>
         {sharedStyles}
 
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0px",
+          width: "100%",
+          height: "100%",
+        }}>
 
             {/* Speech bubble — question + controls / typing */}
             <div
@@ -175,7 +182,7 @@ export default function UnifiedChat({
                 maxWidth: "420px",
                 width: "100%",
                 textAlign: "center",
-                marginBottom: "32px",
+                marginBottom: "8px",
                 cursor: typing ? "default" : "text",
                 opacity: visible ? 1 : 0,
                 transition: "opacity 0.4s ease",
@@ -270,8 +277,8 @@ export default function UnifiedChat({
               fontSize: "10px",
               color: "rgba(255,255,255,0.25)",
               textAlign: "center",
-              marginTop: "-20px",
-              marginBottom: "24px",
+              marginTop: "0",
+              marginBottom: "16px",
               letterSpacing: "0.04em",
               lineHeight: 1.6,
             }}>
@@ -298,6 +305,7 @@ export default function UnifiedChat({
                 cursor: "pointer",
                 userSelect: "none",
                 WebkitUserSelect: "none",
+                marginTop: "8px",
                 transition: "transform 0.2s ease, filter 0.2s ease",
                 transform: holdingDown ? "scale(1.04)" : "scale(1)",
                 filter: holdingDown ? "drop-shadow(0 0 12px rgba(196,151,74,0.4))" : "none",
@@ -306,7 +314,6 @@ export default function UnifiedChat({
               <UFigure state={figureState} scale={5} />
             </div>
 
-          </div>
         </div>
       </div>
     );
