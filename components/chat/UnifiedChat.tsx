@@ -2,39 +2,15 @@
 import { useRef, useState, useEffect } from "react";
 import UFigure from "@/components/UFigure";
 
-const BUBBLE_PROMPTS = [
-  "what brings you here?",
-  "say whatever's true right now.",
-  "start anywhere.",
-  "what are you looking for?",
-  "what's on your mind?",
-  "something brought you here.",
-  "what do you want to say?",
-  "where do you want to begin?",
-  "what matters to you right now?",
-  "what are you hoping for?",
-  "say the thing you haven't said yet.",
-  "what would you want someone to know about you?",
-  "what kind of connection are you looking for?",
-  "what does a good day look like for you?",
-  "what are you in the middle of right now?",
-  "what do you protect?",
-  "what do you give in relationships?",
-  "what do you need but rarely ask for?",
-  "what's something you're figuring out?",
-  "what would you want [u] to know first?",
-  "where are you going?",
-  "what does connection mean to you?",
-  "what kind of person do you resonate with?",
-  "what are you building toward?",
-  "what do you tend to notice first about someone?",
-  "what do you wish people understood about you?",
-  "what's been on your mind lately?",
-  "what would you say if you knew it would land?",
-  "what are you ready for?",
-  "what's something you've never quite named?",
-  "what does depth mean to you?",
-  "just say something true.",
+const questions = [
+  "what's been sitting with you lately that you haven't said out loud?",
+  "when did you last feel completely like yourself?",
+  "what are you pretending is fine?",
+  "who do you become when no one is watching?",
+  "what would you do if you stopped waiting for permission?",
+  "what are you most afraid people would think if they really knew you?",
+  "when did you last do something just for you?",
+  "what feeling have you been avoiding?",
 ];
 
 interface Message {
@@ -70,57 +46,39 @@ export default function UnifiedChat({
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const hasMessages = messages.length > 0 && showMessages;
 
-  // ── Cycling typewriter ────────────────────────────────────────────────────
-  const [typedText, setTypedText] = useState("");
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const promptIndexRef = useRef(Math.floor(Math.random() * BUBBLE_PROMPTS.length));
-  const charIndexRef = useRef(0);
-  const phaseRef = useRef<"typing" | "holding" | "deleting" | "pausing">("typing");
+  // ── Cycling speech bubble ─────────────────────────────────────────────────
+  const [currentQ, setCurrentQ] = useState(0);
+  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    if (hasMessages) return;
+    const interval = setInterval(() => {
+      setVisible(false);
+      setTimeout(() => {
+        setCurrentQ(prev => (prev + 1) % questions.length);
+        setVisible(true);
+      }, 400);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
-    promptIndexRef.current = Math.floor(Math.random() * BUBBLE_PROMPTS.length);
-    charIndexRef.current = 0;
-    phaseRef.current = "typing";
-    setTypedText("");
+  // ── Hold gesture (2s minimum) ─────────────────────────────────────────────
+  const holdTimer = useRef<NodeJS.Timeout | null>(null);
+  const [isHolding, setIsHolding] = useState(false);
 
-    const tick = () => {
-      const prompt = BUBBLE_PROMPTS[promptIndexRef.current];
+  const handleHoldStart = () => {
+    holdTimer.current = setTimeout(() => {
+      setIsHolding(true);
+      onHoldStart();
+    }, 2000);
+  };
 
-      if (phaseRef.current === "typing") {
-        if (charIndexRef.current < prompt.length) {
-          charIndexRef.current++;
-          setTypedText(prompt.slice(0, charIndexRef.current));
-          timerRef.current = setTimeout(tick, 40 + Math.random() * 20);
-        } else {
-          phaseRef.current = "holding";
-          timerRef.current = setTimeout(tick, 2500);
-        }
-      } else if (phaseRef.current === "holding") {
-        phaseRef.current = "deleting";
-        tick();
-      } else if (phaseRef.current === "deleting") {
-        if (charIndexRef.current > 0) {
-          charIndexRef.current--;
-          setTypedText(prompt.slice(0, charIndexRef.current));
-          timerRef.current = setTimeout(tick, 22);
-        } else {
-          phaseRef.current = "pausing";
-          timerRef.current = setTimeout(tick, 400);
-        }
-      } else {
-        // pausing — advance to next prompt
-        promptIndexRef.current = (promptIndexRef.current + 1) % BUBBLE_PROMPTS.length;
-        charIndexRef.current = 0;
-        phaseRef.current = "typing";
-        tick();
-      }
-    };
-
-    timerRef.current = setTimeout(tick, 400);
-    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
-  }, [hasMessages]);
+  const handleHoldEnd = () => {
+    if (holdTimer.current) clearTimeout(holdTimer.current);
+    if (isHolding) {
+      setIsHolding(false);
+      onHoldEnd();
+    }
+  };
 
   const figureState = (isRecording || isLocked) ? "listening" as const
     : isSpeaking ? "speaking" as const
@@ -166,7 +124,7 @@ export default function UnifiedChat({
     `}</style>
   );
 
-  // ── EMPTY STATE — centered figure only (2.5× scale) ─────────────────────
+  // ── EMPTY STATE — centered figure with speech bubble (2.5× scale) ─────────
   if (!hasMessages) {
     return (
       <div style={{ flex: 1, display: "flex", flexDirection: "column", height: "100%", width: "100%" }}>
@@ -182,21 +140,92 @@ export default function UnifiedChat({
           flex: 1,
         }}>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
+
+            {/* Speech bubble */}
+            <div style={{
+              background: "rgba(196,151,74,0.08)",
+              border: "1px solid rgba(196,151,74,0.3)",
+              borderRadius: "12px",
+              padding: "18px 24px",
+              maxWidth: "360px",
+              textAlign: "center",
+              marginBottom: "32px",
+              opacity: visible ? 1 : 0,
+              transition: "opacity 0.4s ease",
+            }}>
+              <p style={{
+                fontFamily: "var(--font-ibm-plex-mono), monospace",
+                fontSize: "13px",
+                color: "rgba(255,255,255,0.85)",
+                lineHeight: 1.65,
+                letterSpacing: "0.02em",
+                margin: 0,
+              }}>
+                {questions[currentQ]}
+              </p>
+            </div>
+
+            {/* UFigure */}
             <div
               role="button"
               aria-label="hold to speak"
               tabIndex={0}
-              onMouseDown={handleBodyMouseDown}
-              onMouseUp={handleBodyMouseUp}
-              onMouseLeave={handleBodyMouseUp}
-              onTouchStart={(e) => { e.preventDefault(); handleBodyMouseDown(); }}
-              onTouchEnd={handleBodyMouseUp}
-              onKeyDown={(e) => { if (e.code === "Space") { e.preventDefault(); onHoldStart(); } }}
-              onKeyUp={(e) => { if (e.code === "Space") { e.preventDefault(); onHoldEnd(); } }}
+              onMouseDown={handleHoldStart}
+              onMouseUp={handleHoldEnd}
+              onMouseLeave={handleHoldEnd}
+              onTouchStart={(e) => { e.preventDefault(); handleHoldStart(); }}
+              onTouchEnd={handleHoldEnd}
+              onKeyDown={(e) => { if (e.code === "Space") { e.preventDefault(); handleHoldStart(); } }}
+              onKeyUp={(e) => { if (e.code === "Space") { e.preventDefault(); handleHoldEnd(); } }}
               style={{ cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" }}
             >
               <UFigure state={figureState} scale={5} />
             </div>
+
+            {/* Hold / tap controls */}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "10px",
+              marginTop: "20px",
+            }}>
+              <span style={{
+                fontFamily: "var(--font-ibm-plex-mono), monospace",
+                fontSize: "11px",
+                color: "#C4974A",
+                letterSpacing: "0.1em",
+              }}>hold me to speak</span>
+              <span style={{
+                width: "1px",
+                height: "12px",
+                background: "rgba(196,151,74,0.35)",
+                display: "inline-block",
+              }}/>
+              <span style={{
+                fontFamily: "var(--font-ibm-plex-mono), monospace",
+                fontSize: "11px",
+                color: "rgba(196,151,74,0.45)",
+                letterSpacing: "0.1em",
+              }}>tap to type</span>
+            </div>
+
+            {/* Legal */}
+            <p style={{
+              fontFamily: "var(--font-ibm-plex-mono), monospace",
+              fontSize: "10px",
+              color: "rgba(255,255,255,0.25)",
+              textAlign: "center",
+              marginTop: "16px",
+              letterSpacing: "0.04em",
+              lineHeight: 1.6,
+            }}>
+              by talking to [u], an AI, you agree to our{" "}
+              <a href="/terms" style={{ color: "rgba(196,151,74,0.5)", textDecoration: "none" }}>[terms]</a>
+              {" "}and{" "}
+              <a href="/privacy" style={{ color: "rgba(196,151,74,0.5)", textDecoration: "none" }}>[privacy policy]</a>
+              .
+            </p>
+
           </div>
         </div>
       </div>
