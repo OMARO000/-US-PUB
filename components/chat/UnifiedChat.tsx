@@ -151,10 +151,13 @@ export default function UnifiedChat({
   // ── EMPTY STATE — centered figure with speech bubble (2.5× scale) ─────────
   if (!hasMessages) {
     return (
-      <div style={{
+      <div suppressHydrationWarning style={{
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        paddingTop: "15vh",
       }}>
         {sharedStyles}
 
