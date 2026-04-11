@@ -403,36 +403,34 @@ function ConversationPage() {
 
             {/* Empty state — pinned at 28vh */}
             {!hasMessages && (
-              <div style={{
-                position: "absolute",
-                inset: 0,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-              }}>
-                <div
-                  style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                >
-                    <UnifiedChat
-                      messages={intake.messages}
-                      isThinking={intake.isThinking}
-                      isSpeaking={intake.isSpeaking}
-                      isRecording={intake.isRecording}
-                      isLocked={isLocked}
-                      onSendText={intake.sendText}
-                      onHoldStart={handleTap}
-                      onHoldEnd={handleTapEnd}
-                      onToggleLock={handleToggleLock}
-                      onRephrase={intake.requestRephrase}
-                      disabled={intake.status !== "active"}
-                      showMessages={false}
-                      placeholder="conversing with [u] is you doing the work. it starts with [u]. it proceeds with [us]."
-                      inputRows={2}
-                    />
-                </div>
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+              >
+                <UnifiedChat
+                  messages={intake.messages}
+                  isThinking={intake.isThinking}
+                  isSpeaking={intake.isSpeaking}
+                  isRecording={intake.isRecording}
+                  isLocked={isLocked}
+                  onSendText={intake.sendText}
+                  onHoldStart={handleTap}
+                  onHoldEnd={handleTapEnd}
+                  onToggleLock={handleToggleLock}
+                  onRephrase={intake.requestRephrase}
+                  disabled={intake.status !== "active"}
+                  showMessages={false}
+                  placeholder="conversing with [u] is you doing the work. it starts with [u]. it proceeds with [us]."
+                  inputRows={2}
+                />
               </div>
             )}
 
