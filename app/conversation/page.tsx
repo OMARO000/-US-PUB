@@ -412,7 +412,7 @@ function ConversationPage() {
                 justifyContent: "center",
               }}>
                 <div
-                  style={{ width: "100%", flex: 1, display: "flex", flexDirection: "column", height: "100%" }}
+                  style={{ display: "flex", flexDirection: "column", alignItems: "center" }}
                   onMouseDown={(e) => e.stopPropagation()}
                   onTouchStart={(e) => e.stopPropagation()}
                 >

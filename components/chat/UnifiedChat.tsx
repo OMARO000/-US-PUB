@@ -155,9 +155,6 @@ export default function UnifiedChat({
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "center",
-        height: "100%",
-        flex: 1,
       }}>
         {sharedStyles}
 
@@ -165,10 +162,8 @@ export default function UnifiedChat({
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
           gap: "0px",
           width: "100%",
-          height: "100%",
         }}>
 
             {/* Speech bubble — question + controls / typing */}
