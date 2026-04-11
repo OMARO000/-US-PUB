@@ -211,7 +211,7 @@ export default function UnifiedChat({
                       letterSpacing: "0.04em",
                       pointerEvents: "none",
                     }}>
-                      [say something<span className="us-cursor">_</span>]
+                      conversing with [u], starts with you<span className="us-cursor">_</span>
                     </span>
                   )}
                   <textarea
@@ -451,7 +451,7 @@ export default function UnifiedChat({
           <textarea
             ref={inputRef}
             rows={inputRows}
-            placeholder={placeholder ?? "[say something…]"}
+            placeholder={placeholder ?? "conversing with [u], starts with you"}
             aria-label="say something"
             className="no-record us-textarea"
             disabled={!!disabled}
