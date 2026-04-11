@@ -410,7 +410,7 @@ function ConversationPage() {
                 style={{
                   position: "fixed",
                   top: 0,
-                  left: "336px",
+                  left: "var(--sidebar-width)",
                   right: 0,
                   bottom: 0,
                   display: "flex",
