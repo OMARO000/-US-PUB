@@ -73,7 +73,7 @@ export default function UnifiedChat({
       setIsHolding(true);
       setLocalListening(true);
       onHoldStart();
-    }, 2000);
+    }, 1000);
   };
 
   const handleHoldEnd = () => {
