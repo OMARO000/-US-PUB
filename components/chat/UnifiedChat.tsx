@@ -197,23 +197,6 @@ export default function UnifiedChat({
             >
               <UFigure state={figureState} scale={5} />
             </div>
-            {figureState !== "listening" && <div className="us-hold-box" style={{
-              width: "450px",
-              marginTop: "-190px",
-              background: "rgba(196,151,74,0.12)",
-              border: "0.5px solid rgba(196,151,74,0.5)",
-              borderRadius: "17px",
-              padding: "30px 40px",
-              fontFamily: "IBM Plex Mono, monospace",
-              fontSize: "30px",
-              color: "#C4974A",
-              letterSpacing: "0.09em",
-              lineHeight: 1.9,
-              textAlign: "center",
-              boxSizing: "border-box",
-            }}>
-              [hold me]<br/>[to speak]
-            </div>}
           </div>
         </div>
       </div>
