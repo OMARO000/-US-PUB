@@ -243,6 +243,8 @@ function ConversationPage() {
         onTouchEnd={isConversationThread ? handleTapEnd : undefined}
         style={{
           flex: 1,
+          minHeight: 0,
+          height: "100%",
           marginLeft: "var(--sidebar-width)",
           width: "calc(100vw - var(--sidebar-width))",
           display: "flex",
