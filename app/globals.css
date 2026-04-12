@@ -19,7 +19,7 @@
   --bg2: #EDEAE5;
   --bg3: #E5E1DB;
   --bg4: #DDD9D2;
-  --amber: #A0522D;
+  --amber: #8B4513;
   --rose: #A85860;
   --text: rgba(28,24,20,0.88);
   --muted: rgba(28,24,20,0.55);
@@ -33,7 +33,7 @@
   --bg2: #EDEAE5;
   --bg3: #E5E1DB;
   --bg4: #DDD9D2;
-  --amber: #A0522D;
+  --amber: #8B4513;
   --rose: #A85860;
   --text: rgba(28,24,20,0.88);
   --muted: rgba(28,24,20,0.55);
@@ -44,7 +44,7 @@
 
 [data-theme="charcoal"] {
   --bg: #1C1C1E; --bg2: #242426; --bg3: #2C2C2E; --bg4: #38383A;
-  --amber: #A0522D;
+  --amber: #8B4513;
   --rose: #C4848A;
   --text: rgba(255,255,255,0.88);
   --muted: rgba(255,255,255,0.5);
@@ -80,8 +80,8 @@ a:hover .nav-tooltip { opacity: 1 !important; }
 
 /* UView bubble — stronger tint in light mode */
 [data-theme="light"] .uview-bubble {
-  background: rgba(160,82,45,0.15) !important;
-  border-color: rgba(160,82,45,0.5) !important;
+  background: rgba(139,69,19,0.15) !important;
+  border-color: rgba(139,69,19,0.5) !important;
 }
 
 @keyframes pulse {
