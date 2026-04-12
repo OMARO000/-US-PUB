@@ -524,7 +524,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
           <div style={{
             display: "flex",
             gap: "24px",
-            alignItems: "flex-start",
+            alignItems: "stretch",
             width: "100%",
           }}>
             {/* faqs */}
@@ -559,6 +559,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
               position: "sticky",
               top: 0,
               height: "100vh",
+              maxHeight: "100%",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
@@ -568,7 +569,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
               <UView
                 tab="about"
                 paddingTop="0"
-                scale={1.2}
+                scale={1.5}
                 onSendText={sendToAbout}
                 onHoldStart={startRecording}
                 onHoldEnd={stopRecording}
