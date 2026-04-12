@@ -568,7 +568,7 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
               <UView
                 tab="about"
                 paddingTop="0"
-                scale={1.8}
+                scale={1.2}
                 onSendText={sendToAbout}
                 onHoldStart={startRecording}
                 onHoldEnd={stopRecording}
