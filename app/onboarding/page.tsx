@@ -568,6 +568,7 @@ export default function OnboardingPage() {
   )
   const [selectedTier, setSelectedTier] = useState("open")
   const [accountNumber, setAccountNumber] = useState("")
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -715,6 +716,28 @@ export default function OnboardingPage() {
             <div style={{ fontSize: "18px", fontFamily: "IBM Plex Mono, monospace", color: "#C4974A", letterSpacing: "0.15em", margin: "4px 0" }}>
               {accountNumber}
             </div>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(accountNumber)
+                setCopied(true)
+                setTimeout(() => setCopied(false), 2000)
+              }}
+              style={{
+                fontFamily: "var(--font-ibm-plex-mono), monospace",
+                fontSize: "11px",
+                color: copied ? "rgba(196,151,74,0.9)" : "rgba(196,151,74,0.5)",
+                background: "transparent",
+                border: "1px solid rgba(196,151,74,0.25)",
+                borderRadius: "6px",
+                padding: "6px 16px",
+                cursor: "pointer",
+                letterSpacing: "0.08em",
+                marginTop: "8px",
+                transition: "color 0.2s ease, border-color 0.2s ease",
+              }}
+            >
+              {copied ? "[copied]" : "[copy to clipboard]"}
+            </button>
             <div style={{ fontSize: "11px", fontFamily: "IBM Plex Mono, monospace", color: "rgba(255,255,255,0.35)", lineHeight: 1.6 }}>
               save this. it's the only way back in.
             </div>
