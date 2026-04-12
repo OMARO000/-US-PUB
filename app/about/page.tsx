@@ -556,15 +556,11 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
             {/* UView — right column */}
             <div style={{
               flex: 1,
-              position: "sticky",
-              top: 0,
-              height: "100vh",
-              maxHeight: "100%",
               display: "flex",
               flexDirection: "column",
               alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
+              justifyContent: "flex-start",
+              paddingTop: "40px",
             }}>
               <UView
                 tab="about"
