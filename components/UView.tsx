@@ -9,9 +9,10 @@ interface UViewProps {
   onHoldStart?: () => void
   onHoldEnd?: () => void
   isListening?: boolean
+  paddingTop?: string
 }
 
-export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListening }: UViewProps) {
+export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListening, paddingTop }: UViewProps) {
   const questions = TAB_QUESTIONS[tab] ?? ["what's on your mind?"]
   const [currentQ, setCurrentQ] = useState(0)
   const [visible, setVisible] = useState(true)
@@ -59,7 +60,7 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
       flexDirection: "column",
       alignItems: "center",
       width: "100%",
-      paddingTop: "15vh",
+      paddingTop: paddingTop ?? "15vh",
     }}>
       <style>{`
         @keyframes uview-blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }

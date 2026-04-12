@@ -556,11 +556,13 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
             {/* UView — right column */}
             <div style={{
               flex: 1, display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "flex-start",
+              alignItems: "center", justifyContent: "center",
               position: "sticky", top: "0",
+              overflow: "hidden",
             }}>
               <UView
                 tab="about"
+                paddingTop="0"
                 onSendText={sendToAbout}
                 onHoldStart={startRecording}
                 onHoldEnd={stopRecording}

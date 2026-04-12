@@ -211,6 +211,7 @@ export default function ThreadChatView({
       style={{
         flex: 1, display: "flex", flexDirection: "column",
         height: "100%", width: "100%", position: "relative",
+        justifyContent: "center", alignItems: "center",
       }}
     >
       <style>{`
@@ -235,6 +236,7 @@ export default function ThreadChatView({
       {!hasConversation && TAB_QUESTIONS[threadType] && (
         <UView
           tab={threadType}
+          paddingTop="0"
           onSendText={(text) => { thread.sendMessage(text) }}
           onHoldStart={startRecording}
           onHoldEnd={stopRecording}
