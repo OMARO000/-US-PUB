@@ -38,7 +38,7 @@ interface Voice {
 
 const THEMES: Theme[] = [
   { id: "light",    label: "[light]",    bg: "#F5F2EE", bg2: "#EDEAE5", text: "rgba(28,24,20,0.88)",   amber: "#A67C3A", rose: "#A85860" },
-  { id: "charcoal", label: "[charcoal]", bg: "#1C1C1E", bg2: "#242426", text: "rgba(255,255,255,0.88)", amber: "#C4974A", rose: "#C4848A" },
+  { id: "charcoal", label: "[charcoal]", bg: "#1C1C1E", bg2: "#242426", text: "rgba(255,255,255,0.88)", amber: "#B85C38", rose: "#C4848A" },
 ]
 
 const TIERS = [
@@ -66,7 +66,7 @@ function StepIndicator({ step }: { step: number }) {
         <span key={n} style={{
           fontFamily: "IBM Plex Mono, monospace",
           fontSize: "10px",
-          color: n <= step ? "#C4974A" : "rgba(255,255,255,0.25)",
+          color: n <= step ? "#B85C38" : "rgba(255,255,255,0.25)",
         }}>
           {n <= step ? "●" : "○"}
         </span>
@@ -167,9 +167,9 @@ function WelcomeScreen({ onNext, onLogin }: { onNext: () => void; onLogin: () =>
           style={{
             width: "100%", height: "64px", borderRadius: "16px",
             background: "transparent",
-            border: "1px solid rgba(196,151,74,0.4)",
+            border: "1px solid rgba(184,92,56,0.4)",
             fontFamily: "var(--font-mono)", fontSize: "16px",
-            color: "#C4974A", cursor: "pointer", letterSpacing: "0.05em", fontWeight: 400,
+            color: "#B85C38", cursor: "pointer", letterSpacing: "0.05em", fontWeight: 400,
           }}
         >
           [create account]
@@ -511,7 +511,7 @@ function TierScreen({
             style={{
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: "18px 20px", borderRadius: "16px", background: "var(--bg2)",
-              border: `1.5px solid ${selectedTier === tier.id ? "#C4974A" : "rgba(255,255,255,0.08)"}`,
+              border: `1.5px solid ${selectedTier === tier.id ? "#B85C38" : "rgba(255,255,255,0.08)"}`,
               cursor: tier.comingSoon ? "default" : "pointer",
               opacity: tier.comingSoon ? 0.5 : 1,
               transition: "border-color 0.15s",
@@ -519,7 +519,7 @@ function TierScreen({
             }}
           >
             <div>
-              <div style={{ fontSize: "15px", fontFamily: "var(--font-mono)", color: selectedTier === tier.id ? "#C4974A" : "var(--text)", letterSpacing: "0.03em" }}>
+              <div style={{ fontSize: "15px", fontFamily: "var(--font-mono)", color: selectedTier === tier.id ? "#B85C38" : "var(--text)", letterSpacing: "0.03em" }}>
                 {tier.label}
               </div>
               <div style={{ fontSize: "11px", fontFamily: "var(--font-mono)", color: "var(--dim)", marginTop: "4px", fontWeight: 300 }}>
@@ -531,7 +531,7 @@ function TierScreen({
                 {tier.price}
               </span>
               {tier.comingSoon && (
-                <span style={{ fontSize: "9px", fontFamily: "var(--font-mono)", color: "#C4974A", opacity: 0.6, letterSpacing: "0.06em" }}>
+                <span style={{ fontSize: "9px", fontFamily: "var(--font-mono)", color: "#B85C38", opacity: 0.6, letterSpacing: "0.06em" }}>
                   [coming soon]
                 </span>
               )}
@@ -544,7 +544,7 @@ function TierScreen({
         onClick={onComplete}
         aria-label="create my account"
         style={{
-          height: "64px", padding: "0 52px", borderRadius: "16px", background: "#C4974A",
+          height: "64px", padding: "0 52px", borderRadius: "16px", background: "#B85C38",
           border: "none", fontFamily: "var(--font-mono)", fontSize: "16px",
           color: "var(--bg)", cursor: "pointer", letterSpacing: "0.05em",
         }}
@@ -713,7 +713,7 @@ export default function OnboardingPage() {
             <div style={{ fontSize: "11px", fontFamily: "IBM Plex Mono, monospace", color: "rgba(255,255,255,0.5)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
               your account number
             </div>
-            <div style={{ fontSize: "18px", fontFamily: "IBM Plex Mono, monospace", color: "#C4974A", letterSpacing: "0.15em", margin: "4px 0" }}>
+            <div style={{ fontSize: "18px", fontFamily: "IBM Plex Mono, monospace", color: "#B85C38", letterSpacing: "0.15em", margin: "4px 0" }}>
               {accountNumber}
             </div>
             <button
@@ -725,9 +725,9 @@ export default function OnboardingPage() {
               style={{
                 fontFamily: "var(--font-ibm-plex-mono), monospace",
                 fontSize: "11px",
-                color: copied ? "rgba(196,151,74,0.9)" : "rgba(196,151,74,0.5)",
+                color: copied ? "rgba(184,92,56,0.9)" : "rgba(184,92,56,0.5)",
                 background: "transparent",
-                border: "1px solid rgba(196,151,74,0.25)",
+                border: "1px solid rgba(184,92,56,0.25)",
                 borderRadius: "6px",
                 padding: "6px 16px",
                 cursor: "pointer",
@@ -745,7 +745,7 @@ export default function OnboardingPage() {
           <button
             onClick={() => router.push("/conversation")}
             style={{
-              height: "64px", padding: "0 52px", borderRadius: "16px", background: "#C4974A",
+              height: "64px", padding: "0 52px", borderRadius: "16px", background: "#B85C38",
               border: "none", fontFamily: "IBM Plex Mono, monospace", fontSize: "16px",
               color: "var(--bg)", cursor: "pointer", letterSpacing: "0.05em",
             }}

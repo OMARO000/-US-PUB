@@ -55,13 +55,13 @@ function getOrCreateUserId(): string {
 
 const ARCHETYPE_GRADIENTS: Record<string, string> = {
   rooted:    "radial-gradient(ellipse at 50% 40%, rgba(80,160,100,0.2) 0%, transparent 70%)",
-  horizon:   "radial-gradient(ellipse at 60% 40%, rgba(196,151,74,0.2) 0%, transparent 70%)",
+  horizon:   "radial-gradient(ellipse at 60% 40%, rgba(184,92,56,0.2) 0%, transparent 70%)",
   intimate:  "radial-gradient(ellipse at 50% 50%, rgba(168,88,96,0.2) 0%, transparent 70%)",
   current:   "radial-gradient(ellipse at 60% 60%, rgba(200,120,60,0.2) 0%, transparent 70%)",
   liminal:   "radial-gradient(ellipse at 40% 60%, rgba(100,140,200,0.2) 0%, transparent 70%)",
   celestial: "radial-gradient(ellipse at 50% 30%, rgba(130,100,200,0.2) 0%, transparent 70%)",
-  composite: "radial-gradient(ellipse at 50% 40%, rgba(196,151,74,0.15) 0%, transparent 70%)",
-  default:   "radial-gradient(ellipse at 50% 40%, rgba(196,151,74,0.12) 0%, transparent 70%)",
+  composite: "radial-gradient(ellipse at 50% 40%, rgba(184,92,56,0.15) 0%, transparent 70%)",
+  default:   "radial-gradient(ellipse at 50% 40%, rgba(184,92,56,0.12) 0%, transparent 70%)",
 }
 
 // All top-right toggles — identical size and weight

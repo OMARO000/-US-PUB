@@ -37,7 +37,7 @@ interface Voice {
 
 const THEMES = [
   { id: "light",    label: "[light]",    bg: "#F5F2EE", bg2: "#EDEAE5", amber: "#A67C3A", rose: "#A85860" },
-  { id: "charcoal", label: "[charcoal]", bg: "#1C1C1E", bg2: "#242426", amber: "#C4974A", rose: "#C4848A" },
+  { id: "charcoal", label: "[charcoal]", bg: "#1C1C1E", bg2: "#242426", amber: "#B85C38", rose: "#C4848A" },
 ]
 
 // ─────────────────────────────────────────────
@@ -545,7 +545,7 @@ function AccountSection() {
               {tier} — your data level and session depth
             </div>
           </div>
-          <a href="/us-plus" style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "11px", color: "rgba(196,151,74,0.6)", textDecoration: "none" }}>
+          <a href="/us-plus" style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "11px", color: "rgba(184,92,56,0.6)", textDecoration: "none" }}>
             [upgrade →]
           </a>
         </div>

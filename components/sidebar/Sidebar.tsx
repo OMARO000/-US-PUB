@@ -182,7 +182,7 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
               opacity: 0.85,
               fontWeight: 300,
             }}>
-              authentic connections.
+              authentic connections<br />through conversation.
             </span>
           </>
         )}
@@ -207,13 +207,13 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
           >
             <div className="us-omaro-box" style={{
               padding: "4px 8px",
-              background: "rgba(196,151,74,0.12)",
-              border: "1px solid rgba(196,151,74,0.25)",
+              background: "rgba(184,92,56,0.12)",
+              border: "1px solid rgba(184,92,56,0.25)",
               borderRadius: "4px",
               fontFamily: "var(--font-mono)",
               fontSize: "9px",
               letterSpacing: "0.1em",
-              color: "#C4974A",
+              color: "#B85C38",
               lineHeight: 1.5,
               textAlign: "center",
               textTransform: "uppercase",

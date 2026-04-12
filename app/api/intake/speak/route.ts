@@ -5,7 +5,7 @@
  * Sends to ElevenLabs v3 with Sage voice settings.
  * Streams audio back to client.
  *
- * Sage: warm, low, genderless. Amber #C4974A.
+ * Sage: warm, low, genderless. Amber #B85C38.
  * ElevenLabs v3 supports non-verbal tags — used for [them] tone cues.
  *
  * Non-verbal examples (injected by [them] engine when appropriate):

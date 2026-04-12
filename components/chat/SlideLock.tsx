@@ -98,7 +98,7 @@ export default function SlideLock({ onLock }: SlideLockProps) {
         position: "absolute",
         left: 0, top: 0, bottom: 0,
         width: `${pct * 100}%`,
-        background: "rgba(196,151,74,0.15)",
+        background: "rgba(184,92,56,0.15)",
         borderRadius: "22px",
         transition: "width 0.05s",
       }} />
