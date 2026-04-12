@@ -150,7 +150,7 @@ function WelcomeScreen({ onNext, onLogin }: { onNext: () => void; onLogin: () =>
           [try it out]
         </button>
         <button
-          onClick={onLogin}
+          onClick={() => router.push("/login")}
           aria-label="log in"
           style={{
             width: "100%", height: "64px", borderRadius: "16px",
