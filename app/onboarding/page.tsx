@@ -649,7 +649,8 @@ export default function OnboardingPage() {
       {screen === "welcome" && (
         <WelcomeScreen
           onNext={() => {
-            const num = "US-" + Math.random().toString(36).substring(2, 10).toUpperCase()
+            const seg = () => Math.floor(1000 + Math.random() * 9000).toString()
+            const num = `${seg()}-${seg()}-${seg()}-${seg()}`
             setAccountNumber(num)
             setScreen("cookies")
           }}

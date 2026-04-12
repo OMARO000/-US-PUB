@@ -9,8 +9,8 @@ export default function LoginPage() {
   const [error, setError] = useState(false)
 
   const handleLogin = () => {
-    const trimmed = value.trim().toUpperCase()
-    if (!trimmed.startsWith("US-") || trimmed.length < 5) {
+    const trimmed = value.trim()
+    if (!/^\d{4}-\d{4}-\d{4}-\d{4}$/.test(trimmed)) {
       setError(true)
       return
     }
