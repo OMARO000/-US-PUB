@@ -210,7 +210,7 @@ export default function ThreadChatView({
     <div
       style={{
         flex: 1, display: "flex", flexDirection: "column",
-        height: "100%", width: "100%", position: "relative",
+        height: "100vh", width: "100%", position: "relative",
         justifyContent: "center", alignItems: "center",
       }}
     >
