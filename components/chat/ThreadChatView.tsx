@@ -254,7 +254,7 @@ export default function ThreadChatView({
           <div style={{ pointerEvents: "auto" }}>
             <UView
               tab={threadType}
-              paddingTop="0"
+              paddingTop="15vh"
               onSendText={(text) => { thread.sendMessage(text) }}
               onHoldStart={startRecording}
               onHoldEnd={stopRecording}
