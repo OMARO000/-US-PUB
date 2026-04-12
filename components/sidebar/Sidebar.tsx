@@ -156,7 +156,7 @@ export default function Sidebar({ activeThread, onThreadSelect, intentSignal = f
         justifyContent: "center",
         marginBottom: "4px",
         textDecoration: "none",
-        color: "var(--amber)",
+        color: "#B85C38",
         fontFamily: "var(--font-sans)",
         flexShrink: 0,
         cursor: "pointer",

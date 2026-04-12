@@ -78,6 +78,12 @@ body {
 .nav-tooltip { opacity: 0; }
 a:hover .nav-tooltip { opacity: 1 !important; }
 
+/* UView bubble — stronger tint in light mode */
+[data-theme="light"] .uview-bubble {
+  background: rgba(184,92,56,0.15) !important;
+  border-color: rgba(184,92,56,0.5) !important;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 0.35; transform: scale(0.82); }
   50% { opacity: 1; transform: scale(1.12); }

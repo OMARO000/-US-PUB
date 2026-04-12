@@ -70,6 +70,7 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
 
       {/* Bubble */}
       <div
+        className="uview-bubble"
         onClick={() => { if (!typing) { setTyping(true); setTimeout(() => inputRef.current?.focus(), 0) } }}
         style={{
           background: "rgba(184,92,56,0.08)",
