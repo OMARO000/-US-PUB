@@ -229,8 +229,12 @@ export default function ThreadChatView({
         .tcv-cursor { animation: tcv-blink 1s step-end infinite; color: #C4974A; }
       `}</style>
 
-      {/* DM analysis banner — messages thread only */}
-      {isMessagesThread && <DMAnalysisBanner />}
+      {/* DM analysis banner — messages thread only, pinned to top */}
+      {isMessagesThread && (
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 50 }}>
+          <DMAnalysisBanner />
+        </div>
+      )}
 
       {/* Empty state — UView */}
       {!hasConversation && TAB_QUESTIONS[threadType] && (

@@ -192,7 +192,7 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
           marginTop: "0px",
         }}
       >
-        <UFigure state={isListening ? "listening" : "idle"} scale={2.5} />
+        <UFigure state={isListening ? "listening" : "idle"} scale={5} />
       </div>
     </div>
   )
