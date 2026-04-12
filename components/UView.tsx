@@ -10,9 +10,10 @@ interface UViewProps {
   onHoldEnd?: () => void
   isListening?: boolean
   paddingTop?: string
+  scale?: number
 }
 
-export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListening, paddingTop }: UViewProps) {
+export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListening, paddingTop, scale }: UViewProps) {
   const questions = TAB_QUESTIONS[tab] ?? ["what's on your mind?"]
   const [currentQ, setCurrentQ] = useState(0)
   const [visible, setVisible] = useState(true)
@@ -192,7 +193,7 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
           marginTop: "0px",
         }}
       >
-        <UFigure state={isListening ? "listening" : "idle"} scale={5} />
+        <UFigure state={isListening ? "listening" : "idle"} scale={scale ?? 5} />
       </div>
     </div>
   )
