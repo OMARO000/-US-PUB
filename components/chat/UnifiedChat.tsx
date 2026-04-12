@@ -1,17 +1,9 @@
 "use client";
 import { useRef, useState, useEffect } from "react";
 import UFigure from "@/components/UFigure";
+import { CONVERSATION_PROMPTS } from "@/lib/threads/conversationPrompts";
 
-const questions = [
-  "what's been sitting with you lately that you haven't said out loud?",
-  "when did you last feel completely like yourself?",
-  "what are you pretending is fine?",
-  "who do you become when no one is watching?",
-  "what would you do if you stopped waiting for permission?",
-  "what are you most afraid people would think if they really knew you?",
-  "when did you last do something just for you?",
-  "what feeling have you been avoiding?",
-];
+const questions = CONVERSATION_PROMPTS;
 
 interface Message {
   id: string;
