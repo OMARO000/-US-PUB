@@ -49,7 +49,7 @@ export default function HAIToast() {
         href="https://haiproject.xyz"
         target="_blank"
         rel="noopener noreferrer"
-        style={{ color: "#A0522D", textDecoration: "none", whiteSpace: "nowrap" }}
+        style={{ color: "#8B4513", textDecoration: "none", whiteSpace: "nowrap" }}
       >
         [learn more →]
       </a>
