@@ -4,9 +4,11 @@ import { useEffect, useRef, useState, useCallback } from "react"
 import { useThread } from "@/hooks/useThread"
 import UFigure from "@/components/UFigure"
 import DMAnalysisBanner from "@/components/chat/DMAnalysisBanner"
+import UView from "@/components/UView"
 import type { ThreadType } from "@/lib/threads/threadPrompts"
 import { THREAD_CONFIGS } from "@/lib/threads/threadPrompts"
 import { THREAD_CONTEXT_PROMPTS } from "@/lib/threads/conversationPrompts"
+import { TAB_QUESTIONS } from "@/lib/tabQuestions"
 
 // ─────────────────────────────────────────────
 // TYPED OPENING HOOK
@@ -229,8 +231,19 @@ export default function ThreadChatView({
       {/* DM analysis banner — messages thread only */}
       {isMessagesThread && <DMAnalysisBanner />}
 
-      {/* Empty state — 3-zone horizontal layout */}
-      {!hasConversation && (
+      {/* Empty state — UView */}
+      {!hasConversation && TAB_QUESTIONS[threadType] && (
+        <UView
+          tab={threadType}
+          onSendText={(text) => { thread.sendMessage(text) }}
+          onHoldStart={startRecording}
+          onHoldEnd={stopRecording}
+          isListening={isRecording}
+        />
+      )}
+
+      {/* Empty state — fallback for tabs without tab questions (terms, privacy) */}
+      {!hasConversation && !TAB_QUESTIONS[threadType] && (
         <div style={{
           display: "flex",
           flexDirection: "column",
@@ -239,148 +252,26 @@ export default function ThreadChatView({
           height: "100%",
           width: "100%",
           flex: 1,
+          padding: "48px 24px",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "48px", width: "100%", maxWidth: "900px" }}>
-
-            {/* Left zone: figure + hold box */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0" }}>
-              <div
-                onMouseDown={startRecording}
-                onMouseUp={stopRecording}
-                onMouseLeave={stopRecording}
-                onTouchStart={(e) => { e.preventDefault(); startRecording() }}
-                onTouchEnd={stopRecording}
-                style={{ cursor: "pointer", userSelect: "none", WebkitUserSelect: "none" as const }}
-              >
-                <UFigure state={isRecording ? "listening" : "idle"} scale={2} />
-              </div>
-              {!isRecording && (
-                <div className="us-hold-box" style={{
-                  marginTop: "-76px",
-                  width: "180px",
-                  background: "rgba(196,151,74,0.12)",
-                  border: "0.5px solid rgba(196,151,74,0.5)",
-                  borderRadius: "7px",
-                  padding: "12px 16px",
-                  fontFamily: "IBM Plex Mono, monospace",
-                  fontSize: "12px",
-                  color: "#C4974A",
-                  letterSpacing: "0.09em",
-                  lineHeight: 1.9,
-                  textAlign: "center" as const,
-                  boxSizing: "border-box" as const,
-                }}>
-                  [hold me]<br/>[to speak]
-                </div>
-              )}
+          {openingPrompt && (
+            <div className="us-bubble" style={{
+              maxWidth: "520px",
+              width: "100%",
+              background: "rgba(255,255,255,0.06)",
+              border: "0.5px solid rgba(255,255,255,0.12)",
+              borderRadius: "14px",
+              padding: "24px 32px",
+              fontFamily: "IBM Plex Mono, monospace",
+              fontSize: "14px",
+              color: "rgba(255,255,255,0.45)",
+              letterSpacing: "0.04em",
+              lineHeight: 1.65,
+            }}>
+              {typedOpening}
+              {!openingDone && <span className="tcv-cursor">|</span>}
             </div>
-
-            {/* Dots — aligned with figure head at 2× scale: (32/130)*260 ≈ 64px from top */}
-            <div style={{ display: "flex", flexDirection: "column", alignSelf: "flex-start", paddingTop: "64px" }}>
-              <div style={{ display: "flex", alignItems: "center" }}>
-                <div className="tcv-dot-1 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
-                <div className="tcv-dot-2 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
-                <div className="tcv-dot-3 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
-              </div>
-            </div>
-
-            {/* Right zone: bubble + input + disclaimer */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "20px", minWidth: "448px", maxWidth: "520px", width: "100%", flex: 1 }}>
-              {/* Typewriter bubble */}
-              {openingPrompt && (
-                <div className="us-bubble" style={{
-                  width: "100%",
-                  boxSizing: "border-box" as const,
-                  background: "rgba(255,255,255,0.06)",
-                  border: "0.5px solid rgba(255,255,255,0.12)",
-                  borderRadius: "14px",
-                  padding: "24px 32px",
-                  fontFamily: "IBM Plex Mono, monospace",
-                  fontSize: "14px",
-                  color: "rgba(255,255,255,0.45)",
-                  letterSpacing: "0.04em",
-                  lineHeight: 1.65,
-                  minHeight: "64px",
-                }}>
-                  {typedOpening}
-                  {!openingDone && <span className="tcv-cursor">|</span>}
-                </div>
-              )}
-
-              {/* Input + send */}
-              <div className="no-record us-chatbox" style={{
-                width: "100%",
-                boxSizing: "border-box" as const,
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                background: "rgba(255,255,255,0.04)",
-                border: "0.5px solid rgba(196,151,74,0.22)",
-                borderRadius: "14px",
-                padding: "24px 32px",
-                opacity: thread.isStreaming ? 0.4 : 1,
-              }}>
-                <textarea
-                  ref={inputRef}
-                  rows={1}
-                  placeholder={contextPrompt ?? "conversing with [u] starts with you..."}
-                  aria-label="message [them]"
-                  className="no-record us-textarea"
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onTouchStart={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend() }
-                  }}
-                  onInput={(e) => {
-                    const t = e.currentTarget
-                    t.style.height = "auto"
-                    t.style.height = Math.min(t.scrollHeight, 110) + "px"
-                  }}
-                  style={{
-                    flex: 1, background: "transparent", border: "none", outline: "none",
-                    fontSize: "14px", fontWeight: 300, color: "var(--text)",
-                    fontFamily: "var(--font-mono)", resize: "none", lineHeight: 1.5,
-                  }}
-                />
-                <button
-                  className="no-record"
-                  aria-label="send message"
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={handleSend}
-                  disabled={thread.isStreaming}
-                  style={{
-                    width: "38px", height: "38px", borderRadius: "8px", border: "none",
-                    background: "rgba(196,151,74,0.14)",
-                    cursor: thread.isStreaming ? "default" : "pointer",
-                    display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                    stroke="var(--amber)" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="22" y1="2" x2="11" y2="13"/>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-                  </svg>
-                </button>
-              </div>
-
-              {/* Disclaimer */}
-              <div style={{
-                fontSize: "10px",
-                fontFamily: "IBM Plex Mono, monospace",
-                color: "var(--muted)",
-                opacity: 0.6,
-                lineHeight: 1.6,
-                letterSpacing: "0.03em",
-                textAlign: "center",
-              }}>
-                by talking to [u], an AI, you agree to our{" "}
-                <a href="/terms" style={{ color: "#C4974A", textDecoration: "none" }}>[terms]</a>
-                {" "}and{" "}
-                <a href="/privacy" style={{ color: "#C4974A", textDecoration: "none" }}>[privacy policy]</a>
-              </div>
-            </div>
-
-          </div>
+          )}
         </div>
       )}
 
