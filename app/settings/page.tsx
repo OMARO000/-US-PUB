@@ -469,13 +469,16 @@ function VoiceSection({ currentVoiceId, onVoiceChange }: {
 function AccountSection() {
   const [accountNumber, setAccountNumber] = useState("")
   const [copied, setCopied] = useState(false)
+  const [tier, setTier] = useState("[open]")
 
   useEffect(() => {
     if (typeof window === "undefined") return
     const saved = localStorage.getItem("us_account_number")
-    if (saved) {
-      setAccountNumber(saved)
-    }
+    if (saved) setAccountNumber(saved)
+    const tierLocal = localStorage.getItem("us_tier")
+    if (tierLocal) { setTier(`[${tierLocal}]`); return }
+    const cookieMatch = document.cookie.split(";").find((c) => c.trim().startsWith("us_tier="))
+    if (cookieMatch) setTier(`[${cookieMatch.split("=")[1].trim()}]`)
   }, [])
 
   const handleCopy = () => {
@@ -496,7 +499,6 @@ function AccountSection() {
         <SettingRow
           label="account number"
           description="your anonymous identifier. no email, no name."
-          noBorder
         >
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <span style={{
@@ -528,6 +530,25 @@ function AccountSection() {
             </button>
           </div>
         </SettingRow>
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "14px 16px",
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+        }}>
+          <div>
+            <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "13px", color: "rgba(255,255,255,0.85)" }}>
+              current tier
+            </div>
+            <div style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "11px", color: "rgba(255,255,255,0.35)", marginTop: "4px" }}>
+              {tier} — your data level and session depth
+            </div>
+          </div>
+          <a href="/us-plus" style={{ fontFamily: "IBM Plex Mono, monospace", fontSize: "11px", color: "rgba(196,151,74,0.6)", textDecoration: "none" }}>
+            [upgrade →]
+          </a>
+        </div>
       </div>
     </section>
   )
