@@ -182,7 +182,7 @@ export default function ThreadChatView({
           disabled={thread.isStreaming}
           style={{
             width: "44px", height: "44px", borderRadius: "10px", border: "none",
-            background: "rgba(184,92,56,0.14)",
+            background: "rgba(160,82,45,0.14)",
             cursor: thread.isStreaming ? "default" : "pointer",
             display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
           }}
@@ -226,7 +226,7 @@ export default function ThreadChatView({
         .tcv-dot-1 { animation: tcv-pulse 1.6s ease-in-out infinite 0s; }
         .tcv-dot-2 { animation: tcv-pulse 1.6s ease-in-out infinite 0.22s; }
         .tcv-dot-3 { animation: tcv-pulse 1.6s ease-in-out infinite 0.44s; }
-        .tcv-cursor { animation: tcv-blink 1s step-end infinite; color: #B85C38; }
+        .tcv-cursor { animation: tcv-blink 1s step-end infinite; color: #A0522D; }
       `}</style>
 
       {/* DM analysis banner — messages thread only, pinned to top */}

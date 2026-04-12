@@ -73,8 +73,8 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
         className="uview-bubble"
         onClick={() => { if (!typing) { setTyping(true); setTimeout(() => inputRef.current?.focus(), 0) } }}
         style={{
-          background: "rgba(184,92,56,0.08)",
-          border: "1px solid rgba(184,92,56,0.3)",
+          background: "rgba(160,82,45,0.08)",
+          border: "1px solid rgba(160,82,45,0.3)",
           borderRadius: "12px",
           padding: "28px 36px",
           maxWidth: "538px",
@@ -96,7 +96,7 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
         }}>
           {questions[currentQ]}
         </p>
-        <div style={{ width: "100%", height: "1px", background: "rgba(184,92,56,0.2)", marginBottom: "14px" }}/>
+        <div style={{ width: "100%", height: "1px", background: "rgba(160,82,45,0.2)", marginBottom: "14px" }}/>
 
         {typing ? (
           <div style={{ position: "relative", textAlign: "left" }}>
@@ -107,7 +107,7 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
                 left: 0,
                 fontFamily: "var(--font-ibm-plex-mono), monospace",
                 fontSize: "13px",
-                color: "rgba(184,92,56,0.45)",
+                color: "rgba(160,82,45,0.45)",
                 letterSpacing: "0.04em",
                 pointerEvents: "none",
               }}>
@@ -148,8 +148,8 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
           </div>
         ) : (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
-            <span style={{ fontFamily: "var(--font-ibm-plex-mono), monospace", fontSize: "11px", color: "rgba(184,92,56,0.45)", letterSpacing: "0.1em" }}>tap to type</span>
-            <span style={{ width: "1px", height: "12px", background: "rgba(184,92,56,0.35)", display: "inline-block" }}/>
+            <span style={{ fontFamily: "var(--font-ibm-plex-mono), monospace", fontSize: "11px", color: "rgba(160,82,45,0.45)", letterSpacing: "0.1em" }}>tap to type</span>
+            <span style={{ width: "1px", height: "12px", background: "rgba(160,82,45,0.35)", display: "inline-block" }}/>
             <span style={{ fontFamily: "var(--font-ibm-plex-mono), monospace", fontSize: "11px", color: "var(--amber)", letterSpacing: "0.1em" }}>hold [u] to speak</span>
           </div>
         )}
@@ -166,9 +166,9 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
         lineHeight: 1.6,
       }}>
         by talking to [u], an AI, you agree to our{" "}
-        <a href="/terms" style={{ color: "rgba(184,92,56,0.5)", textDecoration: "none" }}>[terms]</a>
+        <a href="/terms" style={{ color: "rgba(160,82,45,0.5)", textDecoration: "none" }}>[terms]</a>
         {" "}and{" "}
-        <a href="/privacy" style={{ color: "rgba(184,92,56,0.5)", textDecoration: "none" }}>[privacy policy]</a>
+        <a href="/privacy" style={{ color: "rgba(160,82,45,0.5)", textDecoration: "none" }}>[privacy policy]</a>
         .
       </p>
 
@@ -190,7 +190,7 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
           WebkitUserSelect: "none",
           transition: "transform 0.2s ease, filter 0.2s ease",
           transform: holdingDown ? "scale(1.04)" : "scale(1)",
-          filter: holdingDown ? "drop-shadow(0 0 12px rgba(184,92,56,0.4))" : "none",
+          filter: holdingDown ? "drop-shadow(0 0 12px rgba(160,82,45,0.4))" : "none",
           marginTop: "0px",
         }}
       >

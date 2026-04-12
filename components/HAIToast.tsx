@@ -31,7 +31,7 @@ export default function HAIToast() {
       transform: "translateX(-50%)",
       zIndex: 100,
       background: "rgba(13,17,23,0.95)",
-      border: "1px solid rgba(184,92,56,0.25)",
+      border: "1px solid rgba(160,82,45,0.25)",
       borderRadius: "8px",
       padding: "12px 20px",
       display: "flex",
@@ -49,7 +49,7 @@ export default function HAIToast() {
         href="https://haiproject.xyz"
         target="_blank"
         rel="noopener noreferrer"
-        style={{ color: "#B85C38", textDecoration: "none", whiteSpace: "nowrap" }}
+        style={{ color: "#A0522D", textDecoration: "none", whiteSpace: "nowrap" }}
       >
         [learn more →]
       </a>

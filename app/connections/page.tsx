@@ -49,12 +49,12 @@ function formatTimeAgo(dateStr: string): string {
 
 const ARCHETYPE_COLORS: Record<string, string> = {
   rooted:    "rgba(80,160,100,0.18)",
-  horizon:   "rgba(184,92,56,0.18)",
+  horizon:   "rgba(160,82,45,0.18)",
   intimate:  "rgba(168,88,96,0.18)",
   current:   "rgba(200,120,60,0.18)",
   liminal:   "rgba(100,140,200,0.18)",
   celestial: "rgba(130,100,200,0.18)",
-  composite: "rgba(184,92,56,0.12)",
+  composite: "rgba(160,82,45,0.12)",
 }
 
 function ArchetypeAvatar({ archetype, initials }: { archetype: string; initials: string }) {
@@ -90,7 +90,7 @@ function MatchCard({ match, onConnect, onNotAFit, mutual, isActing }: {
   const [expanded, setExpanded] = useState(false)
   const initials = initialsFromId(match.targetUserId)
   const freeSignals = match.resonanceSignals.filter((s) => !s.isPaid)
-  const pulseColor = freeSignals.length >= 3 ? "var(--amber)" : freeSignals.length >= 2 ? "rgba(184,92,56,0.5)" : "var(--border)"
+  const pulseColor = freeSignals.length >= 3 ? "var(--amber)" : freeSignals.length >= 2 ? "rgba(160,82,45,0.5)" : "var(--border)"
   const isConnected = match.status === "connected"
   const isNotFit = match.status === "not_a_fit"
 
@@ -142,7 +142,7 @@ function MatchCard({ match, onConnect, onNotAFit, mutual, isActing }: {
 
           {!isConnected && (
             <div style={{ display: "flex", gap: "8px" }}>
-              <button onClick={() => onConnect(match.id)} disabled={isActing} style={{ flex: 1, height: "40px", borderRadius: "9px", background: "rgba(184,92,56,0.12)", border: "1px solid var(--amber)", fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--amber)", cursor: isActing ? "default" : "pointer", letterSpacing: "0.04em", opacity: isActing ? 0.5 : 1, transition: "opacity 0.15s" }}>
+              <button onClick={() => onConnect(match.id)} disabled={isActing} style={{ flex: 1, height: "40px", borderRadius: "9px", background: "rgba(160,82,45,0.12)", border: "1px solid var(--amber)", fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--amber)", cursor: isActing ? "default" : "pointer", letterSpacing: "0.04em", opacity: isActing ? 0.5 : 1, transition: "opacity 0.15s" }}>
                 [connect]
               </button>
               <button onClick={() => onNotAFit(match.id)} disabled={isActing} style={{ height: "40px", padding: "0 14px", borderRadius: "9px", background: "transparent", border: "1px solid var(--border)", fontFamily: "var(--font-mono)", fontSize: "11px", color: "var(--muted)", cursor: isActing ? "default" : "pointer", letterSpacing: "0.04em", opacity: isActing ? 0.5 : 1, whiteSpace: "nowrap", transition: "opacity 0.15s" }}>

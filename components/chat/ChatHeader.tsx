@@ -30,8 +30,8 @@ export default function ChatHeader({ mode, isRecording, isLocked }: ChatHeaderPr
           width: "34px",
           height: "34px",
           borderRadius: "50%",
-          background: "linear-gradient(135deg, rgba(184,92,56,0.2), rgba(196,132,138,0.2))",
-          border: "1px solid rgba(184,92,56,0.3)",
+          background: "linear-gradient(135deg, rgba(160,82,45,0.2), rgba(196,132,138,0.2))",
+          border: "1px solid rgba(160,82,45,0.3)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -41,7 +41,7 @@ export default function ChatHeader({ mode, isRecording, isLocked }: ChatHeaderPr
             position: "absolute",
             inset: "-3px",
             borderRadius: "50%",
-            border: "1px solid rgba(184,92,56,0.18)",
+            border: "1px solid rgba(160,82,45,0.18)",
             animation: "rpulse 2.4s ease-in-out infinite",
           }} />
           <div style={{

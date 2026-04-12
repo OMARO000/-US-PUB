@@ -42,8 +42,8 @@ function WaitingContent() {
         width: "64px",
         height: "64px",
         borderRadius: "50%",
-        background: "radial-gradient(circle at 40% 35%, rgba(184,92,56,0.35) 0%, rgba(184,92,56,0.08) 60%, transparent 100%)",
-        border: "1px solid rgba(184,92,56,0.2)",
+        background: "radial-gradient(circle at 40% 35%, rgba(160,82,45,0.35) 0%, rgba(160,82,45,0.08) 60%, transparent 100%)",
+        border: "1px solid rgba(160,82,45,0.2)",
         marginBottom: "40px",
         animation: "breathe 3s ease-in-out infinite",
       }} />

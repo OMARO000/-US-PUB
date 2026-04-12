@@ -44,7 +44,7 @@
 
 [data-theme="charcoal"] {
   --bg: #1C1C1E; --bg2: #242426; --bg3: #2C2C2E; --bg4: #38383A;
-  --amber: #B85C38;
+  --amber: #A0522D;
   --rose: #C4848A;
   --text: rgba(255,255,255,0.88);
   --muted: rgba(255,255,255,0.5);
@@ -80,8 +80,8 @@ a:hover .nav-tooltip { opacity: 1 !important; }
 
 /* UView bubble — stronger tint in light mode */
 [data-theme="light"] .uview-bubble {
-  background: rgba(184,92,56,0.15) !important;
-  border-color: rgba(184,92,56,0.5) !important;
+  background: rgba(160,82,45,0.15) !important;
+  border-color: rgba(160,82,45,0.5) !important;
 }
 
 @keyframes pulse {

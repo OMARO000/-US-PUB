@@ -34,12 +34,12 @@ function getOrCreateUserId(): string {
 
 const ARCHETYPE_COLORS: Record<string, string> = {
   rooted:    "rgba(80,160,100,0.15)",
-  horizon:   "rgba(184,92,56,0.15)",
+  horizon:   "rgba(160,82,45,0.15)",
   intimate:  "rgba(168,88,96,0.15)",
   current:   "rgba(200,120,60,0.15)",
   liminal:   "rgba(100,140,200,0.15)",
   celestial: "rgba(130,100,200,0.15)",
-  composite: "rgba(184,92,56,0.10)",
+  composite: "rgba(160,82,45,0.10)",
 }
 
 // ─────────────────────────────────────────────

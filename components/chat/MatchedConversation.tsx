@@ -331,7 +331,7 @@ export default function MatchedConversation({ conversationId, userId, firstPromp
               style={{
                 width: "44px", height: "44px",
                 borderRadius: "10px", border: "none",
-                background: "rgba(184,92,56,0.14)",
+                background: "rgba(160,82,45,0.14)",
                 cursor: sending || !input.trim() ? "default" : "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 flexShrink: 0,

@@ -145,7 +145,7 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
           style={{
             border: `1px solid ${selected === mode.id ? "var(--amber)" : mode.amber ? "var(--amber)" : "var(--border)"}`,
             borderRadius: "13px",
-            background: selected === mode.id ? "rgba(184,92,56,0.06)" : "var(--bg2)",
+            background: selected === mode.id ? "rgba(160,82,45,0.06)" : "var(--bg2)",
             padding: "20px",
             display: "flex",
             flexDirection: "column",
@@ -243,7 +243,7 @@ export default function UsPlusPage({ embedded }: { embedded?: boolean } = {}) {
             <div style={{
               height: "44px",
               borderRadius: "10px",
-              background: "rgba(184,92,56,0.06)",
+              background: "rgba(160,82,45,0.06)",
               border: "1px solid var(--border)",
               fontFamily: "var(--font-mono)",
               fontSize: "12px",

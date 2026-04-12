@@ -131,7 +131,7 @@ export default function UnifiedChat({
       .us-dot-1 { animation: uspulse 1.6s ease-in-out infinite 0s; }
       .us-dot-2 { animation: uspulse 1.6s ease-in-out infinite 0.22s; }
       .us-dot-3 { animation: uspulse 1.6s ease-in-out infinite 0.44s; }
-      .us-cursor { animation: usblink 1s step-end infinite; color: #B85C38; }
+      .us-cursor { animation: usblink 1s step-end infinite; color: #A0522D; }
       .us-textarea:focus-visible {
         outline: 2px solid var(--amber) !important;
         outline-offset: 2px;
@@ -165,8 +165,8 @@ export default function UnifiedChat({
             <div
               onClick={() => { if (!typing) { setTyping(true); setTimeout(() => bubbleInputRef.current?.focus(), 0); } }}
               style={{
-                background: "rgba(184,92,56,0.08)",
-                border: "1px solid rgba(184,92,56,0.3)",
+                background: "rgba(160,82,45,0.08)",
+                border: "1px solid rgba(160,82,45,0.3)",
                 borderRadius: "12px",
                 padding: "28px 36px",
                 maxWidth: "538px",
@@ -191,7 +191,7 @@ export default function UnifiedChat({
               <div style={{
                 width: "100%",
                 height: "1px",
-                background: "rgba(184,92,56,0.2)",
+                background: "rgba(160,82,45,0.2)",
                 marginBottom: "14px",
               }}/>
               {typing ? (
@@ -203,7 +203,7 @@ export default function UnifiedChat({
                       left: 0,
                       fontFamily: "var(--font-ibm-plex-mono), monospace",
                       fontSize: "13px",
-                      color: "rgba(184,92,56,0.45)",
+                      color: "rgba(160,82,45,0.45)",
                       letterSpacing: "0.04em",
                       pointerEvents: "none",
                     }}>
@@ -238,7 +238,7 @@ export default function UnifiedChat({
                       letterSpacing: "0.04em",
                       lineHeight: 1.65,
                       resize: "none",
-                      caretColor: "#B85C38",
+                      caretColor: "#A0522D",
                     }}
                   />
                 </div>
@@ -247,14 +247,14 @@ export default function UnifiedChat({
                   <span style={{
                     fontFamily: "var(--font-ibm-plex-mono), monospace",
                     fontSize: "11px",
-                    color: "rgba(184,92,56,0.45)",
+                    color: "rgba(160,82,45,0.45)",
                     letterSpacing: "0.1em",
                   }}>tap to type</span>
-                  <span style={{ width: "1px", height: "12px", background: "rgba(184,92,56,0.35)", display: "inline-block" }}/>
+                  <span style={{ width: "1px", height: "12px", background: "rgba(160,82,45,0.35)", display: "inline-block" }}/>
                   <span style={{
                     fontFamily: "var(--font-ibm-plex-mono), monospace",
                     fontSize: "11px",
-                    color: "#B85C38",
+                    color: "#A0522D",
                     letterSpacing: "0.1em",
                   }}>hold [u] to speak</span>
                 </div>
@@ -273,9 +273,9 @@ export default function UnifiedChat({
               lineHeight: 1.6,
             }}>
               by talking to [u], an AI, you agree to our{" "}
-              <a href="/terms" style={{ color: "rgba(184,92,56,0.5)", textDecoration: "none" }}>[terms]</a>
+              <a href="/terms" style={{ color: "rgba(160,82,45,0.5)", textDecoration: "none" }}>[terms]</a>
               {" "}and{" "}
-              <a href="/privacy" style={{ color: "rgba(184,92,56,0.5)", textDecoration: "none" }}>[privacy policy]</a>
+              <a href="/privacy" style={{ color: "rgba(160,82,45,0.5)", textDecoration: "none" }}>[privacy policy]</a>
               .
             </p>
 
@@ -298,7 +298,7 @@ export default function UnifiedChat({
                 marginTop: "0px",
                 transition: "transform 0.2s ease, filter 0.2s ease",
                 transform: holdingDown ? "scale(1.04)" : "scale(1)",
-                filter: holdingDown ? "drop-shadow(0 0 12px rgba(184,92,56,0.4))" : "none",
+                filter: holdingDown ? "drop-shadow(0 0 12px rgba(160,82,45,0.4))" : "none",
               }}
             >
               <UFigure state={figureState} scale={5} />
@@ -488,7 +488,7 @@ export default function UnifiedChat({
               height: "44px",
               borderRadius: "10px",
               border: "none",
-              background: "rgba(184,92,56,0.14)",
+              background: "rgba(160,82,45,0.14)",
               cursor: disabled ? "default" : "pointer",
               display: "flex",
               alignItems: "center",

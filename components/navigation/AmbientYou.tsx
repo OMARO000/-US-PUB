@@ -235,7 +235,7 @@ export default function AmbientYou() {
 
   const pillLabel = isRecording ? "[listening…]" : isTranscribing ? "[thinking…]" : "[speak to [u]]"
   const pillGlow = isRecording
-    ? "0 0 0 3px rgba(184,92,56,0.25), 0 2px 12px rgba(184,92,56,0.2)"
+    ? "0 0 0 3px rgba(160,82,45,0.25), 0 2px 12px rgba(160,82,45,0.2)"
     : "none"
 
   if (dismissed) return null
@@ -329,7 +329,7 @@ export default function AmbientYou() {
               justifyContent: "center",
               flexShrink: 0,
               transition: "background 0.15s",
-              boxShadow: isRecording ? "0 0 0 3px rgba(184,92,56,0.2)" : "none",
+              boxShadow: isRecording ? "0 0 0 3px rgba(160,82,45,0.2)" : "none",
             }}
           >
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={isRecording ? "var(--bg)" : "var(--muted)"} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -377,7 +377,7 @@ export default function AmbientYou() {
               height: "32px",
               borderRadius: "8px",
               border: "none",
-              background: inputText.trim() ? "rgba(184,92,56,0.18)" : "transparent",
+              background: inputText.trim() ? "rgba(160,82,45,0.18)" : "transparent",
               cursor: inputText.trim() ? "pointer" : "default",
               display: "flex",
               alignItems: "center",
@@ -432,7 +432,7 @@ export default function AmbientYou() {
               padding: "16px 32px",
               borderRadius: "26px",
               border: `1.5px solid ${isRecording ? "var(--amber)" : "var(--amber)"}`,
-              background: isRecording ? "rgba(184,92,56,0.15)" : "var(--bg2)",
+              background: isRecording ? "rgba(160,82,45,0.15)" : "var(--bg2)",
               cursor: "pointer",
               fontSize: "16px",
               fontFamily: "var(--font-mono)",
@@ -487,8 +487,8 @@ export default function AmbientYou() {
           50% { opacity: 0; }
         }
         @keyframes ambientPillPulse {
-          0%, 100% { box-shadow: 0 0 0 2px rgba(184,92,56,0.15); }
-          50%       { box-shadow: 0 0 0 5px rgba(184,92,56,0.28); }
+          0%, 100% { box-shadow: 0 0 0 2px rgba(160,82,45,0.15); }
+          50%       { box-shadow: 0 0 0 5px rgba(160,82,45,0.28); }
         }
       `}</style>
     </div>

@@ -46,19 +46,19 @@ export default function UFigure({ state = "idle", scale = 1 }: UFigureProps) {
   if (state === "speaking") {
     return (
       <svg width={90 * scale} height={130 * scale} viewBox="0 0 90 130" xmlns="http://www.w3.org/2000/svg">
-        <text x="45" y="32" textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="28" fontWeight="400" fill="#B85C38">[u]</text>
+        <text x="45" y="32" textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="28" fontWeight="400" fill="#A0522D">[u]</text>
         {/* body */}
-        <line x1="45" y1="40" x2="45" y2="64" stroke="#B85C38" strokeWidth="5.4" strokeLinecap="round"/>
+        <line x1="45" y1="40" x2="45" y2="64" stroke="#A0522D" strokeWidth="5.4" strokeLinecap="round"/>
         {/* arms lowered */}
-        <line x1="45" y1="48" x2="22" y2="58" stroke="#B85C38" strokeWidth="5.4" strokeLinecap="round"/>
-        <line x1="45" y1="48" x2="68" y2="58" stroke="#B85C38" strokeWidth="5.4" strokeLinecap="round"/>
+        <line x1="45" y1="48" x2="22" y2="58" stroke="#A0522D" strokeWidth="5.4" strokeLinecap="round"/>
+        <line x1="45" y1="48" x2="68" y2="58" stroke="#A0522D" strokeWidth="5.4" strokeLinecap="round"/>
         {/* legs */}
-        <line x1="45" y1="64" x2="30" y2="86" stroke="#B85C38" strokeWidth="5.4" strokeLinecap="round"/>
-        <line x1="45" y1="64" x2="60" y2="86" stroke="#B85C38" strokeWidth="5.4" strokeLinecap="round"/>
+        <line x1="45" y1="64" x2="30" y2="86" stroke="#A0522D" strokeWidth="5.4" strokeLinecap="round"/>
+        <line x1="45" y1="64" x2="60" y2="86" stroke="#A0522D" strokeWidth="5.4" strokeLinecap="round"/>
         {/* speech dots */}
-        <circle cx="60" cy="20" r="2.5" fill="#B85C38" opacity="0.6"/>
-        <circle cx="68" cy="14" r="3" fill="#B85C38" opacity="0.4"/>
-        <circle cx="77" cy="8" r="3.5" fill="#B85C38" opacity="0.2"/>
+        <circle cx="60" cy="20" r="2.5" fill="#A0522D" opacity="0.6"/>
+        <circle cx="68" cy="14" r="3" fill="#A0522D" opacity="0.4"/>
+        <circle cx="77" cy="8" r="3.5" fill="#A0522D" opacity="0.2"/>
       </svg>
     );
   }
@@ -66,15 +66,15 @@ export default function UFigure({ state = "idle", scale = 1 }: UFigureProps) {
   // idle
   return (
     <svg width={90 * scale} height={130 * scale} viewBox="0 0 90 130" xmlns="http://www.w3.org/2000/svg">
-      <text x="45" y="32" textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="28" fontWeight="400" fill="#B85C38">[u]</text>
+      <text x="45" y="32" textAnchor="middle" fontFamily="IBM Plex Mono, monospace" fontSize="28" fontWeight="400" fill="#A0522D">[u]</text>
       {/* body */}
-      <line x1="45" y1="40" x2="45" y2="64" stroke="#B85C38" strokeWidth="5.4" strokeLinecap="round"/>
+      <line x1="45" y1="40" x2="45" y2="64" stroke="#A0522D" strokeWidth="5.4" strokeLinecap="round"/>
       {/* arms */}
-      <line x1="45" y1="48" x2="20" y2="42" stroke="#B85C38" strokeWidth="5.4" strokeLinecap="round"/>
-      <line x1="45" y1="48" x2="70" y2="42" stroke="#B85C38" strokeWidth="5.4" strokeLinecap="round"/>
+      <line x1="45" y1="48" x2="20" y2="42" stroke="#A0522D" strokeWidth="5.4" strokeLinecap="round"/>
+      <line x1="45" y1="48" x2="70" y2="42" stroke="#A0522D" strokeWidth="5.4" strokeLinecap="round"/>
       {/* legs */}
-      <line x1="45" y1="64" x2="30" y2="86" stroke="#B85C38" strokeWidth="5.4" strokeLinecap="round"/>
-      <line x1="45" y1="64" x2="60" y2="86" stroke="#B85C38" strokeWidth="5.4" strokeLinecap="round"/>
+      <line x1="45" y1="64" x2="30" y2="86" stroke="#A0522D" strokeWidth="5.4" strokeLinecap="round"/>
+      <line x1="45" y1="64" x2="60" y2="86" stroke="#A0522D" strokeWidth="5.4" strokeLinecap="round"/>
     </svg>
   );
 }
