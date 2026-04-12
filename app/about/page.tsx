@@ -9,7 +9,7 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from "react"
-import UFigure from "@/components/UFigure"
+import UView from "@/components/UView"
 
 // ─────────────────────────────────────────────
 // CONTENT
@@ -267,13 +267,11 @@ const FAQ_INTRO = "you might be wondering..."
 export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
   const [stage, setStage] = useState(0)
   const [skipped, setSkipped] = useState(false)
-  const [inputValue, setInputValue] = useState("")
   const [messages, setMessages] = useState<{ role: "them" | "user"; content: string }[]>([])
   const [isThinking, setIsThinking] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
 
-  const inputRef = useRef<HTMLTextAreaElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
@@ -311,9 +309,6 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
   // ── send to about ───────────────────────────
   const sendToAbout = useCallback(async (text: string) => {
     if (!text || isThinking) return
-    setInputValue("")
-    if (inputRef.current) inputRef.current.style.height = "auto"
-
     setMessages((prev) => [...prev, { role: "user", content: text }])
     setIsThinking(true)
 
@@ -373,12 +368,6 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
     }
   }, [isThinking, messages, speakResponse])
 
-  // ── text input send ─────────────────────────
-  const handleSend = useCallback(() => {
-    const text = inputValue.trim()
-    if (text) sendToAbout(text)
-  }, [inputValue, sendToAbout])
-
   // ── recording ──────────────────────────────
   const startRecording = useCallback(async () => {
     try {
@@ -431,8 +420,6 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
   const onUExplanationDone  = useCallback(() => { setTimeout(() => setStage(3), 600) }, [])
   const onFaqIntroDone      = useCallback(() => { setTimeout(() => setStage(4), 400) }, [])
 
-  const inputUnlocked = stage >= 4
-  const orbState = isRecording ? "recording" : isThinking ? "thinking" : isSpeaking ? "speaking" : "idle"
 
   return (
     <div
@@ -566,86 +553,19 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
               )}
             </div>
 
-            {/* Orb — right column */}
+            {/* UView — right column */}
             <div style={{
               flex: 1, display: "flex", flexDirection: "column",
-              alignItems: "center", justifyContent: "center",
-              gap: "24px", position: "sticky", top: "0",
-              minHeight: "400px",
+              alignItems: "center", justifyContent: "flex-start",
+              position: "sticky", top: "0",
             }}>
-              <div style={{ display: "flex", alignItems: "flex-start" }}>
-                {/* Dots — aligned to figure head level */}
-                <div style={{ display: "flex", flexDirection: "column", alignSelf: "flex-start", paddingTop: "64px" }}>
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <div className="abt-dot-1 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
-                    <div className="abt-dot-2 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
-                    <div className="abt-dot-3 us-dot" style={{ width: 10, height: 10, borderRadius: "50%", background: "#C4974A", margin: "0 8px", flexShrink: 0 }} />
-                  </div>
-                </div>
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div
-                  style={{ transform: "scale(2)", transformOrigin: "center center" }}
-                  onMouseDown={handleOrbTap}
-                  onMouseUp={handleOrbRelease}
-                  onMouseLeave={handleOrbRelease}
-                  onTouchStart={(e) => { e.preventDefault(); handleOrbTap() }}
-                  onTouchEnd={handleOrbRelease}
-                >
-                  <UFigure state={isRecording ? "listening" : isSpeaking ? "speaking" : "idle"} />
-                </div>
-                <div className="us-hold-box" style={{
-                  fontFamily: "IBM Plex Mono, monospace",
-                  fontSize: "9px",
-                  letterSpacing: "0.09em",
-                  color: "#C4974A",
-                  background: "rgba(196,151,74,0.15)",
-                  border: "0.5px solid rgba(196,151,74,0.5)",
-                  borderRadius: "5px",
-                  padding: "6px 10px",
-                  textAlign: "center",
-                  lineHeight: 1.9,
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  marginTop: "0px",
-                }}>
-                  <span>[hold me]</span>
-                  <span>[to speak]</span>
-                </div>
-                </div>
-              </div>
-              {(isRecording || isThinking || isSpeaking) && (
-                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "6px" }}>
-                  <span style={{
-                    fontFamily: "var(--font-mono)", fontSize: "12px",
-                    color: "var(--muted)", letterSpacing: "0.06em", opacity: 0.7,
-                  }}>
-                    {isRecording ? "release to send" : isThinking ? "thinking..." : "speaking..."}
-                  </span>
-                  {isSpeaking && (
-                    <button
-                      onClick={() => {
-                        audioRef.current?.pause()
-                        setIsSpeaking(false)
-                      }}
-                      style={{
-                        marginTop: "8px",
-                        background: "transparent",
-                        border: "1px solid var(--border)",
-                        borderRadius: "6px",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: "10px",
-                        color: "var(--muted)",
-                        cursor: "pointer",
-                        padding: "4px 10px",
-                        letterSpacing: "0.04em",
-                      }}
-                    >
-                      [stop]
-                    </button>
-                  )}
-                </div>
-              )}
+              <UView
+                tab="about"
+                onSendText={sendToAbout}
+                onHoldStart={startRecording}
+                onHoldEnd={stopRecording}
+                isListening={isRecording}
+              />
             </div>
           </div>
         )}
@@ -681,85 +601,6 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* input — appears after delivery */}
-      {inputUnlocked && (
-        <div style={{
-          padding: "16px 24px 24px",
-          flexShrink: 0,
-        }}>
-          <div style={{ borderTop: "1px solid var(--border)", margin: "0 -18px 12px" }} />
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            background: "var(--bg2)",
-            border: "1px solid var(--border)",
-            borderRadius: "13px",
-            padding: "9px 13px",
-            opacity: isThinking ? 0.4 : 1,
-            transition: "opacity 0.15s",
-          }}>
-            <textarea
-              ref={inputRef}
-              rows={1}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="[ask anything about [us]...]"
-              aria-label="ask about [us]"
-              onMouseDown={(e) => e.stopPropagation()}
-              onTouchStart={(e) => e.stopPropagation()}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault()
-                  handleSend()
-                }
-              }}
-              onInput={(e) => {
-                const t = e.currentTarget
-                t.style.height = "auto"
-                t.style.height = Math.min(t.scrollHeight, 110) + "px"
-              }}
-              style={{
-                flex: 1, background: "transparent", border: "none", outline: "none",
-                fontSize: "20px", fontWeight: 300, color: "var(--text)",
-                fontFamily: "var(--font-sans)", resize: "none", lineHeight: 1.5,
-              }}
-            />
-            <button
-              onClick={handleSend}
-              disabled={isThinking || !inputValue.trim()}
-              onMouseDown={(e) => e.stopPropagation()}
-              aria-label="send"
-              style={{
-                width: "44px", height: "44px", borderRadius: "10px", border: "none",
-                background: "rgba(196,151,74,0.14)",
-                cursor: isThinking || !inputValue.trim() ? "default" : "pointer",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                flexShrink: 0,
-                opacity: isThinking || !inputValue.trim() ? 0.4 : 1,
-                transition: "opacity 0.15s",
-              }}
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                stroke="var(--amber)" strokeWidth={2}
-                strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <line x1="22" y1="2" x2="11" y2="13"/>
-                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
-              </svg>
-            </button>
-          </div>
-          <div style={{
-            textAlign: "center", marginTop: "8px",
-            fontSize: "12px", fontFamily: "var(--font-mono)",
-            color: "var(--muted)", opacity: 0.6, lineHeight: 1.5,
-          }}>
-            by talking to [them], an AI, you agree to our{" "}
-            <a href="/terms" style={{ color: "inherit", textDecoration: "underline" }}>[terms]</a>
-            {" "}and{" "}
-            <a href="/privacy" style={{ color: "inherit", textDecoration: "underline" }}>[privacy policy]</a>
-          </div>
-        </div>
-      )}
 
       <style>{`
         @keyframes blink { 0%, 100% { opacity: 0.7; } 50% { opacity: 0; } }

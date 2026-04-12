@@ -29,4 +29,10 @@ export const TAB_QUESTIONS: Record<string, string[]> = {
     "what would your honest portrait look like?",
     "who are you becoming?",
   ],
+  about: [
+    "curious about something? just ask.",
+    "what do you want to know about [us]?",
+    "what brought you to this page?",
+    "what would help you decide if this is for you?",
+  ],
 }
