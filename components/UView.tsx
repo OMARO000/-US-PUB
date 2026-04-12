@@ -86,7 +86,7 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
         <p style={{
           fontFamily: "var(--font-ibm-plex-mono), monospace",
           fontSize: "15px",
-          color: "rgba(255,255,255,0.85)",
+          color: "var(--text)",
           lineHeight: 1.65,
           letterSpacing: "0.02em",
           margin: "0 0 16px 0",
@@ -135,7 +135,7 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
                 outline: "none",
                 fontFamily: "var(--font-ibm-plex-mono), monospace",
                 fontSize: "13px",
-                color: "rgba(255,255,255,0.9)",
+                color: "var(--text)",
                 letterSpacing: "0.04em",
                 lineHeight: 1.65,
                 resize: "none",
@@ -156,7 +156,7 @@ export default function UView({ tab, onSendText, onHoldStart, onHoldEnd, isListe
       <p style={{
         fontFamily: "var(--font-ibm-plex-mono), monospace",
         fontSize: "10px",
-        color: "rgba(255,255,255,0.25)",
+        color: "var(--dim)",
         textAlign: "center",
         marginBottom: "4px",
         letterSpacing: "0.04em",
