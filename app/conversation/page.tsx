@@ -34,7 +34,6 @@ const AboutPage           = dynamic(() => import("@/app/about/page"),           
 const NotificationsPageView = dynamic(() => import("@/app/notifications/PageView"), { ssr: false })
 const UsPlusPageView        = dynamic(() => import("@/app/us-plus/PageView"),        { ssr: false })
 
-import HAIToast from "@/components/HAIToast"
 import { useSearchParams } from "next/navigation"
 import { useIntentSignal } from "@/hooks/useIntentSignal"
 const MatchedConversation = dynamic(() => import("@/components/chat/MatchedConversation"), { ssr: false })
@@ -532,7 +531,6 @@ function ConversationPage() {
           </div>
         )}
       </main>
-      <HAIToast />
     </div>
   )
 }

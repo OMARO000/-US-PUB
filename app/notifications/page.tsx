@@ -192,6 +192,48 @@ export default function NotificationsPage({ embedded }: { embedded?: boolean } =
         )}
       </div>
 
+      {/* HAI Standard notice */}
+      <div style={{
+        border: "1px solid rgba(139,69,19,0.25)",
+        borderRadius: "8px",
+        padding: "16px 20px",
+        marginBottom: "16px",
+        background: "rgba(139,69,19,0.06)",
+      }}>
+        <p style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "11px",
+          color: "#8B4513",
+          letterSpacing: "0.1em",
+          marginBottom: "8px",
+        }}>
+          [HAI STANDARD]
+        </p>
+        <p style={{
+          fontFamily: "var(--font-mono)",
+          fontSize: "12px",
+          color: "var(--text)",
+          lineHeight: 1.65,
+          marginBottom: "12px",
+        }}>
+          [us] is built to the HAI Standard — AI held accountable to human values.
+        </p>
+        <a
+          href="https://haiproject.xyz"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: "11px",
+            color: "#8B4513",
+            textDecoration: "none",
+            letterSpacing: "0.06em",
+          }}
+        >
+          [learn more →]
+        </a>
+      </div>
+
       {loading && (
         <div style={{
           fontFamily: "var(--font-mono)",
