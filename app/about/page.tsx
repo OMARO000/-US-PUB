@@ -560,12 +560,12 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "flex-start",
-              paddingTop: "40px",
+              paddingTop: "20px",
             }}>
               <UView
                 tab="about"
                 paddingTop="0"
-                scale={1.5}
+                scale={1.2}
                 onSendText={sendToAbout}
                 onHoldStart={startRecording}
                 onHoldEnd={stopRecording}
