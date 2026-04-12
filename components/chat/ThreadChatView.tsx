@@ -280,13 +280,13 @@ export default function ThreadChatView({
             <div className="us-bubble" style={{
               maxWidth: "520px",
               width: "100%",
-              background: "rgba(255,255,255,0.06)",
-              border: "0.5px solid rgba(255,255,255,0.12)",
+              background: "var(--bg2)",
+              border: "0.5px solid var(--border2)",
               borderRadius: "14px",
               padding: "24px 32px",
               fontFamily: "IBM Plex Mono, monospace",
               fontSize: "14px",
-              color: "rgba(255,255,255,0.45)",
+              color: "var(--muted)",
               letterSpacing: "0.04em",
               lineHeight: 1.65,
             }}>
