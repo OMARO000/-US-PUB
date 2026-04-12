@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation"
 // TYPES
 // ─────────────────────────────────────────────
 
-type Screen = "welcome" | "cookies" | "theme" | "voice" | "tier"
+type Screen = "welcome" | "cookies" | "theme" | "voice" | "tier" | "done"
 
 interface Theme {
   id: string
@@ -567,6 +567,7 @@ export default function OnboardingPage() {
     process.env.NEXT_PUBLIC_DEFAULT_VOICE_ID ?? "UgBBYS2sOqTuMpoF3BR0"
   )
   const [selectedTier, setSelectedTier] = useState("open")
+  const [accountNumber, setAccountNumber] = useState("")
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -584,7 +585,6 @@ export default function OnboardingPage() {
   }
 
   const handleCreateAccount = async () => {
-    const accountNumber = "US-" + Math.random().toString(36).substring(2, 10).toUpperCase()
     document.cookie = `us_account=${accountNumber}; max-age=31536000; path=/`
     document.cookie = `us_theme=${selectedTheme}; max-age=31536000; path=/`
     document.cookie = `us_voice=${selectedVoice}; max-age=31536000; path=/`
@@ -610,7 +610,7 @@ export default function OnboardingPage() {
       } catch { }
     }
 
-    router.push("/conversation")
+    setScreen("done")
   }
 
   const handleLogin = () => {
@@ -647,7 +647,14 @@ export default function OnboardingPage() {
       )}
 
       {screen === "welcome" && (
-        <WelcomeScreen onNext={() => setScreen("cookies")} onLogin={handleLogin} />
+        <WelcomeScreen
+          onNext={() => {
+            const num = "US-" + Math.random().toString(36).substring(2, 10).toUpperCase()
+            setAccountNumber(num)
+            setScreen("cookies")
+          }}
+          onLogin={handleLogin}
+        />
       )}
       {screen === "cookies" && (
         <CookiesScreen onAccept={() => setScreen("theme")} />
@@ -672,6 +679,56 @@ export default function OnboardingPage() {
           onSelect={setSelectedTier}
           onComplete={handleCreateAccount}
         />
+      )}
+      {screen === "done" && (
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          minHeight: "100dvh",
+          padding: "40px 32px",
+          gap: "40px",
+          textAlign: "center",
+        }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
+            <div style={{ fontSize: "13px", fontFamily: "IBM Plex Mono, monospace", color: "var(--amber)", letterSpacing: "0.08em", opacity: 0.8 }}>
+              [account created]
+            </div>
+          </div>
+          <div style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "16px",
+            background: "var(--bg2)",
+            border: "1px solid var(--border)",
+            borderRadius: "16px",
+            padding: "32px 40px",
+            maxWidth: "400px",
+            width: "100%",
+          }}>
+            <div style={{ fontSize: "11px", fontFamily: "IBM Plex Mono, monospace", color: "rgba(255,255,255,0.5)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+              your account number
+            </div>
+            <div style={{ fontSize: "18px", fontFamily: "IBM Plex Mono, monospace", color: "#C4974A", letterSpacing: "0.15em", margin: "4px 0" }}>
+              {accountNumber}
+            </div>
+            <div style={{ fontSize: "11px", fontFamily: "IBM Plex Mono, monospace", color: "rgba(255,255,255,0.35)", lineHeight: 1.6 }}>
+              save this. it's the only way back in.
+            </div>
+          </div>
+          <button
+            onClick={() => router.push("/conversation")}
+            style={{
+              height: "64px", padding: "0 52px", borderRadius: "16px", background: "#C4974A",
+              border: "none", fontFamily: "IBM Plex Mono, monospace", fontSize: "16px",
+              color: "var(--bg)", cursor: "pointer", letterSpacing: "0.05em",
+            }}
+          >
+            [enter [us]]
+          </button>
+        </div>
       )}
     </div>
   )
