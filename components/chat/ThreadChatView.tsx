@@ -238,14 +238,30 @@ export default function ThreadChatView({
 
       {/* Empty state — UView */}
       {!hasConversation && TAB_QUESTIONS[threadType] && (
-        <UView
-          tab={threadType}
-          paddingTop="0"
-          onSendText={(text) => { thread.sendMessage(text) }}
-          onHoldStart={startRecording}
-          onHoldEnd={stopRecording}
-          isListening={isRecording}
-        />
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: "var(--sidebar-width, 430px)",
+          right: 0,
+          bottom: 0,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 10,
+          pointerEvents: "none",
+        }}>
+          <div style={{ pointerEvents: "auto" }}>
+            <UView
+              tab={threadType}
+              paddingTop="0"
+              onSendText={(text) => { thread.sendMessage(text) }}
+              onHoldStart={startRecording}
+              onHoldEnd={stopRecording}
+              isListening={isRecording}
+            />
+          </div>
+        </div>
       )}
 
       {/* Empty state — fallback for tabs without tab questions (terms, privacy) */}

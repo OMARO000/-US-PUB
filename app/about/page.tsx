@@ -558,12 +558,13 @@ export default function AboutPage({ embedded }: { embedded?: boolean } = {}) {
               flex: 1, display: "flex", flexDirection: "column",
               alignItems: "center", justifyContent: "center",
               position: "sticky", top: "0",
+              minHeight: "100vh",
               overflow: "hidden",
             }}>
               <UView
                 tab="about"
                 paddingTop="0"
-                scale={1.5}
+                scale={2.5}
                 onSendText={sendToAbout}
                 onHoldStart={startRecording}
                 onHoldEnd={stopRecording}
